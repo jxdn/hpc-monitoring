@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-01-27T04:02:05.987Z",
+  "data": [
+    {
+      "username": "peeratli",
+      "numJobs": 219,
+      "totalGpusUsed": 1102,
+      "avgGpusPerJob": "5.03",
+      "totalGpuHours": "6487.69",
+      "avgGpuHoursPerJob": "29.62"
+    },
+    {
+      "username": "huangyl",
+      "numJobs": 101,
+      "totalGpusUsed": 2069,
+      "avgGpusPerJob": "20.49",
+      "totalGpuHours": "4107.70",
+      "avgGpuHoursPerJob": "40.67"
+    },
+    {
+      "username": "e0974140",
+      "numJobs": 41,
+      "totalGpusUsed": 68,
+      "avgGpusPerJob": "1.66",
+      "totalGpuHours": "2529.33",
+      "avgGpuHoursPerJob": "61.69"
+    },
+    {
+      "username": "e1374390",
+      "numJobs": 186,
+      "totalGpusUsed": 573,
+      "avgGpusPerJob": "3.08",
+      "totalGpuHours": "2267.35",
+      "avgGpuHoursPerJob": "12.19"
+    },
+    {
+      "username": "e1351094",
+      "numJobs": 4,
+      "totalGpusUsed": 32,
+      "avgGpusPerJob": "8.00",
+      "totalGpuHours": "2164.71",
+      "avgGpuHoursPerJob": "541.18"
+    },
+    {
+      "username": "e1374536",
+      "numJobs": 19,
+      "totalGpusUsed": 110,
+      "avgGpusPerJob": "5.79",
+      "totalGpuHours": "2045.21",
+      "avgGpuHoursPerJob": "107.64"
+    },
+    {
+      "username": "e0795287",
+      "numJobs": 83,
+      "totalGpusUsed": 124,
+      "avgGpusPerJob": "1.49",
+      "totalGpuHours": "2034.08",
+      "avgGpuHoursPerJob": "24.51"
+    }
+  ]
+}

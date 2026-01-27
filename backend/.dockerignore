@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Development
+.git/
+.gitignore
+*.md
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Cache
+cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+test/
+
+# Misc
+*.orig
+*.bak

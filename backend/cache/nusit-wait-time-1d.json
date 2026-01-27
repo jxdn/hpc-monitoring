@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-01-27T04:02:06.326Z",
+  "data": [
+    {
+      "date": "26 Jan 2026",
+      "queueName": "interactive",
+      "numJobs": 120,
+      "totalGpuHours": 283.6,
+      "avgGpuHoursPerJob": 2.4,
+      "avgWaitMinutes": 0.3
+    },
+    {
+      "date": "26 Jan 2026",
+      "queueName": "medium",
+      "numJobs": 83,
+      "totalGpuHours": 1399.8,
+      "avgGpuHoursPerJob": 16.9,
+      "avgWaitMinutes": 34.8
+    },
+    {
+      "date": "26 Jan 2026",
+      "queueName": "small",
+      "numJobs": 279,
+      "totalGpuHours": 466.3,
+      "avgGpuHoursPerJob": 1.7,
+      "avgWaitMinutes": 6.1
+    }
+  ]
+}

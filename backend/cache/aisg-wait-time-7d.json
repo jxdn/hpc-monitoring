@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-01-27T04:02:06.266Z",
+  "data": [
+    {
+      "date": "26 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 14,
+      "totalGpuHours": 2.3,
+      "avgGpuHoursPerJob": 0.2,
+      "avgWaitMinutes": 0.1
+    },
+    {
+      "date": "26 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 57,
+      "totalGpuHours": 317.8,
+      "avgGpuHoursPerJob": 5.6,
+      "avgWaitMinutes": 61.1
+    },
+    {
+      "date": "25 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 65,
+      "totalGpuHours": 194.3,
+      "avgGpuHoursPerJob": 3,
+      "avgWaitMinutes": 7.6
+    },
+    {
+      "date": "25 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 50,
+      "totalGpuHours": 359.4,
+      "avgGpuHoursPerJob": 7.2,
+      "avgWaitMinutes": 25.1
+    },
+    {
+      "date": "24 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 80,
+      "totalGpuHours": 313.1,
+      "avgGpuHoursPerJob": 3.9,
+      "avgWaitMinutes": 5.7
+    },
+    {
+      "date": "24 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 49,
+      "totalGpuHours": 1040.1,
+      "avgGpuHoursPerJob": 21.2,
+      "avgWaitMinutes": 0.5
+    },
+    {
+      "date": "23 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 41,
+      "totalGpuHours": 26.5,
+      "avgGpuHoursPerJob": 0.6,
+      "avgWaitMinutes": 0.2
+    },
+    {
+      "date": "23 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 31,
+      "totalGpuHours": 1840.3,
+      "avgGpuHoursPerJob": 59.4,
+      "avgWaitMinutes": 0.1
+    },
+    {
+      "date": "22 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 44,
+      "totalGpuHours": 86.2,
+      "avgGpuHoursPerJob": 2,
+      "avgWaitMinutes": 0.6
+    },
+    {
+      "date": "22 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 43,
+      "totalGpuHours": 1451.9,
+      "avgGpuHoursPerJob": 33.8,
+      "avgWaitMinutes": 0.1
+    },
+    {
+      "date": "21 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 103,
+      "totalGpuHours": 702.5,
+      "avgGpuHoursPerJob": 6.8,
+      "avgWaitMinutes": 0.4
+    },
+    {
+      "date": "21 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 40,
+      "totalGpuHours": 1058.3,
+      "avgGpuHoursPerJob": 26.5,
+      "avgWaitMinutes": 0.1
+    },
+    {
+      "date": "20 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 186,
+      "totalGpuHours": 1949,
+      "avgGpuHoursPerJob": 10.5,
+      "avgWaitMinutes": 3.3
+    },
+    {
+      "date": "20 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 38,
+      "totalGpuHours": 1325,
+      "avgGpuHoursPerJob": 34.9,
+      "avgWaitMinutes": 2.4
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-01-27T04:02:06.237Z",
+  "data": [
+    {
+      "date": "26 Jan 2026",
+      "queueName": "AISG_debug",
+      "numJobs": 14,
+      "totalGpuHours": 2.3,
+      "avgGpuHoursPerJob": 0.2,
+      "avgWaitMinutes": 0.1
+    },
+    {
+      "date": "26 Jan 2026",
+      "queueName": "AISG_large",
+      "numJobs": 57,
+      "totalGpuHours": 317.8,
+      "avgGpuHoursPerJob": 5.6,
+      "avgWaitMinutes": 61.1
+    }
+  ]
+}

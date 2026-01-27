@@ -1,0 +1,91 @@
+.gpu-usage-table-container {
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.gpu-usage-table {
+  max-width: 1200px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.gpu-usage-table thead {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.gpu-usage-table th {
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gpu-usage-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.gpu-usage-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.gpu-usage-table tbody tr.top-user {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.gpu-usage-table tbody tr.top-user:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.gpu-usage-table td {
+  padding: 1.25rem 1.5rem;
+  color: var(--text-primary);
+}
+
+.username-cell {
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.number-cell {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+.number-cell.highlight {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.gpu-usage-loading,
+.gpu-usage-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gpu-usage-table {
+    font-size: 0.8rem;
+  }
+
+  .gpu-usage-table th,
+  .gpu-usage-table td {
+    padding: 0.5rem;
+  }
+
+  .gpu-usage-table th {
+    font-size: 0.75rem;
+  }
+}

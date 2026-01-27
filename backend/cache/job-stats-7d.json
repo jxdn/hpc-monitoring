@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-01-27T04:02:06.126Z",
+  "data": [
+    {
+      "jobDate": "2026-01-25T16:00:00.000Z",
+      "numJobs": 553,
+      "totalGpuHours": "5791.05"
+    },
+    {
+      "jobDate": "2026-01-24T16:00:00.000Z",
+      "numJobs": 481,
+      "totalGpuHours": "4471.25"
+    },
+    {
+      "jobDate": "2026-01-23T16:00:00.000Z",
+      "numJobs": 529,
+      "totalGpuHours": "8331.54"
+    },
+    {
+      "jobDate": "2026-01-22T16:00:00.000Z",
+      "numJobs": 450,
+      "totalGpuHours": "4304.50"
+    },
+    {
+      "jobDate": "2026-01-21T16:00:00.000Z",
+      "numJobs": 404,
+      "totalGpuHours": "5708.45"
+    },
+    {
+      "jobDate": "2026-01-20T16:00:00.000Z",
+      "numJobs": 524,
+      "totalGpuHours": "5165.02"
+    },
+    {
+      "jobDate": "2026-01-19T16:00:00.000Z",
+      "numJobs": 594,
+      "totalGpuHours": "7013.18"
+    }
+  ]
+}
