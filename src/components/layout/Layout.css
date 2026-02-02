@@ -2,6 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
 }
 
 .layout-content {
@@ -11,7 +12,7 @@
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: var(--space-lg);
   overflow-y: auto;
   background-color: var(--bg-primary);
 }
@@ -19,6 +20,36 @@
 /* Print styles */
 @media print {
   .main-content {
-    padding: 1rem;
+    padding: var(--space-md);
+  }
+
+  .layout {
+    background: white;
+  }
+}
+
+/* Smooth scrolling */
+.main-content {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for webkit browsers */
+@media (pointer: fine) {
+  .main-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .main-content::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  .main-content::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .main-content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
   }
 }

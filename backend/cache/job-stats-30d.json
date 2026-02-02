@@ -1,6 +1,36 @@
 {
-  "timestamp": "2026-01-27T04:02:06.206Z",
+  "timestamp": "2026-02-02T02:39:50.767Z",
   "data": [
+    {
+      "jobDate": "2026-01-31T16:00:00.000Z",
+      "numJobs": 374,
+      "totalGpuHours": "3770.35"
+    },
+    {
+      "jobDate": "2026-01-30T16:00:00.000Z",
+      "numJobs": 418,
+      "totalGpuHours": "4801.30"
+    },
+    {
+      "jobDate": "2026-01-29T16:00:00.000Z",
+      "numJobs": 867,
+      "totalGpuHours": "12559.17"
+    },
+    {
+      "jobDate": "2026-01-28T16:00:00.000Z",
+      "numJobs": 723,
+      "totalGpuHours": "5538.30"
+    },
+    {
+      "jobDate": "2026-01-27T16:00:00.000Z",
+      "numJobs": 751,
+      "totalGpuHours": "7278.39"
+    },
+    {
+      "jobDate": "2026-01-26T16:00:00.000Z",
+      "numJobs": 630,
+      "totalGpuHours": "4758.47"
+    },
     {
       "jobDate": "2026-01-25T16:00:00.000Z",
       "numJobs": 553,
@@ -120,36 +150,6 @@
       "jobDate": "2026-01-02T16:00:00.000Z",
       "numJobs": 458,
       "totalGpuHours": "3779.91"
-    },
-    {
-      "jobDate": "2026-01-01T16:00:00.000Z",
-      "numJobs": 1829,
-      "totalGpuHours": "2641.36"
-    },
-    {
-      "jobDate": "2025-12-31T16:00:00.000Z",
-      "numJobs": 187,
-      "totalGpuHours": "3862.20"
-    },
-    {
-      "jobDate": "2025-12-30T16:00:00.000Z",
-      "numJobs": 401,
-      "totalGpuHours": "2490.47"
-    },
-    {
-      "jobDate": "2025-12-29T16:00:00.000Z",
-      "numJobs": 2131,
-      "totalGpuHours": "4373.25"
-    },
-    {
-      "jobDate": "2025-12-28T16:00:00.000Z",
-      "numJobs": 1911,
-      "totalGpuHours": "3112.82"
-    },
-    {
-      "jobDate": "2025-12-27T16:00:00.000Z",
-      "numJobs": 709,
-      "totalGpuHours": "4286.05"
     }
   ]
 }

@@ -103,16 +103,19 @@ async function getJobStats() {
 
 /**
  * Get jobs by user from VictoriaMetrics
- * @returns {Promise<Array>} - Jobs by user
+ * @returns {Promise<Array>} - Jobs by user (top 5 running jobs)
  */
 async function getJobsByUser() {
   try {
     const result = await queryVictoriaMetrics('qstat_running_jobs_by_user');
 
-    return result.map(item => ({
-      user: item.metric.user,
-      count: parseInt(item.value[1]),
-    }));
+    return result
+      .map(item => ({
+        user: item.metric.user,
+        count: parseInt(item.value[1]),
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
   } catch (error) {
     console.error('Error fetching jobs by user:', error);
     return [];
@@ -127,10 +130,12 @@ async function getJobsByQueue() {
   try {
     const result = await queryVictoriaMetrics('qstat_running_jobs_by_queue');
 
-    return result.map(item => ({
-      queue: item.metric.queue,
-      count: parseInt(item.value[1]),
-    }));
+    return result
+      .map(item => ({
+        queue: item.metric.queue,
+        count: parseInt(item.value[1]),
+      }))
+      .sort((a, b) => b.count - a.count);
   } catch (error) {
     console.error('Error fetching jobs by queue:', error);
     return [];
@@ -412,6 +417,11 @@ async function getHistoricalGPUOccupation(timeRange = '24h') {
     const aisgNodes = ['hopper-46', 'hopper-43', 'hopper-45', 'hopper-44', 'hopper-42',
                       'hopper-41', 'hopper-40', 'hopper-39', 'hopper-38', 'hopper-37',
                       'hopper-36', 'hopper-34', 'hopper-33', 'hopper-32', 'hopper-31', 'hopper-35'];
+    
+    // NON-AISG nodes (hopper-07 to hopper-30): 24 nodes × 8 GPUs = 192 GPUs total
+    const nonAisgNodes = Array.from({ length: 24 }, (_, i) => i + 7).map(i => 
+      i < 10 ? `hopper-0${i}` : `hopper-${i}`
+    );
 
     // Overall GPU occupation rate (excluding hopper-1 to hopper-6)
     const overallQuery = `(
@@ -419,16 +429,16 @@ async function getHistoricalGPUOccupation(timeRange = '24h') {
       sum(pbs_node_gpus_total{node!~"hopper-[1-6]"})
     ) * 100`;
 
-    // AISG GPU occupation rate
+    // AISG GPU occupation rate (hopper-31 to hopper-46)
     const aisgQuery = `(
       sum(pbs_node_gpus_used{node=~"${aisgNodes.join('|')}"}) /
       sum(pbs_node_gpus_total{node=~"${aisgNodes.join('|')}"})
     ) * 100`;
 
-    // NON-AISG GPU occupation rate (excluding hopper-1 to hopper-6 and AISG nodes)
+    // NON-AISG GPU occupation rate (hopper-07 to hopper-30 only)
     const nonAisgQuery = `(
-      sum(pbs_node_gpus_used{node!~"hopper-[1-6]|${aisgNodes.join('|')}"}) /
-      192
+      sum(pbs_node_gpus_used{node=~"${nonAisgNodes.join('|')}"}) /
+      sum(pbs_node_gpus_total{node=~"${nonAisgNodes.join('|')}"})
     ) * 100`;
 
     const [overallData, aisgData, nonAisgData] = await Promise.all([
@@ -501,7 +511,7 @@ function parseTimeRange(timeRange) {
       break;
     case '30d':
       start = now - 2592000;
-      step = '30m'; // Use same step as 7d to show all available data
+      step = '4h'; // Use 4 hour step to get better data coverage
       break;
     default:
       start = now - 86400;

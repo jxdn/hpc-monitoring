@@ -1,33 +1,41 @@
 .navbar {
-  height: 70px;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  height: 64px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--color-neutral-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2.5rem;
+  padding: 0 var(--space-lg);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .navbar-brand {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
 
 .navbar-brand h1 {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   margin: 0;
-  color: var(--primary-color);
-  font-weight: 700;
+  color: var(--color-text-primary);
+  font-weight: 600;
   letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.navbar-brand svg {
+  color: var(--color-primary);
 }
 
 .navbar-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
   font-weight: 400;
   margin-top: 2px;
 }
@@ -35,33 +43,53 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-sm);
+}
+
+.navbar-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.navbar-link:hover {
+  color: var(--color-text-primary);
+  background-color: var(--bg-secondary);
+}
+
+.navbar-link.active {
+  color: var(--color-primary-dark);
+  background-color: var(--color-success-bg);
 }
 
 .pdf-download-btn {
-  padding: 0.65rem 1.25rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  color: #24292e;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   white-space: nowrap;
 }
 
 .pdf-download-btn:hover:not(:disabled) {
-  background: #0d9488;
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .pdf-download-btn:disabled {
-  background: #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.7;
   transform: none;
@@ -70,22 +98,25 @@
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--bg-primary);
-  border-radius: 8px;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--text-secondary);
+  background-color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
 .status-dot.active {
-  background-color: var(--success-color);
+  background-color: var(--color-success);
   animation: pulse 2s infinite;
 }
 
@@ -101,27 +132,47 @@
 /* Responsive styles */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 1rem;
+    padding: 0 var(--space-md);
+    height: 56px;
   }
 
   .navbar-actions {
-    gap: 0.5rem;
+    gap: var(--space-xs);
+  }
+
+  .navbar-brand h1 {
+    font-size: 1.125rem;
+  }
+
+  .navbar-subtitle {
+    display: none;
   }
 
   .pdf-download-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8125rem;
   }
 
   .status-indicator {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8125rem;
+  }
+
+  .navbar-link {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8125rem;
   }
 }
 
 /* Print styles */
 @media print {
-  .pdf-download-btn {
+  .navbar {
+    position: static;
+    border-bottom: none;
+  }
+
+  .pdf-download-btn,
+  .navbar-link {
     display: none !important;
   }
 }

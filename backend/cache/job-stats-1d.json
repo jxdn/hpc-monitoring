@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-01-27T04:02:06.057Z",
+  "timestamp": "2026-02-02T02:39:50.619Z",
   "data": [
     {
-      "jobDate": "2026-01-25T16:00:00.000Z",
-      "numJobs": 553,
-      "totalGpuHours": "5791.05"
+      "jobDate": "2026-01-31T16:00:00.000Z",
+      "numJobs": 374,
+      "totalGpuHours": "3770.35"
     }
   ]
 }

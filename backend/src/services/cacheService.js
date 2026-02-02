@@ -68,34 +68,70 @@ async function updateAllCaches() {
     await writeCache('gpu-usage-by-user', gpuUsageByUser);
 
     // Job Stats for different time ranges
-    const jobStats1d = await xdmodService.getJobStatsLast7Days(1);
-    await writeCache('job-stats-1d', jobStats1d);
+try {
+      const jobStats1d = await xdmodService.getJobStatsLast7Days(1);
+      await writeCache('job-stats-1d', jobStats1d);
+    } catch (error) {
+      console.error('Error updating job-stats-1d:', error.message);
+    }
 
-    const jobStats7d = await xdmodService.getJobStatsLast7Days(7);
-    await writeCache('job-stats-7d', jobStats7d);
+    try {
+      const jobStats7d = await xdmodService.getJobStatsLast7Days(7);
+      await writeCache('job-stats-7d', jobStats7d);
+    } catch (error) {
+      console.error('Error updating job-stats-7d:', error.message);
+    }
 
-    const jobStats30d = await xdmodService.getJobStatsLast7Days(30);
-    await writeCache('job-stats-30d', jobStats30d);
+    try {
+      const jobStats30d = await xdmodService.getJobStatsLast7Days(30);
+      await writeCache('job-stats-30d', jobStats30d);
+    } catch (error) {
+      console.error('Error updating job-stats-30d:', error.message);
+    }
 
     // AISG Wait Time for different time ranges
-    const aisgWaitTime1d = await xdmodService.getAISGWaitTime(1);
-    await writeCache('aisg-wait-time-1d', aisgWaitTime1d);
+    try {
+      const aisgWaitTime1d = await xdmodService.getAISGWaitTime(1);
+      await writeCache('aisg-wait-time-1d', aisgWaitTime1d);
+    } catch (error) {
+      console.error('Error updating aisg-wait-time-1d:', error.message);
+    }
 
-    const aisgWaitTime7d = await xdmodService.getAISGWaitTime(7);
-    await writeCache('aisg-wait-time-7d', aisgWaitTime7d);
+    try {
+      const aisgWaitTime7d = await xdmodService.getAISGWaitTime(7);
+      await writeCache('aisg-wait-time-7d', aisgWaitTime7d);
+    } catch (error) {
+      console.error('Error updating aisg-wait-time-7d:', error.message);
+    }
 
-    const aisgWaitTime30d = await xdmodService.getAISGWaitTime(30);
-    await writeCache('aisg-wait-time-30d', aisgWaitTime30d);
+    try {
+      const aisgWaitTime30d = await xdmodService.getAISGWaitTime(30);
+      await writeCache('aisg-wait-time-30d', aisgWaitTime30d);
+    } catch (error) {
+      console.error('Error updating aisg-wait-time-30d:', error.message);
+    }
 
     // NUS IT Wait Time for different time ranges
-    const nusitWaitTime1d = await xdmodService.getNUSITWaitTime(1);
-    await writeCache('nusit-wait-time-1d', nusitWaitTime1d);
+    try {
+      const nusitWaitTime1d = await xdmodService.getNUSITWaitTime(1);
+      await writeCache('nusit-wait-time-1d', nusitWaitTime1d);
+    } catch (error) {
+      console.error('Error updating nusit-wait-time-1d:', error.message);
+    }
 
-    const nusitWaitTime7d = await xdmodService.getNUSITWaitTime(7);
-    await writeCache('nusit-wait-time-7d', nusitWaitTime7d);
+    try {
+      const nusitWaitTime7d = await xdmodService.getNUSITWaitTime(7);
+      await writeCache('nusit-wait-time-7d', nusitWaitTime7d);
+    } catch (error) {
+      console.error('Error updating nusit-wait-time-7d:', error.message);
+    }
 
-    const nusitWaitTime30d = await xdmodService.getNUSITWaitTime(30);
-    await writeCache('nusit-wait-time-30d', nusitWaitTime30d);
+    try {
+      const nusitWaitTime30d = await xdmodService.getNUSITWaitTime(30);
+      await writeCache('nusit-wait-time-30d', nusitWaitTime30d);
+    } catch (error) {
+      console.error('Error updating nusit-wait-time-30d:', error.message);
+    }
 
     console.log('Cache update completed successfully');
   } catch (error) {

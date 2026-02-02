@@ -4,7 +4,7 @@ import Card from '../components/dashboard/Card';
 import './Nodes.css';
 
 const Nodes: React.FC = () => {
-  const { nodes, loading, error } = useNodes(30000); // Refresh every 30 seconds
+  const { nodes, loading, error } = useNodes(60000); // Refresh every 1 minute
 
   if (loading) {
     return <div className="loading">Loading nodes...</div>;

@@ -12,9 +12,9 @@ import WaitTimeTableWithPagination from '../components/dashboard/WaitTimeTableWi
 import './ClusterDashboard.css';
 
 const ClusterDashboard: React.FC = () => {
-  const { nodes, loading: nodesLoading } = useNodes(30000);
-  const { jobs, loading: jobsLoading } = useJobs(30000);
-  const { stats, loading: statsLoading } = useClusterStats(30000);
+  const { nodes, loading: nodesLoading } = useNodes(60000);
+  const { jobs, loading: jobsLoading } = useJobs(60000);
+  const { stats, loading: statsLoading } = useClusterStats(60000);
   const [jobHistory, setJobHistory] = useState<any[]>([]);
   const [gpuOccupationHistory, setGpuOccupationHistory] = useState<any[]>([]);
   const [gpuUsageByUser, setGpuUsageByUser] = useState<any[]>([]);
@@ -27,6 +27,7 @@ const ClusterDashboard: React.FC = () => {
   const [nusitWaitTimeLoading, setNusitWaitTimeLoading] = useState<boolean>(true);
   const [monthlyGPUHours, setMonthlyGPUHours] = useState<any[]>([]);
   const [monthlyGPUHoursLoading, setMonthlyGPUHoursLoading] = useState<boolean>(true);
+  const [monthlyGPUHoursError, setMonthlyGPUHoursError] = useState<string | null>(null);
 
   // Separate state for all time ranges for static summary
   const [aisgWaitTime1d, setAisgWaitTime1d] = useState<any[]>([]);
@@ -38,7 +39,6 @@ const ClusterDashboard: React.FC = () => {
   const [summaryLoading, setSummaryLoading] = useState<boolean>(true);
 
   const [timeRange, setTimeRange] = useState<string>('30d');
-  const [xdmodTimeRange, setXdmodTimeRange] = useState<'1d' | '7d' | '30d'>('30d');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   // Update current time every second
@@ -52,7 +52,7 @@ const ClusterDashboard: React.FC = () => {
   useEffect(() => {
     const fetchJobHistory = async () => {
       try {
-        const data = await pbsApi.getJobStats(timeRange);
+        const data = await pbsApi.getJobStats(timeRange as '30d' | '1h' | '24h' | '7d');
         setJobHistory(data);
       } catch (error) {
         console.error('Error fetching job history:', error);
@@ -101,7 +101,9 @@ const ClusterDashboard: React.FC = () => {
     const fetchJobStatsLast7Days = async () => {
       try {
         setJobStatsLoading(true);
+        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
         const data = await pbsApi.getJobStatsLast7Days(xdmodTimeRange);
+        console.log('Job stats data received:', data);
         setJobStatsLast7Days(data);
       } catch (error) {
         console.error('Error fetching job stats:', error);
@@ -113,12 +115,13 @@ const ClusterDashboard: React.FC = () => {
     fetchJobStatsLast7Days();
     const interval = setInterval(fetchJobStatsLast7Days, 60000);
     return () => clearInterval(interval);
-  }, [xdmodTimeRange]);
+  }, [timeRange]);
 
   useEffect(() => {
     const fetchAISGWaitTime = async () => {
       try {
         setAisgWaitTimeLoading(true);
+        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
         const data = await pbsApi.getAISGWaitTime(xdmodTimeRange);
         setAisgWaitTime(data);
       } catch (error) {
@@ -131,12 +134,13 @@ const ClusterDashboard: React.FC = () => {
     fetchAISGWaitTime();
     const interval = setInterval(fetchAISGWaitTime, 60000);
     return () => clearInterval(interval);
-  }, [xdmodTimeRange]);
+  }, [timeRange]);
 
   useEffect(() => {
     const fetchNUSITWaitTime = async () => {
       try {
         setNusitWaitTimeLoading(true);
+        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
         const data = await pbsApi.getNUSITWaitTime(xdmodTimeRange);
         setNusitWaitTime(data);
       } catch (error) {
@@ -149,7 +153,7 @@ const ClusterDashboard: React.FC = () => {
     fetchNUSITWaitTime();
     const interval = setInterval(fetchNUSITWaitTime, 60000);
     return () => clearInterval(interval);
-  }, [xdmodTimeRange]);
+  }, [timeRange]);
 
   // Fetch all time ranges for static summary boxes
   useEffect(() => {
@@ -190,10 +194,12 @@ const ClusterDashboard: React.FC = () => {
     const fetchMonthlyGPUHours = async () => {
       try {
         setMonthlyGPUHoursLoading(true);
+        setMonthlyGPUHoursError(null);
         const data = await pbsApi.getMonthlyGPUHours();
         setMonthlyGPUHours(data);
       } catch (error) {
         console.error('Error fetching monthly GPU hours:', error);
+        setMonthlyGPUHoursError('Unable to load GPU hours data. Historical data may not be available.');
       } finally {
         setMonthlyGPUHoursLoading(false);
       }
@@ -203,6 +209,9 @@ const ClusterDashboard: React.FC = () => {
     const interval = setInterval(fetchMonthlyGPUHours, 300000); // Update every 5 minutes
     return () => clearInterval(interval);
   }, []);
+
+  // Generate sample data indicator
+  const isSampleData = monthlyGPUHours.length > 0 && monthlyGPUHours[0].month === 'Feb 2024';
 
   // Format time in Singapore Time (SGT, UTC+8)
   const formatSGT = (date: Date) => {
@@ -222,6 +231,22 @@ const ClusterDashboard: React.FC = () => {
   // Static queue definitions (must match database exactly)
   const AISG_QUEUES = ['AISG_debug', 'AISG_large', 'AISG_guest'];
   const NUSIT_QUEUES = ['interactive', 'medium', 'small', 'large', 'special'];
+
+  // Helper function to determine wait time status
+  const getWaitTimeStatus = (value: string): 'good' | 'warning' | 'danger' => {
+    if (value === 'NA') return 'good';
+    const minutes = parseFloat(value.replace(' min', ''));
+    if (minutes < 30) return 'good';
+    if (minutes <= 60) return 'warning';
+    return 'danger';
+  };
+
+  // Helper function to get wait time class
+  const getWaitTimeClass = (status: 'good' | 'warning' | 'danger'): string => {
+    if (status === 'good') return 'stat-value good';
+    if (status === 'warning') return 'stat-value warning';
+    return 'stat-value danger';
+  };
 
   // Helper function to create queue summary cards with static queues
   const createQueueSummaryCards = (
@@ -248,36 +273,51 @@ const ClusterDashboard: React.FC = () => {
       return acc;
     }, {} as Record<string, { total: number; count: number }>);
 
-    // Create cards for all static queues
+    // Get all unique queues for each type
+    const getQueueStat = (queueName: string, stats: Record<string, { total: number; count: number }>, type: 'aisg' | 'nusit') => {
+      const queueStats = stats[queueName];
+      const displayValue = queueStats
+        ? `${(queueStats.total / queueStats.count).toFixed(1)} min`
+        : 'NA';
+      const status = getWaitTimeStatus(displayValue);
+      const valueClass = getWaitTimeClass(status);
+      return {
+        label: queueName,
+        value: displayValue,
+        type: type,
+        status: status,
+        valueClass: valueClass
+      };
+    };
+
+    // Create boxed cards organized by queue type
     return [
-      ...AISG_QUEUES.map(queue => {
-        const stats = aisgStats[queue];
-        const displayValue = stats
-          ? `${(stats.total / stats.count).toFixed(1)} min`
-          : 'NA';
-
-        return (
-          <div key={`${keyPrefix}-aisg-${queue}`} className="summary-card">
-            <div className="summary-label">{queue}</div>
-            <div className="summary-value">{displayValue}</div>
-            <div className="summary-period">AISG</div>
-          </div>
-        );
-      }),
-      ...NUSIT_QUEUES.map(queue => {
-        const stats = nusitStats[queue];
-        const displayValue = stats
-          ? `${(stats.total / stats.count).toFixed(1)} min`
-          : 'NA';
-
-        return (
-          <div key={`${keyPrefix}-nusit-${queue}`} className="summary-card">
-            <div className="summary-label">{queue}</div>
-            <div className="summary-value">{displayValue}</div>
-            <div className="summary-period">NUS IT</div>
-          </div>
-        );
-      })
+      // AISG Queues
+      <div key={`${keyPrefix}-aisg-group`} className="queue-summary-card aisg-queues-card">
+        <h5>AISG Queues</h5>
+        {AISG_QUEUES.map(queue => {
+          const stat = getQueueStat(queue, aisgStats, 'aisg');
+          return (
+            <div key={queue} className="queue-summary-stat">
+              <span className="stat-label">{stat.label}</span>
+              <span className={stat.valueClass}>{stat.value}</span>
+            </div>
+          );
+        })}
+      </div>,
+      // NUS IT Queues
+      <div key={`${keyPrefix}-nusit-group`} className="queue-summary-card nusit-queues-card">
+        <h5>NUS IT Queues</h5>
+        {NUSIT_QUEUES.map(queue => {
+          const stat = getQueueStat(queue, nusitStats, 'nusit');
+          return (
+            <div key={queue} className="queue-summary-stat">
+              <span className="stat-label">{stat.label}</span>
+              <span className={stat.valueClass}>{stat.value}</span>
+            </div>
+          );
+        })}
+      </div>
     ];
   };
 
@@ -363,11 +403,19 @@ const ClusterDashboard: React.FC = () => {
       </div>
 
       {/* Monthly GPU Hours Chart */}
-      <Card title="GPU Hours: Total (Last 2 Years)">
+      <Card title="GPU Hours: Total (Last 2 Years)" className="gpu-hours-card">
         {monthlyGPUHoursLoading ? (
           <div className="loading">Loading monthly GPU hours...</div>
+        ) : monthlyGPUHoursError ? (
+          <div className="error">{monthlyGPUHoursError}</div>
         ) : (
-          <ResponsiveContainer width="100%" height={400}>
+          <>
+            {isSampleData && (
+              <div style={{ padding: '10px', backgroundColor: '#fef3c7', borderRadius: '4px', marginBottom: '10px', color: '#92400e', fontSize: '14px' }}>
+                ⚠️ Sample data - Unable to connect to database. Showing example data.
+              </div>
+            )}
+            <ResponsiveContainer width="100%" height={400}>
             <BarChart data={monthlyGPUHours.map(item => ({
               month: item.month,
               gpuHours: parseFloat(item.gpuHours)
@@ -402,6 +450,7 @@ const ClusterDashboard: React.FC = () => {
               />
             </BarChart>
           </ResponsiveContainer>
+          </>
         )}
       </Card>
 
@@ -419,22 +468,22 @@ const ClusterDashboard: React.FC = () => {
         </Card>
 
         <Card title="Job Status">
-          <div className="job-status-grid">
-            <div className="status-item">
-              <span className="status-label">Total</span>
-              <span className="status-value">{jobs.summary.total}</span>
+          <div className="job-stats">
+            <div className="stat-item">
+              <span className="stat-name">Total</span>
+              <span className="stat-count">{jobs.summary.total}</span>
             </div>
-            <div className="status-item">
-              <span className="status-label">R (Running)</span>
-              <span className="status-value">{jobs.summary.running}</span>
+            <div className="stat-item">
+              <span className="stat-name">Running (R)</span>
+              <span className="stat-count running">{jobs.summary.running}</span>
             </div>
-            <div className="status-item">
-              <span className="status-label">Q (Queued)</span>
-              <span className="status-value">{jobs.summary.queued}</span>
+            <div className="stat-item">
+              <span className="stat-name">Queued (Q)</span>
+              <span className="stat-count queued">{jobs.summary.queued}</span>
             </div>
-            <div className="status-item">
-              <span className="status-label">H (Hold)</span>
-              <span className="status-value">{jobs.summary.hold}</span>
+            <div className="stat-item">
+              <span className="stat-name">Hold (H)</span>
+              <span className="stat-count held">{jobs.summary.hold}</span>
             </div>
           </div>
         </Card>
@@ -450,26 +499,27 @@ const ClusterDashboard: React.FC = () => {
           </div>
         </Card>
 
-        <Card title="Node status">
-          <div className="node-status-grid">
-            <div className="status-item">
-              <span className="status-label">Available</span>
-              <span className="status-value">{stats.freeNodes}</span>
+        <Card title="Node Status">
+          <div className="node-stats">
+            <div className="stat-item">
+              <span className="stat-name">Available</span>
+              <span className="stat-count free">{stats.freeNodes}</span>
             </div>
-            <div className="status-item">
-              <span className="status-label">Busy</span>
-              <span className="status-value">{stats.busyNodes}</span>
+            <div className="stat-item">
+              <span className="stat-name">Busy</span>
+              <span className="stat-count busy">{stats.busyNodes}</span>
             </div>
-            <div className="status-item">
-              <span className="status-label">Down</span>
-              <span className="status-value">{stats.downNodes}</span>
+            <div className="stat-item">
+              <span className="stat-name">Down</span>
+              <span className="stat-count down">{stats.downNodes}</span>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Job History Chart */}
-      <Card title="Total running job">
+      {/* Real-time Charts Section */}
+      <div className="section-header">
+        <h2>Real-time Monitoring</h2>
         <div className="time-range-selector">
           <button
             className={`time-range-btn ${timeRange === '24h' ? 'active' : ''}`}
@@ -490,6 +540,10 @@ const ClusterDashboard: React.FC = () => {
             30 Days
           </button>
         </div>
+      </div>
+
+      {/* Job History Chart */}
+      <Card title="Total running job">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={jobHistory}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -579,43 +633,25 @@ const ClusterDashboard: React.FC = () => {
             />
           </LineChart>
         </ResponsiveContainer>
-      </Card>
+</Card>
 
-      {/* XDMoD Tables Time Range Selector */}
-      <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>Historical Data (XDMoD)</h2>
-        <div className="time-range-selector">
-          <button
-            className={`time-range-btn ${xdmodTimeRange === '1d' ? 'active' : ''}`}
-            onClick={() => setXdmodTimeRange('1d')}
-          >
-            Last Day
-          </button>
-          <button
-            className={`time-range-btn ${xdmodTimeRange === '7d' ? 'active' : ''}`}
-            onClick={() => setXdmodTimeRange('7d')}
-          >
-            Last 7 Days
-          </button>
-          <button
-            className={`time-range-btn ${xdmodTimeRange === '30d' ? 'active' : ''}`}
-            onClick={() => setXdmodTimeRange('30d')}
-          >
-            Last 30 Days
-          </button>
-        </div>
+      {/* Historical Data Section */}
+      <div className="section-header">
+        <h2>Historical Data (XDMoD)</h2>
       </div>
 
       {/* Job Status Chart */}
       <Card title="Job Completion History">
         {jobStatsLoading ? (
           <div className="loading">Loading job statistics...</div>
+        ) : jobStatsLast7Days.length === 0 ? (
+          <div className="data-table-empty">No job completion data available</div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={jobStatsLast7Days.map(item => ({
-              date: new Date(item.jobDate).toLocaleDateString('en-SG', { month: 'short', day: 'numeric' }),
-              numJobs: item.numJobs,
-              totalGpuHours: parseFloat(item.totalGpuHours)
+              date: item.jobDate ? new Date(item.jobDate).toLocaleDateString('en-SG', { month: 'short', day: 'numeric' }) : 'N/A',
+              numJobs: item.numJobs || 0,
+              totalGpuHours: parseFloat(item.totalGpuHours || 0)
             }))}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
@@ -668,13 +704,11 @@ const ClusterDashboard: React.FC = () => {
       </Card>
 
       {/* Wait Time Summary Stats - Static for All Time Ranges */}
-      <div className="wait-time-summary-section">
-        <h3 className="summary-section-title">Average Wait Time per Queue</h3>
-
+      <Card title="Average Wait Time per Queue" className="wait-time-title-card">
         {summaryLoading ? (
-          <div className="summary-loading">Loading summaries...</div>
+          <div className="loading">Loading summaries...</div>
         ) : (
-          <>
+          <div className="wait-time-summary-content">
             {/* Yesterday (1 Day) */}
             <div className="time-range-group">
               <h4 className="time-range-group-title">Yesterday</h4>
@@ -698,9 +732,9 @@ const ClusterDashboard: React.FC = () => {
                 {createQueueSummaryCards(aisgWaitTime30d, nusitWaitTime30d, '30d')}
               </div>
             </div>
-          </>
+          </div>
         )}
-      </div>
+      </Card>
 
       {/* Additional Tables */}
       <div className="centered-tables">

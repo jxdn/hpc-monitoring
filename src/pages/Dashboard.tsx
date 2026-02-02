@@ -5,7 +5,7 @@ import Card from '../components/dashboard/Card';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const { stats, loading, error } = useClusterStats(30000); // Refresh every 30 seconds
+  const { stats, loading, error } = useClusterStats(60000); // Refresh every 1 minute
 
   if (loading) {
     return <div className="loading">Loading cluster statistics...</div>;

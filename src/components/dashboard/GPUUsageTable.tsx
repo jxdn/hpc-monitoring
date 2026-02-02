@@ -16,12 +16,33 @@ interface GPUUsageTableProps {
 }
 
 const GPUUsageTable: React.FC<GPUUsageTableProps> = ({ data, loading }) => {
+  const formatNumber = (num: string | number): string => {
+    const n = typeof num === 'string' ? parseFloat(num) : num;
+    if (n >= 1000) {
+      return (n / 1000).toFixed(1) + 'k';
+    }
+    return n.toFixed(0);
+  };
+
+  const formatHours = (hours: string): string => {
+    const h = parseFloat(hours);
+    if (h >= 1000) {
+      return (h / 1000).toFixed(1) + 'k';
+    }
+    return h.toFixed(1);
+  };
+
   if (loading) {
-    return <div className="gpu-usage-loading">Loading GPU usage data...</div>;
+    return (
+      <div className="gpu-usage-loading">
+        <div className="loading-spinner"></div>
+        Loading GPU usage data...
+      </div>
+    );
   }
 
   if (!data || data.length === 0) {
-    return <div className="gpu-usage-empty">No GPU usage data available</div>;
+    return <div className="gpu-usage-empty">No GPU usage data available for the last 7 days</div>;
   }
 
   return (
@@ -29,6 +50,7 @@ const GPUUsageTable: React.FC<GPUUsageTableProps> = ({ data, loading }) => {
       <table className="gpu-usage-table">
         <thead>
           <tr>
+            <th>Rank</th>
             <th>Username</th>
             <th>Jobs</th>
             <th>Total GPUs</th>
@@ -39,12 +61,13 @@ const GPUUsageTable: React.FC<GPUUsageTableProps> = ({ data, loading }) => {
         </thead>
         <tbody>
           {data.map((row, index) => (
-            <tr key={row.username} className={index === 0 ? 'top-user' : ''}>
+            <tr key={row.username} className={index < 3 ? 'top-user' : ''}>
+              <td className="number-cell rank-cell">#{index + 1}</td>
               <td className="username-cell">{row.username}</td>
-              <td className="number-cell">{row.numJobs}</td>
-              <td className="number-cell">{row.totalGpusUsed}</td>
+              <td className="number-cell">{formatNumber(row.numJobs)}</td>
+              <td className="number-cell">{formatNumber(row.totalGpusUsed)}</td>
               <td className="number-cell">{row.avgGpusPerJob}</td>
-              <td className="number-cell highlight">{row.totalGpuHours}</td>
+              <td className="number-cell highlight">{formatHours(row.totalGpuHours)}</td>
               <td className="number-cell">{row.avgGpuHoursPerJob}</td>
             </tr>
           ))}

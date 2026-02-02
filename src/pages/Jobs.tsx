@@ -5,7 +5,7 @@ import StatCard from '../components/dashboard/StatCard';
 import './Jobs.css';
 
 const Jobs: React.FC = () => {
-  const { jobs, loading, error } = useJobs(30000); // Refresh every 30 seconds
+  const { jobs, loading, error } = useJobs(60000); // Refresh every 1 minute
 
   if (loading) {
     return <div className="loading">Loading jobs...</div>;
