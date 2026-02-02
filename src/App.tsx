@@ -7,11 +7,13 @@ import ClusterDashboard from './pages/ClusterDashboard';
 import Jobs from './pages/Jobs';
 import Nodes from './pages/Nodes';
 import Analytics from './pages/Analytics';
+import DebugDashboard from './pages/DebugDashboard';
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/debug" element={<DebugDashboard />} />
         <Route path="/" element={<Landing />} />
         <Route path="/" element={<LayoutNew />}>
           <Route path="dashboard" element={<Dashboard />} />
