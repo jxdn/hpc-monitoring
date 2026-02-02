@@ -67,6 +67,12 @@ const Landing: React.FC = () => {
                 View Dashboard
               </Link>
               <Link
+                to="/test"
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              >
+                Test Frontend
+              </Link>
+              <Link
                 to="/cluster"
                 className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl font-semibold hover:bg-white/10 transition-all duration-300"
               >
