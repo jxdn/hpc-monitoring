@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPC Monitor Test</title>
+    <style>
+      body {
+        padding: 50px;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      }
+      h1 {
+        color: #667eea;
+        font-size: 48px;
+        margin-bottom: 20px;
+      }
+      .success {
+        background: #10b981;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-size: 24px;
+        text-align: center;
+        margin: 20px 0;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f3f4f6;
+        border-radius: 8px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>✅ FRONTEND IS WORKING!</h1>
+      <div class="success">
+        This is a static HTML test page that doesn't use React
+      </div>
+      <div class="status">
+        <strong>Location:</strong> http://localhost:3000/static-test.html<br>
+        <strong>Status:</strong> If you see this, the server is working!<br>
+        <strong>Next step:</strong> Check Browser Console (F12) for React errors
+      </div>
+    </div>
+  </body>
+</html>

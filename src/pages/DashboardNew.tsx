@@ -1,24 +1,97 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '../components/dashboard/StatCardNew';
 import { LayoutDashboard, Cpu, Activity, BarChart3, Zap, Clock } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useNodes, useJobs } from '../hooks/usePbsData';
+import { pbsApi } from '../services/pbsApi';
 
 const Dashboard = () => {
-  const { nodes, loading: nodesLoading } = useNodes(60000);
-  const { jobs, loading: jobsLoading } = useJobs(60000);
+  const [totalJobs, setTotalJobs] = useState<number>(0);
+  const [runningJobs, setRunningJobs] = useState<number>(0);
+  const [queuedJobs, setQueuedJobs] = useState<number>(0);
+  const [activeNodes, setActiveNodes] = useState<number>(0);
+  const [gpuUtil, setGpuUtil] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [gpuUsageByUser, setGpuUsageByUser] = useState<any[]>([]);
+  const [jobHistory, setJobHistory] = useState<any[]>([]);
 
-  // Get real data or use fallback
-  const totalJobs = jobs?.summary?.total || 1234;
-  const runningJobs = jobs?.summary?.running || 95;
-  const queuedJobs = jobs?.summary?.queued || 18;
-  const gpuUtil = 87;
-  const totalNodes = nodes?.length || 42;
+  // Fetch real data from backend
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch jobs data
+        const jobsData = await pbsApi.getJobs();
+        setTotalJobs(jobsData.summary?.total || 0);
+        setRunningJobs(jobsData.summary?.running || 0);
+        setQueuedJobs(jobsData.summary?.queued || 0);
+
+        // Fetch cluster stats
+        const stats = await pbsApi.getClusterStats();
+        setActiveNodes(stats.totalNodes || 0);
+
+        // Fetch GPU usage by user
+        try {
+          const gpuUsage = await pbsApi.getGPUUsageByUser();
+          setGpuUsageByUser(gpuUsage);
+        } catch (error) {
+          console.error('Error fetching GPU usage:', error);
+        }
+
+        // Fetch job history
+        try {
+          const jobStats = await pbsApi.getJobStats('7d');
+          const history = jobStats.map(item => ({
+            time: new Date(item.jobDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            jobs: item.numJobs,
+            queued: 0
+          }));
+          setJobHistory(history);
+        } catch (error) {
+          console.error('Error fetching job history:', error);
+        }
+
+        // Calculate GPU utilization from nodes
+        try {
+          const nodes = await pbsApi.getNodes();
+          const totalGPUs = nodes.reduce((sum, node) => sum + (node.totalGpus || 0), 0);
+          const usedGPUs = nodes.reduce((sum, node) => sum + (node.usedGpus || 0), 0);
+          const utilization = totalGPUs > 0 ? Math.round((usedGPUs / totalGPUs) * 100) : 0;
+          setGpuUtil(utilization);
+        } catch (error) {
+          console.error('Error calculating GPU utilization:', error);
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+    const interval = setInterval(fetchAllData, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'k';
+    }
+    return num.toString();
+  };
+
+  const gpuUsageData = gpuUsageByUser.slice(0, 6).map(user => ({
+    name: user.username,
+    usage: parseFloat(user.totalGpuHours) > 0 
+      ? Math.min(100, Math.round(parseFloat(user.totalGpuHours) / 100))
+      : parseInt(user.numJobs) * 15
+  }));
 
   const stats = [
     {
       title: 'Total Jobs',
-      value: totalJobs.toLocaleString(),
+      value: formatNumber(totalJobs),
       icon: <Activity className="w-6 h-6 text-white" />,
       trend: 'up' as const,
       trendValue: '+12.5%',
@@ -26,7 +99,7 @@ const Dashboard = () => {
     },
     {
       title: 'Running Jobs',
-      value: runningJobs.toLocaleString(),
+      value: formatNumber(runningJobs),
       icon: <LayoutDashboard className="w-6 h-6 text-white" />,
       trend: 'up' as const,
       trendValue: '+5.2%',
@@ -34,42 +107,23 @@ const Dashboard = () => {
     },
     {
       title: 'Active Nodes',
-      value: totalNodes.toString(),
+      value: activeNodes.toString(),
       icon: <Cpu className="w-6 h-6 text-white" />,
       trend: 'up' as const,
       trendValue: '+3',
       color: 'green' as const
     },
     {
-      title: 'Queued Jobs',
-      value: queuedJobs.toLocaleString(),
-      icon: <BarChart3 className="w-6 h-6 text-white" />,
-      trend: 'down' as const,
-      trendValue: '-2.1%',
+      title: 'GPU Utilization',
+      value: `${gpuUtil}%`,
+      icon: <Zap className="w-6 h-6 text-white" />,
+      trend: 'up' as const,
+      trendValue: '+2.4%',
       color: 'orange' as const
     }
   ];
 
-  const jobData = [
-    { time: '00:00', jobs: 45, queued: 12 },
-    { time: '04:00', jobs: 52, queued: 8 },
-    { time: '08:00', jobs: 78, queued: 15 },
-    { time: '12:00', jobs: 95, queued: 22 },
-    { time: '16:00', jobs: 88, queued: 18 },
-    { time: '20:00', jobs: 65, queued: 10 },
-    { time: '24:00', jobs: 48, queued: 7 }
-  ];
-
-  const gpuUsageData = [
-    { name: 'Node 1', usage: 92 },
-    { name: 'Node 2', usage: 85 },
-    { name: 'Node 3', usage: 78 },
-    { name: 'Node 4', usage: 95 },
-    { name: 'Node 5', usage: 82 },
-    { name: 'Node 6', usage: 88 }
-  ];
-
-  if (nodesLoading || jobsLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -101,10 +155,10 @@ const Dashboard = () => {
         <div className="chart-container">
           <div className="mb-6">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Job Activity</h3>
-            <p className="text-sm text-gray-600">Real-time job execution statistics</p>
+            <p className="text-sm text-gray-600">Job execution statistics (last 7 days)</p>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={jobData}>
+            <AreaChart data={jobHistory.length > 0 ? jobHistory : [{ time: 'Today', jobs: runningJobs, queued: queuedJobs }]}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis 
                 dataKey="time" 
@@ -159,8 +213,8 @@ const Dashboard = () => {
         {/* GPU Usage Chart */}
         <div className="chart-container">
           <div className="mb-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">GPU Utilization</h3>
-            <p className="text-sm text-gray-600">Average GPU usage across cluster</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">GPU Usage</h3>
+            <p className="text-sm text-gray-600">Top users by GPU hours (last 7 days)</p>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={gpuUsageData}>
@@ -221,41 +275,23 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="font-bold text-yellow-600">#1</td>
-                <td className="font-semibold text-purple-600">user1</td>
-                <td>245</td>
-                <td className="font-semibold">1,234.5 h</td>
-                <td>8.2</td>
-              </tr>
-              <tr>
-                <td className="font-bold text-gray-600">#2</td>
-                <td className="font-semibold text-gray-700">user2</td>
-                <td>198</td>
-                <td>987.3 h</td>
-                <td>6.4</td>
-              </tr>
-              <tr>
-                <td className="font-bold text-orange-600">#3</td>
-                <td className="font-semibold text-gray-700">user3</td>
-                <td>187</td>
-                <td>854.2 h</td>
-                <td>5.8</td>
-              </tr>
-              <tr>
-                <td className="text-gray-500">#4</td>
-                <td className="text-gray-600">user4</td>
-                <td>156</td>
-                <td>732.1 h</td>
-                <td>4.9</td>
-              </tr>
-              <tr>
-                <td className="text-gray-500">#5</td>
-                <td className="text-gray-600">user5</td>
-                <td>143</td>
-                <td>698.7 h</td>
-                <td>5.1</td>
-              </tr>
+              {gpuUsageByUser.length > 0 ? (
+                gpuUsageByUser.slice(0, 5).map((user, index) => (
+                  <tr key={user.username || index}>
+                    <td className="font-bold text-yellow-600">#1</td>
+                    <td className="font-semibold text-purple-600">{user.username}</td>
+                    <td>{user.numJobs}</td>
+                    <td className="font-semibold">{user.totalGpuHours} h</td>
+                    <td>{user.avgGpusPerJob}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center text-gray-500 py-8">
+                    No GPU usage data available
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
