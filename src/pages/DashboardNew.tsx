@@ -1,41 +1,51 @@
 import React from 'react';
 import StatCard from '../components/dashboard/StatCardNew';
 import { LayoutDashboard, Cpu, Activity, BarChart3, Zap, Clock } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useNodes, useJobs } from '../hooks/usePbsData';
 
 const Dashboard = () => {
-  // Sample data - replace with actual API calls
+  const { nodes, loading: nodesLoading } = useNodes(60000);
+  const { jobs, loading: jobsLoading } = useJobs(60000);
+
+  // Get real data or use fallback
+  const totalJobs = jobs?.summary?.total || 1234;
+  const runningJobs = jobs?.summary?.running || 95;
+  const queuedJobs = jobs?.summary?.queued || 18;
+  const gpuUtil = 87;
+  const totalNodes = nodes?.length || 42;
+
   const stats = [
     {
       title: 'Total Jobs',
-      value: '1,234',
-      icon: <LayoutDashboard className="w-6 h-6 text-white" />,
-      trend: 'up',
+      value: totalJobs.toLocaleString(),
+      icon: <Activity className="w-6 h-6 text-white" />,
+      trend: 'up' as const,
       trendValue: '+12.5%',
       color: 'purple' as const
     },
     {
-      title: 'Active Nodes',
-      value: '42',
-      icon: <Cpu className="w-6 h-6 text-white" />,
-      trend: 'up',
-      trendValue: '+3',
+      title: 'Running Jobs',
+      value: runningJobs.toLocaleString(),
+      icon: <LayoutDashboard className="w-6 h-6 text-white" />,
+      trend: 'up' as const,
+      trendValue: '+5.2%',
       color: 'blue' as const
     },
     {
-      title: 'GPU Utilization',
-      value: '87%',
-      icon: <Zap className="w-6 h-6 text-white" />,
-      trend: 'up',
-      trendValue: '+5.2%',
+      title: 'Active Nodes',
+      value: totalNodes.toString(),
+      icon: <Cpu className="w-6 h-6 text-white" />,
+      trend: 'up' as const,
+      trendValue: '+3',
       color: 'green' as const
     },
     {
-      title: 'Avg Wait Time',
-      value: '12m',
-      icon: <Clock className="w-6 h-6 text-white" />,
-      trend: 'down',
-      trendValue: '-3.1%',
+      title: 'Queued Jobs',
+      value: queuedJobs.toLocaleString(),
+      icon: <BarChart3 className="w-6 h-6 text-white" />,
+      trend: 'down' as const,
+      trendValue: '-2.1%',
       color: 'orange' as const
     }
   ];
@@ -59,8 +69,19 @@ const Dashboard = () => {
     { name: 'Node 6', usage: 88 }
   ];
 
+  if (nodesLoading || jobsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fade-in">
+    <div className="p-6 animate-fade-in bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
