@@ -1,27 +1,29 @@
 .node-heatmap-container {
   background: var(--bg-primary);
-  border: 1px solid var(--color-neutral-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  border: var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
   box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
+  transition: all var(--transition-base) ease;
 }
 
 .node-heatmap-container:hover {
   box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
 }
 
 .heatmap-title {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-lg) 0;
+  margin: 0 0 var(--space-xl) 0;
+  letter-spacing: -0.01em;
 }
 
 .node-heatmap {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: var(--space-sm);
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-md);
 }
 
 .node-cell {
@@ -30,53 +32,68 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid var(--color-neutral-border);
+  transition: all var(--transition-base) ease;
+  border: var(--border-medium);
   background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--transition-base) ease;
 }
 
 .node-cell:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
   z-index: 10;
 }
 
+.node-cell:hover::before {
+  opacity: 1;
+}
+
 .node-name {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: var(--space-xs);
   text-align: center;
+  z-index: 1;
 }
 
 .node-value {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-text-primary);
+  z-index: 1;
 }
 
 /* Heatmap color variations */
 .node-cell.level-0 {
-  background: var(--color-success-bg);
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
   border-color: var(--color-success);
 }
 
 .node-cell.level-1 {
-  background: #def7ec;
-  border-color: #6ee7b7;
+  background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
+  border-color: #34d399;
 }
 
 .node-cell.level-2 {
-  background: #fee4cb;
-  border-color: #fcd9bd;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: var(--color-warning);
 }
 
 .node-cell.level-3 {
-  background: #fecaca;
-  border-color: #fca5a5;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: var(--color-danger);
 }
 
 .node-cell.level-4 {

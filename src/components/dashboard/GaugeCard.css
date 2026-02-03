@@ -1,46 +1,69 @@
 .gauge-card {
   background: var(--bg-primary);
-  border: 1px solid var(--color-neutral-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  border: var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gauge-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--bg-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-base) ease;
 }
 
 .gauge-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-border-light);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--color-primary-light);
+}
+
+.gauge-card:hover::before {
+  opacity: 1;
 }
 
 .gauge-title {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin: 0 0 var(--space-md) 0;
+  margin: 0 0 var(--space-xl) 0;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .gauge-container {
   position: relative;
   width: 100%;
-  max-width: 200px;
+  max-width: 220px;
 }
 
 .gauge-svg {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
 }
 
 .gauge-bg {
-  stroke: var(--bg-tertiary);
+  stroke: var(--color-neutral-200);
+  stroke-width: 12;
 }
 
 .gauge-fill {
-  transition: stroke-dasharray 0.5s ease;
+  transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+  stroke-width: 12;
+  filter: drop-shadow(0 0 6px currentColor);
 }
 
 .gauge-value {
@@ -48,10 +71,11 @@
   top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
   text-align: center;
   color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 /* Status-based color variations */
@@ -61,10 +85,18 @@
   stroke: var(--color-danger);
 }
 
+.gauge-card.high-value::before {
+  background: var(--color-danger-gradient);
+}
+
 .gauge-card.medium-value .gauge-value,
 .gauge-card.medium-value .gauge-fill {
   color: var(--color-warning);
   stroke: var(--color-warning);
+}
+
+.gauge-card.medium-value::before {
+  background: var(--color-warning-gradient);
 }
 
 .gauge-card.good-value .gauge-value,
@@ -73,17 +105,25 @@
   stroke: var(--color-success);
 }
 
+.gauge-card.good-value::before {
+  background: var(--color-success-gradient);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .gauge-card {
-    padding: var(--space-md);
+    padding: var(--space-xl);
   }
 
   .gauge-container {
-    max-width: 180px;
+    max-width: 200px;
   }
 
   .gauge-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+
+  .gauge-title {
+    font-size: 0.9375rem;
   }
 }
