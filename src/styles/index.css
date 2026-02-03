@@ -14,44 +14,58 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
-  /* LiteLLM-inspired color palette */
-  --color-primary: #79c0ff;
-  --color-primary-hover: #58a6ff;
-  --color-primary-dark: #0969da;
-  --color-success: #3fb950;
-  --color-success-bg: #dafbe1;
-  --color-warning: #d29922;
-  --color-warning-bg: #f8e3a1;
-  --color-danger: #f85149;
-  --color-danger-bg: #ffe2dd;
-  --color-neutral-bg: #f6f8fa;
-  --color-neutral-border: #d0d7de;
-  --color-text-primary: #24292e;
-  --color-text-secondary: #57606a;
-  --color-text-muted: #8c959f;
-  --color-border-light: #d8dee4;
+  /* McKinsey-inspired color palette */
+  --color-primary: #0066cc;
+  --color-primary-hover: #005bb5;
+  --color-primary-dark: #004494;
+  --color-primary-light: #e6f2ff;
+  --color-secondary: #0044aa;
+  --color-teal: #00897b;
+  --color-teal-light: #e6fffa;
+  --color-success: #10b981;
+  --color-success-bg: #dcfce7;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d5d7db;
+  --color-neutral-400: #cbd5e1;
+  --color-neutral-500: #6b7280;
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #475569;
+  --color-text-muted: #9ca3af;
+  --color-border-gray: #e5e7eb;
   --bg-primary: #ffffff;
-  --bg-secondary: #f6f8fa;
-  --bg-tertiary: #eaeef2;
+  --bg-secondary: #fafbfc;
+  --bg-tertiary: #f3f4f6;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* Shadows - McKinsey-style (cleaner, professional) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+  --shadow-blue: 0 2px 8px rgba(0, 102, 204, 0.12);
+  --shadow-teal: 0 4px 12px rgba(0, 137, 123, 0.15);
   
-  /* Spacing */
+  /* Spacing - McKinsey-style (more generous, clean) */
+  --space-xxs: 0.125rem;
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  --space-2xl: 3rem;
+  --space-2xl: 2.5rem;
+  --space-3xl: 3rem;
   
-  /* Border radius */
+  /* Border radius - McKinsey-style (subtle, professional) */
+  --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 20px;
 }
 
 * {
@@ -65,8 +79,10 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--bg-primary);
+  background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 50%, #f0f2f5 100%);
   color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -74,12 +90,178 @@ body {
   min-height: 100vh;
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.25;
-  margin-bottom: var(--space-md);
-  color: var(--color-text-primary);
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* McKinsey Gradient Backgrounds */
+.gradient-mckinsey-blue {
+  background: linear-gradient(135deg, #0066cc 0%, #0044bb 100%);
+  color: white;
+}
+
+.gradient-mckinsey-teal {
+  background: linear-gradient(135deg, #00897b 0%, #006666 100%);
+  color: white;
+}
+
+.gradient-mckinsey-bg {
+  background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
+}
+
+/* McKinsey Button Styles */
+.btn-mckinsey {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #0066cc 0%, #0055bb 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.15);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.btn-mckinsey:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 102, 204, 0.25);
+}
+
+.btn-mckinsey-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: white;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 102, 204, 0.08);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.btn-mckinsey-secondary:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+/* McKinsey Card Enhancement */
+.mckinsey-card {
+  background: white;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.mckinsey-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 2px rgba(0, 0, 0, 0.04);
+  border-color: var(--color-primary-light);
+}
+
+.mckinsey-header {
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.mckinsey-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.01em;
+}
+
+.mckinsey-header h2::before {
+  content: '';
+  height: 3px;
+  display: block;
+  background: linear-gradient(90deg, #0066cc 0%, #0044bb 100%);
+  margin-bottom: var(--space-md);
+  width: 40px;
+}
+
+.mckinsey-header h2::after {
+  content: '';
+  height: 3px;
+  display: block;
+  background: linear-gradient(90deg, #0066cc 0%, #0044bb 100%);
+  margin-top: var(--space-md);
+  width: 40px;
+}
+
+.mckinsey-stat-row {
+  display: flex;
+  gap: 2rem;
+  align-items: baseline;
+  padding: var(--space-xl);
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.mckinsey-stat-item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mckinsey-stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  letter-spacing: -0.01em;
+}
+
+.mckinsey-stat-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.mckinsey-stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-sm);
+  margin-left: 16px;
+}
+
+.mckinsey-stat-trend.up {
+  color: var(--color-teal);
+}
+
+.mckinsey-stat-trend.down {
+  color: var(--color-danger);
+}
+
+.mckinsey-stat-trend.neutral {
+  color: var(--color-text-muted);
 }
 
 h1 { font-size: 2rem; }

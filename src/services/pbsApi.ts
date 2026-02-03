@@ -11,6 +11,14 @@ const api = axios.create({
   },
 });
 
+const longTimeoutApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 export const pbsApi = {
   // Jobs (now returns aggregated data from Prometheus)
   async getJobs(): Promise<AggregatedJobData> {
@@ -135,7 +143,7 @@ export const pbsApi = {
     month: string;
     gpuHours: string;
   }>> {
-    const response = await api.get('/analytics/monthly-gpu-hours');
+    const response = await longTimeoutApi.get('/analytics/monthly-gpu-hours');
     return response.data;
   },
 };

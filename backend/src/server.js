@@ -297,6 +297,13 @@ app.get('/api/analytics/nusit-wait-time', async (req, res) => {
  */
 app.get('/api/analytics/monthly-gpu-hours', async (req, res) => {
   try {
+    // Try to read from cache first
+    const cachedData = await cacheService.readCache('monthly-gpu-hours');
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
+    // If no cache, fetch from database
     const data = await xdmodService.getMonthlyGPUHours();
     res.json(data);
   } catch (error) {

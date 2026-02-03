@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, AreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { pbsApi } from '../services/pbsApi';
 import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
-import StatCard from '../components/dashboard/StatCard';
 import GaugeCard from '../components/dashboard/GaugeCard';
 import NodeHeatmap from '../components/dashboard/NodeHeatmap';
 import Card from '../components/dashboard/Card';
 import GPUUsageTable from '../components/dashboard/GPUUsageTable';
-import JobStatsTableWithPagination from '../components/dashboard/JobStatsTableWithPagination';
 import WaitTimeTableWithPagination from '../components/dashboard/WaitTimeTableWithPagination';
 import './ClusterDashboard.css';
 
@@ -329,10 +327,14 @@ const ClusterDashboard: React.FC = () => {
     return <div className="error">No data available</div>;
   }
 
+  // Define nodes to exclude (hopper-1 to hopper-6)
+  const excludedNodes = ['hopper-1', 'hopper-2', 'hopper-3', 'hopper-4', 'hopper-5', 'hopper-6'];
+  const filteredNodes = nodes.filter(n => !excludedNodes.includes(n.name));
+
   // Calculate GPU occupation rates
-  const totalGPUs = stats.totalGpus;
-  const usedGPUs = stats.usedGpus;
-  const gpuOccupationRate = totalGPUs > 0 ? (usedGPUs / totalGPUs) * 100 : 0;
+  const filteredTotalGPUs = filteredNodes.reduce((sum, n) => sum + n.totalGpus, 0);
+  const filteredUsedGPUs = filteredNodes.reduce((sum, n) => sum + n.usedGpus, 0);
+  const gpuOccupationRate = filteredTotalGPUs > 0 ? (filteredUsedGPUs / filteredTotalGPUs) * 100 : 0;
 
   // Filter nodes for AISG and NON-AISG (based on your Grafana config)
   const aisgNodes = nodes.filter(n =>
@@ -393,7 +395,7 @@ const ClusterDashboard: React.FC = () => {
           value={gpuOccupationRate}
         />
         <GaugeCard
-          title="NON-AISG Occ. rate"
+          title="NUS-IT occ rate"
           value={nonAisgOccupation}
         />
         <GaugeCard

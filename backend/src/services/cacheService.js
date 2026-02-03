@@ -133,6 +133,14 @@ try {
       console.error('Error updating nusit-wait-time-30d:', error.message);
     }
 
+    // Monthly GPU Hours
+    try {
+      const monthlyGPUHours = await xdmodService.getMonthlyGPUHours();
+      await writeCache('monthly-gpu-hours', monthlyGPUHours);
+    } catch (error) {
+      console.error('Error updating monthly-gpu-hours:', error.message);
+    }
+
     console.log('Cache update completed successfully');
   } catch (error) {
     console.error('Error updating caches:', error);
