@@ -58,7 +58,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchJobHistory();
-    const interval = setInterval(fetchJobHistory, 60000);
+    const interval = setInterval(fetchJobHistory, 120000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -73,7 +73,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchGPUOccupationHistory();
-    const interval = setInterval(fetchGPUOccupationHistory, 60000);
+    const interval = setInterval(fetchGPUOccupationHistory, 120000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -91,7 +91,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchGPUUsageByUser();
-    const interval = setInterval(fetchGPUUsageByUser, 60000);
+    const interval = setInterval(fetchGPUUsageByUser, 120000);
     return () => clearInterval(interval);
   }, []);
 
@@ -111,7 +111,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchJobStatsLast7Days();
-    const interval = setInterval(fetchJobStatsLast7Days, 60000);
+    const interval = setInterval(fetchJobStatsLast7Days, 120000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -130,7 +130,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchAISGWaitTime();
-    const interval = setInterval(fetchAISGWaitTime, 60000);
+    const interval = setInterval(fetchAISGWaitTime, 120000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -149,7 +149,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchNUSITWaitTime();
-    const interval = setInterval(fetchNUSITWaitTime, 60000);
+    const interval = setInterval(fetchNUSITWaitTime, 120000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -183,7 +183,7 @@ const ClusterDashboard: React.FC = () => {
     };
 
     fetchAllWaitTimeSummaries();
-    const interval = setInterval(fetchAllWaitTimeSummaries, 60000);
+    const interval = setInterval(fetchAllWaitTimeSummaries, 120000);
     return () => clearInterval(interval);
   }, []);
 
@@ -246,11 +246,11 @@ const ClusterDashboard: React.FC = () => {
     return 'stat-value danger';
   };
 
-  // Helper function to create queue summary cards with static queues
-  const createQueueSummaryCards = (
+  // Helper function to calculate average wait time statistics table data
+  const getAverageWaitTimeTableData = (
     aisgData: any[],
     nusitData: any[],
-    keyPrefix: string
+    timeRangeLabel: string
   ) => {
     // Calculate stats from data
     const aisgStats = aisgData.reduce((acc, item) => {
@@ -271,51 +271,37 @@ const ClusterDashboard: React.FC = () => {
       return acc;
     }, {} as Record<string, { total: number; count: number }>);
 
-    // Get all unique queues for each type
+    // Get all queue stats
     const getQueueStat = (queueName: string, stats: Record<string, { total: number; count: number }>, type: 'aisg' | 'nusit') => {
       const queueStats = stats[queueName];
       const displayValue = queueStats
         ? `${(queueStats.total / queueStats.count).toFixed(1)} min`
         : 'NA';
       const status = getWaitTimeStatus(displayValue);
-      const valueClass = getWaitTimeClass(status);
       return {
-        label: queueName,
-        value: displayValue,
-        type: type,
+        queueType: type === 'aisg' ? 'AISG' : 'NUS IT',
+        queueName: queueName,
+        averageWaitTime: displayValue,
         status: status,
-        valueClass: valueClass
+        timeRange: timeRangeLabel
       };
     };
 
-    // Create boxed cards organized by queue type
+    // Combine all queue data
+    const allQueues = [
+      ...AISG_QUEUES.map(q => getQueueStat(q, aisgStats, 'aisg')),
+      ...NUSIT_QUEUES.map(q => getQueueStat(q, nusitStats, 'nusit'))
+    ];
+
+    return allQueues;
+  };
+
+  // Combine all time range data into a single table
+  const getCombinedWaitTimeTableData = () => {
     return [
-      // AISG Queues
-      <div key={`${keyPrefix}-aisg-group`} className="queue-summary-card aisg-queues-card">
-        <h5>AISG Queues</h5>
-        {AISG_QUEUES.map(queue => {
-          const stat = getQueueStat(queue, aisgStats, 'aisg');
-          return (
-            <div key={queue} className="queue-summary-stat">
-              <span className="stat-label">{stat.label}</span>
-              <span className={stat.valueClass}>{stat.value}</span>
-            </div>
-          );
-        })}
-      </div>,
-      // NUS IT Queues
-      <div key={`${keyPrefix}-nusit-group`} className="queue-summary-card nusit-queues-card">
-        <h5>NUS IT Queues</h5>
-        {NUSIT_QUEUES.map(queue => {
-          const stat = getQueueStat(queue, nusitStats, 'nusit');
-          return (
-            <div key={queue} className="queue-summary-stat">
-              <span className="stat-label">{stat.label}</span>
-              <span className={stat.valueClass}>{stat.value}</span>
-            </div>
-          );
-        })}
-      </div>
+      ...getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday'),
+      ...getAverageWaitTimeTableData(aisgWaitTime7d, nusitWaitTime7d, 'Last 7 Days'),
+      ...getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days')
     ];
   };
 
@@ -381,7 +367,13 @@ const ClusterDashboard: React.FC = () => {
   return (
     <div className="cluster-dashboard">
       <div className="dashboard-header">
-        <h1>Cluster Overview</h1>
+        <div className="header-left">
+          <h1>Cluster Overview</h1>
+          <div className="refresh-indicator">
+            <span className="refresh-icon">↻</span>
+            <span className="refresh-text">Auto-refresh every 2 minutes</span>
+          </div>
+        </div>
         <div className="dashboard-time">
           <span className="time-label">Singapore Time (SGT)</span>
           <span className="time-value">{formatSGT(currentTime)}</span>
@@ -705,35 +697,42 @@ const ClusterDashboard: React.FC = () => {
         )}
       </Card>
 
-      {/* Wait Time Summary Stats - Static for All Time Ranges */}
+      {/* Wait Time Summary Stats - Table Display */}
       <Card title="Average Wait Time per Queue" className="wait-time-title-card">
         {summaryLoading ? (
           <div className="loading">Loading summaries...</div>
         ) : (
-          <div className="wait-time-summary-content">
-            {/* Yesterday (1 Day) */}
-            <div className="time-range-group">
-              <h4 className="time-range-group-title">Yesterday</h4>
-              <div className="queue-summary-grid">
-                {createQueueSummaryCards(aisgWaitTime1d, nusitWaitTime1d, '1d')}
-              </div>
-            </div>
-
-            {/* Last 7 Days */}
-            <div className="time-range-group">
-              <h4 className="time-range-group-title">Last 7 Days</h4>
-              <div className="queue-summary-grid">
-                {createQueueSummaryCards(aisgWaitTime7d, nusitWaitTime7d, '7d')}
-              </div>
-            </div>
-
-            {/* Last 30 Days */}
-            <div className="time-range-group">
-              <h4 className="time-range-group-title">Last 30 Days</h4>
-              <div className="queue-summary-grid">
-                {createQueueSummaryCards(aisgWaitTime30d, nusitWaitTime30d, '30d')}
-              </div>
-            </div>
+          <div className="average-wait-time-table-container">
+            <table className="average-wait-time-table">
+              <thead>
+                <tr>
+                  <th>Time Range</th>
+                  <th>Queue Type</th>
+                  <th>Queue Name</th>
+                  <th>Average Wait Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getCombinedWaitTimeTableData().map((row, index) => (
+                  <tr key={`${row.timeRange}-${row.queueName}-${index}`}>
+                    <td className="time-range-cell">{row.timeRange}</td>
+                    <td className="queue-type-cell">{row.queueType}</td>
+                    <td className="queue-name-cell">{row.queueName}</td>
+                    <td className="wait-time-cell">
+                      <span className={`wait-time-badge wait-time-badge-${row.status}`}>
+                        {row.averageWaitTime}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status-badge status-badge-${row.status}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </Card>

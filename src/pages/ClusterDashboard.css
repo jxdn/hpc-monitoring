@@ -30,6 +30,12 @@
   background: var(--bg-gradient);
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
 .cluster-dashboard h1 {
   margin: 0;
   font-size: 2rem;
@@ -40,6 +46,38 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.refresh-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+
+.refresh-icon {
+  font-size: 1rem;
+  color: var(--color-primary);
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refresh-text {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 .dashboard-time {
@@ -710,6 +748,138 @@
 
 .wait-time-title-card {
   margin-top: var(--space-2xl);
+}
+
+/* Average Wait Time Table */
+.average-wait-time-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+}
+
+.average-wait-time-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.average-wait-time-table thead {
+  background: var(--bg-gradient);
+}
+
+.average-wait-time-table thead th {
+  padding: var(--space-md) var(--space-lg);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.average-wait-time-table thead th:last-child {
+  border-right: none;
+}
+
+.average-wait-time-table tbody tr {
+  border-bottom: var(--border-light);
+  transition: all var(--transition-fast) ease;
+}
+
+.average-wait-time-table tbody tr:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-xs);
+}
+
+.average-wait-time-table tbody td {
+  padding: var(--space-md) var(--space-lg);
+  color: var(--color-text-primary);
+}
+
+.average-wait-time-table .time-range-cell {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.average-wait-time-table .queue-type-cell {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.average-wait-time-table .queue-name-cell {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.average-wait-time-table .wait-time-cell {
+  font-weight: 600;
+}
+
+/* Wait Time Badge */
+.wait-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast) ease;
+}
+
+.wait-time-badge-good {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.wait-time-badge-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+}
+
+.wait-time-badge-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.wait-time-badge:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-badge-good {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-badge-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.status-badge-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 /* Wait Time Summary Section */
