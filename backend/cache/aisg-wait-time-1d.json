@@ -1,8 +1,0 @@
-{
-  "timestamp": "2026-02-02T02:35:00.000Z",
-  "data": [
-    {"date": "2026-02-02", "queueName": "AISG_debug", "numJobs": 25, "totalGpuHours": 142.3, "avgGpuHoursPerJob": 5.7, "avgWaitMinutes": 12.5},
-    {"date": "2026-02-02", "queueName": "AISG_large", "numJobs": 35, "totalGpuHours": 315.0, "avgGpuHoursPerJob": 9.0, "avgWaitMinutes": 25.3},
-    {"date": "2026-02-02", "queueName": "AISG_guest", "numJobs": 15, "totalGpuHours": 45.0, "avgGpuHoursPerJob": 3.0, "avgWaitMinutes": 8.2}
-  ]
-}
