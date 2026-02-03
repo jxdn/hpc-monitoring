@@ -252,30 +252,32 @@ const ClusterDashboard: React.FC = () => {
     nusitData: any[],
     timeRangeLabel: string
   ) => {
-    // Calculate stats from data
+    // Calculate TOTAL wait time and TOTAL job count for each queue (not average of averages)
     const aisgStats = aisgData.reduce((acc, item) => {
       if (!acc[item.queueName]) {
-        acc[item.queueName] = { total: 0, count: 0 };
+        acc[item.queueName] = { totalWaitTime: 0, totalJobs: 0 };
       }
-      acc[item.queueName].total += item.avgWaitMinutes;
-      acc[item.queueName].count += 1;
+      // Calculate total wait time: daily avg * daily job count
+      acc[item.queueName].totalWaitTime += (item.avgWaitMinutes * item.numJobs);
+      acc[item.queueName].totalJobs += item.numJobs;
       return acc;
-    }, {} as Record<string, { total: number; count: number }>);
+    }, {} as Record<string, { totalWaitTime: number; totalJobs: number }>);
 
     const nusitStats = nusitData.reduce((acc, item) => {
       if (!acc[item.queueName]) {
-        acc[item.queueName] = { total: 0, count: 0 };
+        acc[item.queueName] = { totalWaitTime: 0, totalJobs: 0 };
       }
-      acc[item.queueName].total += item.avgWaitMinutes;
-      acc[item.queueName].count += 1;
+      // Calculate total wait time: daily avg * daily job count
+      acc[item.queueName].totalWaitTime += (item.avgWaitMinutes * item.numJobs);
+      acc[item.queueName].totalJobs += item.numJobs;
       return acc;
-    }, {} as Record<string, { total: number; count: number }>);
+    }, {} as Record<string, { totalWaitTime: number; totalJobs: number }>);
 
     // Get all queue stats
-    const getQueueStat = (queueName: string, stats: Record<string, { total: number; count: number }>, type: 'aisg' | 'nusit') => {
+    const getQueueStat = (queueName: string, stats: Record<string, { totalWaitTime: number; totalJobs: number }>, type: 'aisg' | 'nusit') => {
       const queueStats = stats[queueName];
-      const displayValue = queueStats
-        ? `${(queueStats.total / queueStats.count).toFixed(1)} min`
+      const displayValue = queueStats && queueStats.totalJobs > 0
+        ? `${(queueStats.totalWaitTime / queueStats.totalJobs).toFixed(1)} min`
         : 'NA';
       const status = getWaitTimeStatus(displayValue);
       return {
