@@ -246,6 +246,13 @@ const ClusterDashboard: React.FC = () => {
     return 'stat-value danger';
   };
 
+  // Helper function to get wait time status label
+  const getWaitTimeStatusLabel = (status: 'good' | 'warning' | 'danger'): string => {
+    if (status === 'good') return 'Acceptable';
+    if (status === 'warning') return 'Warning';
+    return 'Warning';
+  };
+
   // Helper function to calculate average wait time statistics table data
   const getAverageWaitTimeTableData = (
     aisgData: any[],
@@ -319,11 +326,6 @@ const ClusterDashboard: React.FC = () => {
   const excludedNodes = ['hopper-1', 'hopper-2', 'hopper-3', 'hopper-4', 'hopper-5', 'hopper-6'];
   const filteredNodes = nodes.filter(n => !excludedNodes.includes(n.name));
 
-  // Calculate GPU occupation rates
-  const filteredTotalGPUs = filteredNodes.reduce((sum, n) => sum + n.totalGpus, 0);
-  const filteredUsedGPUs = filteredNodes.reduce((sum, n) => sum + n.usedGpus, 0);
-  const gpuOccupationRate = filteredTotalGPUs > 0 ? (filteredUsedGPUs / filteredTotalGPUs) * 100 : 0;
-
   // Filter nodes for AISG and NON-AISG (based on your Grafana config)
   const aisgNodes = nodes.filter(n =>
     ['hopper-46', 'hopper-43', 'hopper-45', 'hopper-44', 'hopper-42',
@@ -340,6 +342,9 @@ const ClusterDashboard: React.FC = () => {
   // Assuming NON-AISG has 192 GPUs based on your formula
   const nonAisgUsedGPUs = nonAisgNodes.reduce((sum, n) => sum + n.usedGpus, 0);
   const nonAisgOccupation = (nonAisgUsedGPUs / 192) * 100;
+
+  // Calculate GPU occupation rate (exc. 1-6) using formula: ((NUS-IT occ rate * 24) / 4000) + ((AISG Occ. rate * 16) / 4000)
+  const gpuOccupationRate = ((nonAisgOccupation * 24) / 4000 + (aisgOccupation * 16) / 4000) * 100;
 
   // Top 5 users
   const topUsers = jobs.byUser.slice(0, 5);
@@ -728,7 +733,7 @@ const ClusterDashboard: React.FC = () => {
                     </td>
                     <td>
                       <span className={`status-badge status-badge-${row.status}`}>
-                        {row.status}
+                        {getWaitTimeStatusLabel(row.status)}
                       </span>
                     </td>
                   </tr>

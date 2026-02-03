@@ -157,13 +157,13 @@ async function initializeCacheService() {
   console.log('Initializing cache service...');
   await updateAllCaches();
 
-  // Schedule daily updates at 2 AM
-  schedule.scheduleJob('0 2 * * *', async () => {
+  // Schedule hourly updates at the top of every hour
+  schedule.scheduleJob('0 * * * *', async () => {
     console.log('Running scheduled cache update...');
     await updateAllCaches();
   });
 
-  console.log('Cache service initialized. Daily updates scheduled at 2:00 AM.');
+  console.log('Cache service initialized. Hourly updates scheduled at :00 of every hour.');
 }
 
 module.exports = {
