@@ -60,6 +60,21 @@ const ClusterDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Format time in Singapore Time (SGT, UTC+8)
+  const formatSGT = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: 'Asia/Singapore',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    };
+    return new Intl.DateTimeFormat('en-SG', options).format(date);
+  };
+
   useEffect(() => {
     const fetchJobHistory = async () => {
       try {
