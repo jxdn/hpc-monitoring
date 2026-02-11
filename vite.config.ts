@@ -4,6 +4,7 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/status/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -12,9 +13,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    allowedHosts: ['hopper2.nus.edu.sg'],
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3003',
         changeOrigin: true,
       },
     },

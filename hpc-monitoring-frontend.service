@@ -1,0 +1,17 @@
+[Unit]
+Description=HPC Monitoring Frontend Service
+Documentation=https://github.com/nus-itd/hpc-monitoring
+After=network.target hpc-monitoring-backend.service
+
+[Service]
+Type=simple
+User=zidni
+WorkingDirectory=/nfs/home/svu/zidni/hpc-monitoring
+ExecStart=/usr/bin/npm run preview
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/nfs/home/svu/zidni/hpc-monitoring/frontend.log
+StandardError=append:/nfs/home/svu/zidni/hpc-monitoring/frontend.log
+
+[Install]
+WantedBy=multi-user.target

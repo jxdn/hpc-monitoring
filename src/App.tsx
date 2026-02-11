@@ -9,7 +9,7 @@ import Analytics from './pages/Analytics';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router basename="/status">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<ClusterDashboard />} />

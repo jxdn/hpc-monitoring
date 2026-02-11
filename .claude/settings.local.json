@@ -8,7 +8,8 @@
       "Bash(npm install:*)",
       "Bash(pkill:*)",
       "Bash(npm run dev:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(/nfs/home/svu/zidni/hpc-monitoring/node_modules/.bin/vite:*)"
     ]
   }
 }

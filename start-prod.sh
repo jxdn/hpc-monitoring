@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# HPC Monitoring Development Startup Script
-# Starts both frontend and backend servers
+# HPC Monitoring Production Startup Script
+# Starts both frontend (served) and backend (node) in production mode
 
 # Change to script directory
 cd "$(dirname "$0")"
 
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  HPC Monitoring - Development Startup                   ║"
+echo "║  HPC Monitoring - Production Startup                     ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -23,11 +23,9 @@ echo ""
 
 # Check if .env file exists
 if [ ! -f .env ]; then
-    echo "⚠️  Warning: .env file not found"
-    echo "   Creating from .env.example..."
-    cp .env.example .env
-    echo "   Please edit .env with your configuration"
-    echo ""
+    echo "❌ Error: .env file not found"
+    echo "   Please create .env from .env.example"
+    exit 1
 fi
 
 # Check if node_modules exists for frontend
@@ -46,6 +44,16 @@ if [ ! -d backend/node_modules ]; then
     echo ""
 fi
 
+# Build frontend
+echo "🔨 Building frontend..."
+npm run build
+if [ $? -ne 0 ]; then
+    echo "❌ Frontend build failed"
+    exit 1
+fi
+echo "✅ Frontend built successfully"
+echo ""
+
 # Function to cleanup on exit
 cleanup() {
     echo ""
@@ -56,17 +64,19 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+# Start backend
 echo "🚀 Starting backend server..."
 cd backend
-npm run dev > ../backend.log 2>&1 &
+NODE_ENV=production nohup node src/server.js > ../backend.log 2>&1 &
 BACKEND_PID=$!
 cd ..
 
-# Wait a bit for backend to start
+# Wait for backend to start
 sleep 3
 
+# Start frontend (serve the built files)
 echo "🚀 Starting frontend server..."
-npm run dev > frontend.log 2>&1 &
+nohup npm run preview > frontend.log 2>&1 &
 FRONTEND_PID=$!
 
 echo ""
