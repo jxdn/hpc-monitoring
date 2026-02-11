@@ -18,7 +18,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--bg-gradient);
+  background: #0066cc;
   opacity: 0;
   transition: opacity var(--transition-base) ease;
 }
@@ -36,7 +36,7 @@
 .card-header {
   padding: var(--space-xl) var(--space-2xl);
   border-bottom: var(--border-light);
-  background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,7 +63,7 @@
 .card-footer {
   padding: var(--space-lg) var(--space-2xl);
   border-top: var(--border-light);
-  background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -100,7 +100,7 @@
 
 /* Card with colored header */
 .card.colored-header .card-header {
-  background: var(--bg-gradient);
+  background: #0066cc;
   border-bottom: none;
 }
 

@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--bg-gradient);
+  background: #0066cc;
   opacity: 0;
   transition: opacity var(--transition-base) ease;
 }
@@ -78,35 +78,35 @@
   letter-spacing: -0.02em;
 }
 
-/* Status-based color variations */
+/* Status-based color variations - McKinsey blue shades */
 .gauge-card.high-value .gauge-value,
 .gauge-card.high-value .gauge-fill {
-  color: var(--color-danger);
-  stroke: var(--color-danger);
+  color: #0066cc;
+  stroke: #0066cc;
 }
 
 .gauge-card.high-value::before {
-  background: var(--color-danger-gradient);
+  background: #0066cc;
 }
 
 .gauge-card.medium-value .gauge-value,
 .gauge-card.medium-value .gauge-fill {
-  color: var(--color-warning);
-  stroke: var(--color-warning);
+  color: #0055bb;
+  stroke: #0055bb;
 }
 
 .gauge-card.medium-value::before {
-  background: var(--color-warning-gradient);
+  background: #0055bb;
 }
 
 .gauge-card.good-value .gauge-value,
 .gauge-card.good-value .gauge-fill {
-  color: var(--color-success);
-  stroke: var(--color-success);
+  color: #0044bb;
+  stroke: #0044bb;
 }
 
 .gauge-card.good-value::before {
-  background: var(--color-success-gradient);
+  background: #0044bb;
 }
 
 /* Responsive */

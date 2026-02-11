@@ -1,7 +1,7 @@
 .cluster-dashboard {
   padding: var(--space-3xl);
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background: #f8fafc;
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -11,7 +11,7 @@
   align-items: center;
   margin-bottom: var(--space-3xl);
   padding: var(--space-2xl) var(--space-3xl);
-  background: linear-gradient(135deg, #fafbffcc 0%, #ffffffcc 100%);
+  background: linear-gradient(135deg, #fafbff 0%, #ffffff 100%);
   backdrop-filter: blur(10px);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
@@ -27,7 +27,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--bg-gradient);
+  background: #0066cc;
 }
 
 .header-left {
@@ -42,7 +42,7 @@
   font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: -0.03em;
-  background: var(--bg-gradient);
+  background: #0066cc;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -656,10 +656,11 @@
 }
 
 .cluster-dashboard .time-range-btn.active {
-  background: var(--bg-gradient);
+  background: #0066cc;
   color: white;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+  border-color: #0066cc;
 }
 
 /* Responsive styles for time-range-selector */
@@ -785,8 +786,8 @@
 }
 
 .gpu-usage-card-header .time-range-btn.active {
-  background: var(--bg-gradient);
-  border-color: transparent;
+  background: #0066cc;
+  border-color: #0066cc;
   color: white;
   box-shadow: var(--shadow-md);
 }
@@ -825,8 +826,8 @@
 }
 
 .wait-time-card-header .time-range-btn.active {
-  background: var(--bg-gradient);
-  border-color: transparent;
+  background: #0066cc;
+  border-color: #0066cc;
   color: white;
   box-shadow: var(--shadow-md);
 }
@@ -865,161 +866,10 @@
 }
 
 .merged-wait-time-header .time-range-btn.active {
-  background: var(--bg-gradient);
-  border-color: transparent;
+  background: #0066cc;
+  border-color: #0066cc;
   color: white;
   box-shadow: var(--shadow-md);
-}
-
-/* Date Filter Row */
-.date-filter-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-lg);
-  background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
-  border-bottom: 1px solid var(--border-light);
-  flex-wrap: wrap;
-}
-
-.date-filter-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-
-.date-filter-btn:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--border-hover);
-  color: var(--color-text-primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.clear-date-filter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  margin-left: var(--space-xs);
-  background: var(--color-danger);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 1;
-}
-
-.clear-date-filter:hover {
-  background: #dc2626;
-}
-
-.date-picker-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.date-picker-input {
-  padding: var(--space-sm) var(--space-lg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-family: inherit;
-  color: var(--color-text-primary);
-  background: var(--color-surface);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.date-picker-input:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-sm);
-}
-
-.date-picker-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-/* React Datepicker Custom Styles */
-.react-datepicker-wrapper {
-  display: block;
-  width: 280px;
-}
-
-.react-datepicker {
-  font-family: inherit;
-  font-size: 14px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.react-datepicker__triangle {
-  display: none;
-}
-
-.react-datepicker__header {
-  background: var(--bg-gradient);
-  border-bottom: 1px solid var(--border-hover);
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-  padding: var(--space-md);
-}
-
-.react-datepicker__current-month,
-.react-datepicker__day-name {
-  color: white;
-  font-weight: 600;
-}
-
-.react-datepicker__month-read-view--down-arrow,
-.react-datepicker__year-read-view--down-arrow,
-.react-datepicker__month-year-read-view--down-arrow {
-  border-top-color: white;
-}
-
-.react-datepicker__day {
-  color: var(--color-text-primary);
-  border-radius: var(--radius-sm);
-  margin: 2px;
-}
-
-.react-datepicker__day:hover {
-  background: var(--color-surface-hover);
-}
-
-.react-datepicker__day--selected {
-  background: var(--bg-gradient);
-  color: white;
-}
-
-.react-datepicker__day--keyboard-selected {
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.react-datepicker__day--today {
-  border: 2px solid var(--color-primary);
-  font-weight: 600;
-}
-
-.react-datepicker__day--disabled {
-  color: var(--color-text-muted);
-  background: var(--color-surface);
 }
 
 /* Wait Time Summary Header */
@@ -1058,8 +908,8 @@
 }
 
 .summary-header .time-range-btn.active {
-  background: var(--bg-gradient);
-  border-color: transparent;
+  background: #0066cc;
+  border-color: #0066cc;
   color: white;
   box-shadow: var(--shadow-md);
 }
@@ -1077,7 +927,11 @@
 }
 
 .average-wait-time-table thead {
-  background: var(--bg-gradient);
+  background: #0066cc;
+}
+
+.average-wait-time-table thead th {
+  color: white;
 }
 
 .average-wait-time-table thead th {

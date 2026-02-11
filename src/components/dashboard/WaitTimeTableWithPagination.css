@@ -7,8 +7,12 @@
 }
 
 .wait-time-table thead {
-  background: var(--bg-gradient);
+  background: #0066cc;
   color: #ffffff;
+}
+
+.wait-time-table thead th.sortable:hover {
+  background: #0055bb;
 }
 
 .wait-time-table thead th {
@@ -41,7 +45,7 @@
 }
 
 .wait-time-table tbody tr:hover {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #e6f2ff;
   transform: translateX(4px);
   box-shadow: var(--shadow-sm);
 }
@@ -61,10 +65,11 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: var(--radius-sm);
-  background: var(--bg-secondary);
-  border: 1px solid var(--color-neutral-border);
-  font-weight: 500;
+  background: #e6f2ff;
+  border: 1px solid #99c7ff;
+  font-weight: 600;
   font-size: 0.8125rem;
+  color: #0066cc;
   transition: all 0.2s ease;
 }
 
@@ -80,14 +85,19 @@
   transition: all 0.2s ease;
 }
 
-.queue-type-badge.aisg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
+.queue-type-badge.aisg,
 .queue-type-badge.nusit {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  background: #0066cc;
   color: white;
+  border: 1px solid #0055bb;
 }
 
 .queue-type-cell {
@@ -99,7 +109,7 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Wait Time Badge with color coding */
+/* Wait Time Badge with McKinsey blue color coding */
 .wait-time-badge {
   display: inline-block;
   padding: 6px 16px;
@@ -109,39 +119,40 @@
   transition: all 0.3s ease;
   min-width: 80px;
   text-align: center;
+  border: 2px solid transparent;
 }
 
 .wait-time-good {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-  border: 2px solid var(--color-success);
+  background: #e6f2ff;
+  color: #0066cc;
+  border-color: #0066cc;
 }
 
 .wait-time-good:hover {
-  background: var(--color-success);
-  color: #ffffff;
+  background: #0066cc;
+  color: white;
 }
 
 .wait-time-warning {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-  border: 2px solid var(--color-warning);
+  background: #cce5ff;
+  color: #0055bb;
+  border-color: #0055bb;
 }
 
 .wait-time-warning:hover {
-  background: var(--color-warning);
-  color: #ffffff;
+  background: #0055bb;
+  color: white;
 }
 
 .wait-time-danger {
-  background: var(--color-danger-bg);
-  color: var(--color-danger);
-  border: 2px solid var(--color-danger);
+  background: #99c7ff;
+  color: #0044bb;
+  border-color: #0044bb;
 }
 
 .wait-time-danger:hover {
-  background: var(--color-danger);
-  color: #ffffff;
+  background: #0044bb;
+  color: white;
 }
 
 /* Number cells styling */
@@ -167,14 +178,14 @@
   gap: var(--space-md);
   padding: var(--space-lg);
   border-top: var(--border-light);
-  background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+  background: #ffffff;
 }
 
 .pagination-btn {
   padding: var(--space-sm) var(--space-xl);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0066cc;
   color: white;
-  border: none;
+  border: 1px solid #0055bb;
   border-radius: var(--radius-lg);
   cursor: pointer;
   font-size: 0.875rem;
@@ -184,16 +195,18 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: #0055bb;
+  border-color: #0044bb;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
 }
 
 .pagination-btn:disabled {
-  background: var(--color-neutral-border);
-  color: var(--color-text-muted);
+  background: #e6f2ff;
+  color: #99c7ff;
+  border-color: #cce5ff;
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.7;
   transform: none;
 }
 

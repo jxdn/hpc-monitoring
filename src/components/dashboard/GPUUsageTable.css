@@ -20,7 +20,7 @@
 }
 
 .gpu-usage-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0066cc;
 }
 
 .gpu-usage-table th {
@@ -40,17 +40,17 @@
 }
 
 .gpu-usage-table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: #e6f2ff;
   transform: scale(1.01);
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
 .gpu-usage-table tbody tr.top-user {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%);
+  background: #e6f2ff;
 }
 
 .gpu-usage-table tbody tr.top-user:hover {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);
+  background: #cce5ff;
 }
 
 .gpu-usage-table td {
@@ -60,7 +60,7 @@
 
 .username-cell {
   font-weight: 600;
-  color: #667eea;
+  color: #0066cc;
   text-align: center;
   font-size: 1rem;
   text-transform: none;
@@ -84,7 +84,7 @@
   transform: translateX(-50%);
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: #0066cc;
   transition: width 0.3s ease;
 }
 
@@ -94,8 +94,8 @@
 
 .number-cell.highlight {
   font-weight: 700;
-  color: #667eea;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #0066cc;
+  background: #0066cc;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -103,13 +103,13 @@
 }
 
 .gpu-usage-table tbody tr.top-user .number-cell {
-  color: #059669;
+  color: #0066cc;
   font-weight: 600;
 }
 
 .gpu-usage-table tbody tr.top-user .number-cell.highlight {
-  color: #10b981;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #0066cc;
+  background: #0066cc;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -121,9 +121,9 @@
   text-align: center;
   color: var(--text-secondary);
   font-style: italic;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: #e6f2ff;
   border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  border: 2px dashed #0066cc;
 }
 
 /* Adjust for rank column */

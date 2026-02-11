@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import ReactDatePicker from 'react-datepicker';
 import { pbsApi } from '../services/pbsApi';
 import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
 import GaugeCard from '../components/dashboard/GaugeCard';
@@ -9,7 +8,6 @@ import Card from '../components/dashboard/Card';
 import GPUUsageTable from '../components/dashboard/GPUUsageTable';
 import WaitTimeTableWithPagination from '../components/dashboard/WaitTimeTableWithPagination';
 import './ClusterDashboard.css';
-import 'react-datepicker/dist/react-datepicker.css';
 
 const ClusterDashboard: React.FC = () => {
   const { nodes, loading: nodesLoading } = useNodes(60000);
@@ -49,8 +47,6 @@ const ClusterDashboard: React.FC = () => {
   const [mergedWaitTime1d, setMergedWaitTime1d] = useState<any[]>([]);
   const [mergedWaitTime7d, setMergedWaitTime7d] = useState<any[]>([]);
   const [mergedWaitTime30d, setMergedWaitTime30d] = useState<any[]>([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
 
   // Update current time every second
   useEffect(() => {
@@ -188,31 +184,6 @@ const getMergedWaitTimeTimeRangeLabel = () => {
         return 'Last 7 Days';
     }
   };
-
-  // Filter merged wait time data by date range
-  const getFilteredWaitTimeData = useMemo(() => {
-    const data = getMergedWaitTimeData();
-    if (!data || data.length === 0) return [];
-    
-    if (!dateRange[0] && !dateRange[1]) {
-      return data;
-    }
-    
-    return data.filter(item => {
-      const itemDate = new Date(item.date);
-      const startDate = dateRange[0];
-      const endDate = dateRange[1];
-      
-      if (startDate && endDate) {
-        return itemDate >= startDate && itemDate <= endDate;
-      } else if (startDate) {
-        return itemDate >= startDate;
-      } else if (endDate) {
-        return itemDate <= endDate;
-      }
-      return true;
-    });
-  }, [getMergedWaitTimeData, dateRange, mergedWaitTimeTimeRange, mergedWaitTime1d, mergedWaitTime7d, mergedWaitTime30d]);
 
   // Fetch all merged wait time data
   useEffect(() => {
@@ -748,29 +719,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               </button>
             </div>
           </div>
-          <div className="date-filter-row">
-            <button
-              className="date-filter-btn"
-              onClick={() => setShowDatePicker(!showDatePicker)}
-            >
-              📅 {dateRange[0] || dateRange[1] ? 'Date Filter Active' : 'Filter by Date'}
-              {(dateRange[0] || dateRange[1]) && <span className="clear-date-filter" onClick={(e) => { e.stopPropagation(); setDateRange([null, null]); }}>×</span>}
-            </button>
-            {showDatePicker && (
-              <div className="date-picker-wrapper">
-                <ReactDatePicker
-                  selectsRange
-                  startDate={dateRange[0]}
-                  endDate={dateRange[1]}
-                  onChange={(update) => setDateRange(update)}
-                  placeholderText="Select date range"
-                  className="date-picker-input"
-                  isClearable
-                />
-              </div>
-            )}
-          </div>
-          <WaitTimeTableWithPagination data={getFilteredWaitTimeData} loading={false} />
+          <WaitTimeTableWithPagination data={getMergedWaitTimeData()} loading={false} />
         </Card>
 
         {/* GPU Usage by User Table */}
