@@ -266,6 +266,40 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch all wait time summaries for Average Wait Time per Queue table
+  useEffect(() => {
+    const fetchAllWaitTimeSummaries = async () => {
+      try {
+        setSummaryLoading(true);
+
+        // Fetch all time ranges for AISG and NUS IT
+        const [aisg1d, aisg7d, aisg30d, nusit1d, nusit7d, nusit30d] = await Promise.all([
+          pbsApi.getAISGWaitTime('1d'),
+          pbsApi.getAISGWaitTime('7d'),
+          pbsApi.getAISGWaitTime('30d'),
+          pbsApi.getNUSITWaitTime('1d'),
+          pbsApi.getNUSITWaitTime('7d'),
+          pbsApi.getNUSITWaitTime('30d'),
+        ]);
+
+        setAisgWaitTime1d(aisg1d);
+        setAisgWaitTime7d(aisg7d);
+        setAisgWaitTime30d(aisg30d);
+        setNusitWaitTime1d(nusit1d);
+        setNusitWaitTime7d(nusit7d);
+        setNusitWaitTime30d(nusit30d);
+      } catch (error) {
+        console.error('Error fetching wait time summaries:', error);
+      } finally {
+        setSummaryLoading(false);
+      }
+    };
+
+    fetchAllWaitTimeSummaries();
+    const interval = setInterval(fetchAllWaitTimeSummaries, 120000); // Refresh every 2 minutes
+    return () => clearInterval(interval);
+  }, []);
+
   if (nodesLoading || jobsLoading || statsLoading) {
     return <div className="loading">Loading cluster dashboard...</div>;
   }
