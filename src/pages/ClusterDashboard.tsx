@@ -300,6 +300,85 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Helper function to format wait time status label
+  const getWaitTimeStatusLabel = (status: string) => {
+    if (status === 'good') return 'Low';
+    if (status === 'warning') return 'Medium';
+    if (status === 'danger') return 'High';
+    return 'Unknown';
+  };
+
+  // Helper function to calculate wait time status based on minutes
+  const getWaitTimeStatus = (minutes: number): 'good' | 'warning' | 'danger' => {
+    if (minutes === 0) return 'good';
+    if (minutes < 120) return 'good';       // < 2 hours is good
+    if (minutes < 480) return 'warning';    // < 8 hours is warning
+    return 'danger';                     // >= 8 hours is danger
+  };
+
+  // Helper function to get data in table format
+  const getAverageWaitTimeTableData = (aisgData: any[], nusitData: any[], timeRange: string) => {
+    return [
+      ...aisgData.map(item => ({
+        ...item,
+        queueType: 'AISG',
+        timeRange: timeRange,
+        queueName: item.queueName,
+        averageWaitTime: item.avgWaitMinutes,
+        numJobs: item.numJobs,
+        totalGpuHours: item.totalGpuHours,
+        avgGpuHoursPerJob: item.avgGpuHoursPerJob,
+        status: getWaitTimeStatus(item.avgWaitMinutes)
+      })),
+      ...nusitData.map(item => ({
+        ...item,
+        queueType: 'NUS IT',
+        timeRange: timeRange,
+        queueName: item.queueName,
+        averageWaitTime: item.avgWaitMinutes,
+        numJobs: item.numJobs,
+        totalGpuHours: item.totalGpuHours,
+        avgGpuHoursPerJob: item.avgGpuHoursPerJob,
+        status: getWaitTimeStatus(item.avgWaitMinutes)
+      }))
+    ];
+  };
+
+  // Combine all time range data into merged data based on selected time range
+  const getCombinedWaitTimeTableData = () => {
+    let allData: any[] = [];
+    
+    if (summaryTimeRange === 'Yesterday') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday');
+    } else if (summaryTimeRange === '7 Days') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime7d, nusitWaitTime7d, 'Last 7 Days');
+    } else if (summaryTimeRange === '30 Days') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days');
+    }
+    
+    // Sort data
+    allData.sort((a: any, b: any) => {
+      let comparison = 0;
+      if (summarySortField === 'queueType') {
+        comparison = a.queueType.localeCompare(b.queueType);
+      } else if (summarySortField === 'queueName') {
+        comparison = a.queueName.localeCompare(b.queueName);
+      } else if (summarySortField === 'averageWaitTime') {
+        const parseTime = (timeStr: string) => {
+          if (timeStr === 'NA' || timeStr === undefined) return Infinity;
+          return parseFloat(timeStr || '0');
+        };
+        comparison = parseTime(a.averageWaitTime) - parseTime(b.averageWaitTime);
+      } else if (summarySortField === 'status') {
+        const order: Record<string, number> = { 'good': 1, 'warning': 2, 'danger': 3 };
+        comparison = (order[a.status as string] || 0) - (order[b.status as string] || 0);
+      }
+      return summarySortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return allData;
+  };
+
   if (nodesLoading || jobsLoading || statsLoading) {
     return <div className="loading">Loading cluster dashboard...</div>;
   }
