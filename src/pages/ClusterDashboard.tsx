@@ -359,11 +359,6 @@ const getMergedWaitTimeTimeRangeLabel = () => {
           <div className="error">{monthlyGPUHoursError}</div>
         ) : (
           <>
-            {isSampleData && (
-              <div style={{ padding: '10px', backgroundColor: '#fef3c7', borderRadius: '4px', marginBottom: '10px', color: '#92400e', fontSize: '14px' }}>
-                ⚠️ Sample data - Unable to connect to database. Showing example data.
-              </div>
-            )}
             <ResponsiveContainer width="100%" height={400}>
             <BarChart data={monthlyGPUHours.map(item => ({
               month: item.month,
