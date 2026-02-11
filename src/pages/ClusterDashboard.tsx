@@ -17,6 +17,7 @@ const ClusterDashboard: React.FC = () => {
   const [gpuOccupationHistory, setGpuOccupationHistory] = useState<any[]>([]);
   const [jobStatsLast7Days, setJobStatsLast7Days] = useState<any[]>([]);
   const [jobStatsLoading, setJobStatsLoading] = useState<boolean>(true);
+  const [jobStatsError, setJobStatsError] = useState<string | null>(null);
   const [aisgWaitTime, setAisgWaitTime] = useState<any[]>([]);
   const [aisgWaitTimeLoading, setAisgWaitTimeLoading] = useState<boolean>(true);
   const [nusitWaitTime, setNusitWaitTime] = useState<any[]>([]);
@@ -208,6 +209,60 @@ const getMergedWaitTimeTimeRangeLabel = () => {
 
     fetchAllMergedWaitTimeData();
     const interval = setInterval(fetchAllMergedWaitTimeData, 120000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch monthly GPU hours
+  useEffect(() => {
+    const fetchMonthlyGPUHours = async () => {
+      try {
+        setMonthlyGPUHoursLoading(true);
+        const data = await pbsApi.getMonthlyGPUHours();
+        setMonthlyGPUHours(data);
+        setMonthlyGPUHoursError(null);
+        
+        // Check if data has actual content
+        if (!data || data.length === 0) {
+          setMonthlyGPUHoursError('No GPU hours data available');
+        }
+      } catch (error) {
+        console.error('Error fetching monthly GPU hours:', error);
+        setMonthlyGPUHoursError('Failed to fetch monthly GPU hours');
+        setMonthlyGPUHoursLoading(false);
+      } finally {
+        setMonthlyGPUHoursLoading(false);
+      }
+    };
+
+    fetchMonthlyGPUHours();
+    const interval = setInterval(fetchMonthlyGPUHours, 300000); // Refresh every 5 minutes
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch job statistics (7 days by default)
+  useEffect(() => {
+    const fetchJobStats = async () => {
+      try {
+        setJobStatsLoading(true);
+        const data = await pbsApi.getJobStats('7d'); // Get 7 days of data
+        setJobStatsLast7Days(data);
+        setJobStatsError(null);
+        
+        // Check if data has actual content
+        if (!data || data.length === 0) {
+          setJobStatsError('No job statistics data available');
+        }
+      } catch (error) {
+        console.error('Error fetching job statistics:', error);
+        setJobStatsError('Failed to fetch job statistics');
+        setJobStatsLoading(false);
+      } finally {
+        setJobStatsLoading(false);
+      }
+    };
+
+    fetchJobStats();
+    const interval = setInterval(fetchJobStats, 60000); // Refresh every 1 minute
     return () => clearInterval(interval);
   }, []);
 
@@ -538,6 +593,8 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       <Card title="Job Completion History">
         {jobStatsLoading ? (
           <div className="loading">Loading job statistics...</div>
+        ) : jobStatsError ? (
+          <div className="error">{jobStatsError}</div>
         ) : jobStatsLast7Days.length === 0 ? (
           <div className="data-table-empty">No job completion data available</div>
         ) : (

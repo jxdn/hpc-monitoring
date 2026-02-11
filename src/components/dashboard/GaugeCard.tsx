@@ -9,15 +9,17 @@ interface GaugeCardProps {
 
 const GaugeCard: React.FC<GaugeCardProps> = ({ title, value, unit = '%' }) => {
   const getValueClass = (val: number) => {
-    if (val >= 80) return 'high-value';
-    if (val >= 60) return 'medium-value';
-    return 'good-value';
+    if (val > 95) return 'critical-value';
+    if (val > 80) return 'high-value';
+    if (val > 50) return 'medium-value';
+    return 'low-value';
   };
 
   const getValueColor = (val: number) => {
-    if (val >= 80) return '#f85149';
-    if (val >= 60) return '#d29922';
-    return '#3fb950';
+    if (val > 95) return '#dc2626';      // Red
+    if (val > 80) return '#f97316';      // Orange
+    if (val > 50) return '#eab308';      // Yellow
+    return '#3fb950';                  // Green
   };
 
   const valueClass = getValueClass(value);

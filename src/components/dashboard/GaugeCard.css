@@ -78,35 +78,45 @@
   letter-spacing: -0.02em;
 }
 
-/* Status-based color variations - McKinsey blue shades */
+/* Status-based color variations - Occupation rate thresholds */
+.gauge-card.critical-value .gauge-value,
+.gauge-card.critical-value .gauge-fill {
+  color: #dc2626;
+  stroke: #dc2626;
+}
+
+.gauge-card.critical-value::before {
+  background: #dc2626;
+}
+
 .gauge-card.high-value .gauge-value,
 .gauge-card.high-value .gauge-fill {
-  color: #0066cc;
-  stroke: #0066cc;
+  color: #f97316;
+  stroke: #f97316;
 }
 
 .gauge-card.high-value::before {
-  background: #0066cc;
+  background: #f97316;
 }
 
 .gauge-card.medium-value .gauge-value,
 .gauge-card.medium-value .gauge-fill {
-  color: #0055bb;
-  stroke: #0055bb;
+  color: #eab308;
+  stroke: #eab308;
 }
 
 .gauge-card.medium-value::before {
-  background: #0055bb;
+  background: #eab308;
 }
 
-.gauge-card.good-value .gauge-value,
-.gauge-card.good-value .gauge-fill {
-  color: #0044bb;
-  stroke: #0044bb;
+.gauge-card.low-value .gauge-value,
+.gauge-card.low-value .gauge-fill {
+  color: #3fb950;
+  stroke: #3fb950;
 }
 
-.gauge-card.good-value::before {
-  background: #0044bb;
+.gauge-card.low-value::before {
+  background: #3fb950;
 }
 
 /* Responsive */
