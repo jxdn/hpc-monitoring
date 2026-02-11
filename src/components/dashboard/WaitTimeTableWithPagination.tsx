@@ -5,6 +5,7 @@ import './WaitTimeTableWithPagination.css';
 interface WaitTimeData {
   date: string;
   queueName: string;
+  queueType?: string;
   numJobs: number;
   totalGpuHours: number;
   avgGpuHoursPerJob: number;
@@ -24,6 +25,8 @@ const WaitTimeTableWithPagination: React.FC<WaitTimeTableProps> = ({ data, loadi
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const itemsPerPage = 10;
+
+  const hasQueueType = data && data.length > 0 && data[0].queueType !== undefined;
 
   const sortedData = useMemo(() => {
     if (!data) return [];
@@ -86,6 +89,11 @@ const WaitTimeTableWithPagination: React.FC<WaitTimeTableProps> = ({ data, loadi
               <th onClick={() => handleSort('date')} className="sortable">
                 Date {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
+              {hasQueueType && (
+                <th onClick={() => handleSort('queueName' as SortField)} className="sortable">
+                  Queue Type {sortField === 'queueName' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+              )}
               <th onClick={() => handleSort('queueName')} className="sortable">
                 Queue {sortField === 'queueName' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
@@ -107,8 +115,15 @@ const WaitTimeTableWithPagination: React.FC<WaitTimeTableProps> = ({ data, loadi
             {paginatedData.map((row) => {
               const waitStatus = getWaitTimeStatus(row.avgWaitMinutes);
               return (
-                <tr key={`${row.date}-${row.queueName}`} className="wait-time-row">
+                <tr key={`${row.date}-${row.queueName}-${row.queueType || ''}`} className="wait-time-row">
                   <td className="date-cell">{formatDateForDisplay(row.date)}</td>
+                  {hasQueueType && (
+                    <td className="queue-type-cell">
+                      <span className={`queue-type-badge ${row.queueType === 'AISG' ? 'aisg' : 'nusit'}`}>
+                        {row.queueType}
+                      </span>
+                    </td>
+                  )}
                   <td className="queue-cell">
                     <span className="queue-badge">{row.queueName}</span>
                   </td>

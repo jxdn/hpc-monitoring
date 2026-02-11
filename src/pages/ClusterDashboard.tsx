@@ -43,6 +43,10 @@ const ClusterDashboard: React.FC = () => {
   const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
   const [gpuUsageData7d, setGpuUsageData7d] = useState<any[]>([]);
   const [gpuUsageData30d, setGpuUsageData30d] = useState<any[]>([]);
+  const [mergedWaitTimeTimeRange, setMergedWaitTimeTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+  const [mergedWaitTime1d, setMergedWaitTime1d] = useState<any[]>([]);
+  const [mergedWaitTime7d, setMergedWaitTime7d] = useState<any[]>([]);
+  const [mergedWaitTime30d, setMergedWaitTime30d] = useState<any[]>([]);
 
   // Update current time every second
   useEffect(() => {
@@ -131,71 +135,45 @@ const ClusterDashboard: React.FC = () => {
     }
   };
 
+  // Merge wait time data helper
+  const mergeWaitTimeData = (aisgData: any[], nusitData: any[]) => {
+    return [
+      ...aisgData.map(item => ({ ...item, queueType: 'AISG' })),
+      ...nusitData.map(item => ({ ...item, queueType: 'NUS IT' }))
+    ];
+  };
+
+  // Get merged wait time data based on selected time range
+  const getMergedWaitTimeData = () => {
+    switch (mergedWaitTimeTimeRange) {
+      case '1d':
+        return mergedWaitTime1d;
+      case '7d':
+        return mergedWaitTime7d;
+      case '30d':
+        return mergedWaitTime30d;
+      default:
+        return mergedWaitTime7d;
+    }
+  };
+
+const getMergedWaitTimeTimeRangeLabel = () => {
+    switch (mergedWaitTimeTimeRange) {
+      case '1d':
+        return 'Yesterday';
+      case '7d':
+        return 'Last 7 Days';
+      case '30d':
+        return 'Last 30 Days';
+      default:
+        return 'Last 7 Days';
+    }
+  };
+
+  // Fetch all merged wait time data
   useEffect(() => {
-    const fetchJobStatsLast7Days = async () => {
+    const fetchAllMergedWaitTimeData = async () => {
       try {
-        setJobStatsLoading(true);
-        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
-        const data = await pbsApi.getJobStatsLast7Days(xdmodTimeRange);
-        console.log('Job stats data received:', data);
-        setJobStatsLast7Days(data);
-      } catch (error) {
-        console.error('Error fetching job stats:', error);
-      } finally {
-        setJobStatsLoading(false);
-      }
-    };
-
-    fetchJobStatsLast7Days();
-    const interval = setInterval(fetchJobStatsLast7Days, 120000);
-    return () => clearInterval(interval);
-  }, [timeRange]);
-
-  useEffect(() => {
-    const fetchAISGWaitTime = async () => {
-      try {
-        setAisgWaitTimeLoading(true);
-        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
-        const data = await pbsApi.getAISGWaitTime(xdmodTimeRange);
-        setAisgWaitTime(data);
-      } catch (error) {
-        console.error('Error fetching AISG wait time:', error);
-      } finally {
-        setAisgWaitTimeLoading(false);
-      }
-    };
-
-    fetchAISGWaitTime();
-    const interval = setInterval(fetchAISGWaitTime, 120000);
-    return () => clearInterval(interval);
-  }, [timeRange]);
-
-  useEffect(() => {
-    const fetchNUSITWaitTime = async () => {
-      try {
-        setNusitWaitTimeLoading(true);
-        const xdmodTimeRange = timeRange === '24h' ? '1d' : timeRange as '1d' | '7d' | '30d';
-        const data = await pbsApi.getNUSITWaitTime(xdmodTimeRange);
-        setNusitWaitTime(data);
-      } catch (error) {
-        console.error('Error fetching NUS IT wait time:', error);
-      } finally {
-        setNusitWaitTimeLoading(false);
-      }
-    };
-
-    fetchNUSITWaitTime();
-    const interval = setInterval(fetchNUSITWaitTime, 120000);
-    return () => clearInterval(interval);
-  }, [timeRange]);
-
-  // Fetch all time ranges for static summary boxes
-  useEffect(() => {
-    const fetchAllWaitTimeSummaries = async () => {
-      try {
-        setSummaryLoading(true);
-
-        // Fetch all AISG time ranges
         const [aisg1d, aisg7d, aisg30d, nusit1d, nusit7d, nusit30d] = await Promise.all([
           pbsApi.getAISGWaitTime('1d'),
           pbsApi.getAISGWaitTime('7d'),
@@ -205,171 +183,18 @@ const ClusterDashboard: React.FC = () => {
           pbsApi.getNUSITWaitTime('30d'),
         ]);
 
-        setAisgWaitTime1d(aisg1d);
-        setAisgWaitTime7d(aisg7d);
-        setAisgWaitTime30d(aisg30d);
-        setNusitWaitTime1d(nusit1d);
-        setNusitWaitTime7d(nusit7d);
-        setNusitWaitTime30d(nusit30d);
+        setMergedWaitTime1d(mergeWaitTimeData(aisg1d, nusit1d));
+        setMergedWaitTime7d(mergeWaitTimeData(aisg7d, nusit7d));
+        setMergedWaitTime30d(mergeWaitTimeData(aisg30d, nusit30d));
       } catch (error) {
-        console.error('Error fetching wait time summaries:', error);
-      } finally {
-        setSummaryLoading(false);
+        console.error('Error fetching merged wait time data:', error);
       }
     };
 
-    fetchAllWaitTimeSummaries();
-    const interval = setInterval(fetchAllWaitTimeSummaries, 120000);
+    fetchAllMergedWaitTimeData();
+    const interval = setInterval(fetchAllMergedWaitTimeData, 120000);
     return () => clearInterval(interval);
   }, []);
-
-  // Fetch monthly GPU hours
-  useEffect(() => {
-    const fetchMonthlyGPUHours = async () => {
-      try {
-        setMonthlyGPUHoursLoading(true);
-        setMonthlyGPUHoursError(null);
-        const data = await pbsApi.getMonthlyGPUHours();
-        setMonthlyGPUHours(data);
-      } catch (error) {
-        console.error('Error fetching monthly GPU hours:', error);
-        setMonthlyGPUHoursError('Unable to load GPU hours data. Historical data may not be available.');
-      } finally {
-        setMonthlyGPUHoursLoading(false);
-      }
-    };
-
-    fetchMonthlyGPUHours();
-    const interval = setInterval(fetchMonthlyGPUHours, 300000); // Update every 5 minutes
-    return () => clearInterval(interval);
-  }, []);
-
-  // Generate sample data indicator
-  const isSampleData = monthlyGPUHours.length > 0 && monthlyGPUHours[0].month === 'Feb 2024';
-
-  // Format time in Singapore Time (SGT, UTC+8)
-  const formatSGT = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: 'Asia/Singapore',
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    };
-    return new Intl.DateTimeFormat('en-SG', options).format(date);
-  };
-
-  // Static queue definitions (must match database exactly)
-  const AISG_QUEUES = ['AISG_debug', 'AISG_large', 'AISG_guest'];
-  const NUSIT_QUEUES = ['interactive', 'medium', 'small', 'large', 'special'];
-
-  // Helper function to determine wait time status
-  const getWaitTimeStatus = (value: string): 'good' | 'warning' | 'danger' => {
-    if (value === 'NA') return 'good';
-    const minutes = parseFloat(value.replace(' min', ''));
-    if (minutes < 30) return 'good';
-    if (minutes <= 60) return 'warning';
-    return 'danger';
-  };
-
-  // Helper function to get wait time status label
-  const getWaitTimeStatusLabel = (status: 'good' | 'warning' | 'danger'): string => {
-    if (status === 'good') return 'Acceptable';
-    if (status === 'warning') return 'Warning';
-    return 'Warning';
-  };
-
-  // Helper function to calculate average wait time statistics table data
-  const getAverageWaitTimeTableData = (
-    aisgData: any[],
-    nusitData: any[],
-    timeRangeLabel: string
-  ) => {
-    // Calculate TOTAL wait time and TOTAL job count for each queue (not average of averages)
-    const aisgStats = aisgData.reduce((acc, item) => {
-      if (!acc[item.queueName]) {
-        acc[item.queueName] = { totalWaitTime: 0, totalJobs: 0 };
-      }
-      // Calculate total wait time: daily avg * daily job count
-      acc[item.queueName].totalWaitTime += (item.avgWaitMinutes * item.numJobs);
-      acc[item.queueName].totalJobs += item.numJobs;
-      return acc;
-    }, {} as Record<string, { totalWaitTime: number; totalJobs: number }>);
-
-    const nusitStats = nusitData.reduce((acc, item) => {
-      if (!acc[item.queueName]) {
-        acc[item.queueName] = { totalWaitTime: 0, totalJobs: 0 };
-      }
-      // Calculate total wait time: daily avg * daily job count
-      acc[item.queueName].totalWaitTime += (item.avgWaitMinutes * item.numJobs);
-      acc[item.queueName].totalJobs += item.numJobs;
-      return acc;
-    }, {} as Record<string, { totalWaitTime: number; totalJobs: number }>);
-
-    // Get all queue stats
-    const getQueueStat = (queueName: string, stats: Record<string, { totalWaitTime: number; totalJobs: number }>, type: 'aisg' | 'nusit') => {
-      const queueStats = stats[queueName];
-      const displayValue = queueStats && queueStats.totalJobs > 0
-        ? `${(queueStats.totalWaitTime / queueStats.totalJobs).toFixed(1)} min`
-        : 'NA';
-      const status = getWaitTimeStatus(displayValue);
-      return {
-        queueType: type === 'aisg' ? 'AISG' : 'NUS IT',
-        queueName: queueName,
-        averageWaitTime: displayValue,
-        status: status,
-        timeRange: timeRangeLabel
-      };
-    };
-
-    // Combine all queue data
-    const allQueues = [
-      ...AISG_QUEUES.map(q => getQueueStat(q, aisgStats, 'aisg')),
-      ...NUSIT_QUEUES.map(q => getQueueStat(q, nusitStats, 'nusit'))
-    ];
-
-    return allQueues;
-  };
-
-  // Combine all time range data into a single table
-  const getCombinedWaitTimeTableData = () => {
-    let allData: any[] = [];
-    
-    if (summaryTimeRange === 'Yesterday') {
-      allData = getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday');
-    } else if (summaryTimeRange === '7 Days') {
-      allData = getAverageWaitTimeTableData(aisgWaitTime7d, nusitWaitTime7d, 'Last 7 Days');
-    } else if (summaryTimeRange === '30 Days') {
-      allData = getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days');
-    } else {
-      allData = getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday');
-    }
-    
-    // Sort data
-    allData.sort((a: any, b: any) => {
-      let comparison = 0;
-      if (summarySortField === 'queueType') {
-        comparison = a.queueType.localeCompare(b.queueType);
-      } else if (summarySortField === 'queueName') {
-        comparison = a.queueName.localeCompare(b.queueName);
-      } else if (summarySortField === 'averageWaitTime') {
-        const parseTime = (timeStr: string) => {
-          if (timeStr === 'NA') return Infinity;
-          return parseFloat(timeStr.replace(' min', ''));
-        };
-        comparison = parseTime(a.averageWaitTime) - parseTime(b.averageWaitTime);
-      } else if (summarySortField === 'status') {
-        const order: Record<string, number> = { 'good': 1, 'warning': 2, 'danger': 3 };
-        comparison = (order[a.status as string] || 0) - (order[b.status as string] || 0);
-      }
-      return summarySortOrder === 'asc' ? comparison : -comparison;
-    });
-    
-    return allData;
-  };
 
   if (nodesLoading || jobsLoading || statsLoading) {
     return <div className="loading">Loading cluster dashboard...</div>;
@@ -854,12 +679,32 @@ const ClusterDashboard: React.FC = () => {
 
       {/* Additional Tables */}
       <div className="centered-tables">
-        <Card title="AISG Wait Time">
-          <WaitTimeTableWithPagination data={aisgWaitTime} loading={aisgWaitTimeLoading} />
-        </Card>
-
-        <Card title="NUS IT Wait Time">
-          <WaitTimeTableWithPagination data={nusitWaitTime} loading={nusitWaitTimeLoading} />
+        {/* Merged Wait Time Table */}
+        <Card>
+          <div className="card-header merged-wait-time-header">
+            <span className="card-title">Wait Time ({getMergedWaitTimeTimeRangeLabel()})</span>
+            <div className="time-range-selector">
+              <button
+                className={`time-range-btn ${mergedWaitTimeTimeRange === '1d' ? 'active' : ''}`}
+                onClick={() => setMergedWaitTimeTimeRange('1d')}
+              >
+                Yesterday
+              </button>
+              <button
+                className={`time-range-btn ${mergedWaitTimeTimeRange === '7d' ? 'active' : ''}`}
+                onClick={() => setMergedWaitTimeTimeRange('7d')}
+              >
+                Last 7 Days
+              </button>
+              <button
+                className={`time-range-btn ${mergedWaitTimeTimeRange === '30d' ? 'active' : ''}`}
+                onClick={() => setMergedWaitTimeTimeRange('30d')}
+              >
+                Last 30 Days
+              </button>
+            </div>
+          </div>
+          <WaitTimeTableWithPagination data={getMergedWaitTimeData()} loading={false} />
         </Card>
 
         {/* GPU Usage by User Table */}

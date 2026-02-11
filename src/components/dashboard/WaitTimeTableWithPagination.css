@@ -68,6 +68,32 @@
   transition: all 0.2s ease;
 }
 
+/* Queue Type Badge */
+.queue-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+}
+
+.queue-type-badge.aisg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.queue-type-badge.nusit {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.queue-type-cell {
+  text-align: center;
+}
+
 .wait-time-table tbody tr:hover .queue-badge {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.3);

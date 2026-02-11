@@ -831,6 +831,46 @@
   box-shadow: var(--shadow-md);
 }
 
+.merged-wait-time-header .card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.merged-wait-time-header .time-range-selector {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.merged-wait-time-header .time-range-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.merged-wait-time-header .time-range-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.merged-wait-time-header .time-range-btn.active {
+  background: var(--bg-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
 /* Wait Time Summary Header */
 .summary-header {
   display: flex;
