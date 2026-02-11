@@ -750,6 +750,129 @@
   margin-top: var(--space-2xl);
 }
 
+/* GPU Usage Header */
+.gpu-usage-card-header .card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.gpu-usage-card-header .time-range-selector {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.gpu-usage-card-header .time-range-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.gpu-usage-card-header .time-range-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.gpu-usage-card-header .time-range-btn.active {
+  background: var(--bg-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.wait-time-card-header .card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.wait-time-card-header .time-range-selector {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.wait-time-card-header .time-range-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.wait-time-card-header .time-range-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.wait-time-card-header .time-range-btn.active {
+  background: var(--bg-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+/* Wait Time Summary Header */
+.summary-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.summary-header .time-range-selector {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.summary-header .time-range-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.summary-header .time-range-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-header .time-range-btn.active {
+  background: var(--bg-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
 /* Average Wait Time Table */
 .average-wait-time-table-container {
   overflow-x: auto;
@@ -795,12 +918,6 @@
 .average-wait-time-table tbody td {
   padding: var(--space-md) var(--space-lg);
   color: var(--color-text-primary);
-}
-
-.average-wait-time-table .time-range-cell {
-  font-weight: 600;
-  color: var(--color-text-primary);
-  white-space: nowrap;
 }
 
 .average-wait-time-table .queue-type-cell {

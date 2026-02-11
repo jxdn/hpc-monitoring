@@ -63,9 +63,27 @@ async function updateAllCaches() {
   console.log('Starting cache update...');
 
   try {
-    // GPU Usage by User (last 7 days - default)
-    const gpuUsageByUser = await xdmodService.getGPUUsageByUser();
-    await writeCache('gpu-usage-by-user', gpuUsageByUser);
+    // GPU Usage by User for different time ranges
+    try {
+      const gpuUsageByUser1d = await xdmodService.getGPUUsageByUser(1);
+      await writeCache('gpu-usage-by-user-1d', gpuUsageByUser1d);
+    } catch (error) {
+      console.error('Error updating gpu-usage-by-user-1d:', error.message);
+    }
+
+    try {
+      const gpuUsageByUser7d = await xdmodService.getGPUUsageByUser(7);
+      await writeCache('gpu-usage-by-user-7d', gpuUsageByUser7d);
+    } catch (error) {
+      console.error('Error updating gpu-usage-by-user-7d:', error.message);
+    }
+
+    try {
+      const gpuUsageByUser30d = await xdmodService.getGPUUsageByUser(30);
+      await writeCache('gpu-usage-by-user-30d', gpuUsageByUser30d);
+    } catch (error) {
+      console.error('Error updating gpu-usage-by-user-30d:', error.message);
+    }
 
     // Job Stats for different time ranges
 try {

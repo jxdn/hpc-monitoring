@@ -78,10 +78,11 @@ async function findAvailableTables() {
 }
 
 /**
-  * GPU usage statistics by user for the last 7 days
-  * @returns {Promise<Array>}
- */
-async function getGPUUsageByUser() {
+   * GPU usage statistics by user for the last N days
+   * @param {number} days - Number of days (1, 7, or 30)
+   * @returns {Promise<Array>}
+  */
+ async function getGPUUsageByUser(days = 7) {
   try {
     const query = `
       SELECT
@@ -95,7 +96,7 @@ async function getGPUUsageByUser() {
         modw.job_tasks jt
         JOIN modw.systemaccount sa ON jt.systemaccount_id = sa.id
       WHERE
-        FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL 7 DAY
+        FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
         AND jt.gpu_count > 0
       GROUP BY
         sa.username

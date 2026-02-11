@@ -88,7 +88,7 @@ export const pbsApi = {
     return response.data;
   },
 
-  async getGPUUsageByUser(): Promise<Array<{
+  async getGPUUsageByUser(timeRange: '1d' | '7d' | '30d' = '7d'): Promise<Array<{
     username: string;
     numJobs: number;
     totalGpusUsed: number;
@@ -96,7 +96,9 @@ export const pbsApi = {
     totalGpuHours: string;
     avgGpuHoursPerJob: string;
   }>> {
-    const response = await api.get('/analytics/gpu-usage-by-user');
+    const response = await api.get('/analytics/gpu-usage-by-user', {
+      params: { timeRange }
+    });
     return response.data;
   },
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, BarChart, AreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { pbsApi } from '../services/pbsApi';
 import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
 import GaugeCard from '../components/dashboard/GaugeCard';
@@ -15,8 +15,6 @@ const ClusterDashboard: React.FC = () => {
   const { stats, loading: statsLoading } = useClusterStats(60000);
   const [jobHistory, setJobHistory] = useState<any[]>([]);
   const [gpuOccupationHistory, setGpuOccupationHistory] = useState<any[]>([]);
-  const [gpuUsageByUser, setGpuUsageByUser] = useState<any[]>([]);
-  const [gpuUsageLoading, setGpuUsageLoading] = useState<boolean>(true);
   const [jobStatsLast7Days, setJobStatsLast7Days] = useState<any[]>([]);
   const [jobStatsLoading, setJobStatsLoading] = useState<boolean>(true);
   const [aisgWaitTime, setAisgWaitTime] = useState<any[]>([]);
@@ -38,6 +36,13 @@ const ClusterDashboard: React.FC = () => {
 
   const [timeRange, setTimeRange] = useState<string>('30d');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [summaryTimeRange, setSummaryTimeRange] = useState<string>('Yesterday');
+  const [summarySortField, setSummarySortField] = useState<string>('status');
+  const [summarySortOrder, setSummarySortOrder] = useState<'asc' | 'desc'>('asc');
+  const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+  const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
+  const [gpuUsageData7d, setGpuUsageData7d] = useState<any[]>([]);
+  const [gpuUsageData30d, setGpuUsageData30d] = useState<any[]>([]);
 
   // Update current time every second
   useEffect(() => {
@@ -77,23 +82,54 @@ const ClusterDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, [timeRange]);
 
+  // Fetch all GPU usage time ranges
   useEffect(() => {
-    const fetchGPUUsageByUser = async () => {
+    const fetchAllGPUUsageData = async () => {
       try {
-        setGpuUsageLoading(true);
-        const data = await pbsApi.getGPUUsageByUser();
-        setGpuUsageByUser(data);
+        const [data1d, data7d, data30d] = await Promise.all([
+          pbsApi.getGPUUsageByUser('1d'),
+          pbsApi.getGPUUsageByUser('7d'),
+          pbsApi.getGPUUsageByUser('30d'),
+        ]);
+        setGpuUsageData1d(data1d);
+        setGpuUsageData7d(data7d);
+        setGpuUsageData30d(data30d);
       } catch (error) {
-        console.error('Error fetching GPU usage by user:', error);
-      } finally {
-        setGpuUsageLoading(false);
+        console.error('Error fetching GPU usage data:', error);
       }
     };
 
-    fetchGPUUsageByUser();
-    const interval = setInterval(fetchGPUUsageByUser, 120000);
+    fetchAllGPUUsageData();
+    const interval = setInterval(fetchAllGPUUsageData, 120000);
     return () => clearInterval(interval);
   }, []);
+
+  // Get current GPU usage data based on selected time range
+  const getGpuUsageData = () => {
+    switch (gpuUsageTimeRange) {
+      case '1d':
+        return gpuUsageData1d;
+      case '7d':
+        return gpuUsageData7d;
+      case '30d':
+        return gpuUsageData30d;
+      default:
+        return gpuUsageData7d;
+    }
+  };
+
+  const getGpuUsageTimeRangeLabel = () => {
+    switch (gpuUsageTimeRange) {
+      case '1d':
+        return 'Yesterday';
+      case '7d':
+        return 'Last 7 Days';
+      case '30d':
+        return 'Last 30 Days';
+      default:
+        return 'Last 7 Days';
+    }
+  };
 
   useEffect(() => {
     const fetchJobStatsLast7Days = async () => {
@@ -239,13 +275,6 @@ const ClusterDashboard: React.FC = () => {
     return 'danger';
   };
 
-  // Helper function to get wait time class
-  const getWaitTimeClass = (status: 'good' | 'warning' | 'danger'): string => {
-    if (status === 'good') return 'stat-value good';
-    if (status === 'warning') return 'stat-value warning';
-    return 'stat-value danger';
-  };
-
   // Helper function to get wait time status label
   const getWaitTimeStatusLabel = (status: 'good' | 'warning' | 'danger'): string => {
     if (status === 'good') return 'Acceptable';
@@ -307,11 +336,39 @@ const ClusterDashboard: React.FC = () => {
 
   // Combine all time range data into a single table
   const getCombinedWaitTimeTableData = () => {
-    return [
-      ...getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday'),
-      ...getAverageWaitTimeTableData(aisgWaitTime7d, nusitWaitTime7d, 'Last 7 Days'),
-      ...getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days')
-    ];
+    let allData: any[] = [];
+    
+    if (summaryTimeRange === 'Yesterday') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday');
+    } else if (summaryTimeRange === '7 Days') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime7d, nusitWaitTime7d, 'Last 7 Days');
+    } else if (summaryTimeRange === '30 Days') {
+      allData = getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days');
+    } else {
+      allData = getAverageWaitTimeTableData(aisgWaitTime1d, nusitWaitTime1d, 'Yesterday');
+    }
+    
+    // Sort data
+    allData.sort((a: any, b: any) => {
+      let comparison = 0;
+      if (summarySortField === 'queueType') {
+        comparison = a.queueType.localeCompare(b.queueType);
+      } else if (summarySortField === 'queueName') {
+        comparison = a.queueName.localeCompare(b.queueName);
+      } else if (summarySortField === 'averageWaitTime') {
+        const parseTime = (timeStr: string) => {
+          if (timeStr === 'NA') return Infinity;
+          return parseFloat(timeStr.replace(' min', ''));
+        };
+        comparison = parseTime(a.averageWaitTime) - parseTime(b.averageWaitTime);
+      } else if (summarySortField === 'status') {
+        const order: Record<string, number> = { 'good': 1, 'warning': 2, 'danger': 3 };
+        comparison = (order[a.status as string] || 0) - (order[b.status as string] || 0);
+      }
+      return summarySortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return allData;
   };
 
   if (nodesLoading || jobsLoading || statsLoading) {
@@ -321,10 +378,6 @@ const ClusterDashboard: React.FC = () => {
   if (!stats || !jobs) {
     return <div className="error">No data available</div>;
   }
-
-  // Define nodes to exclude (hopper-1 to hopper-6)
-  const excludedNodes = ['hopper-1', 'hopper-2', 'hopper-3', 'hopper-4', 'hopper-5', 'hopper-6'];
-  const filteredNodes = nodes.filter(n => !excludedNodes.includes(n.name));
 
   // Filter nodes for AISG and NON-AISG (based on your Grafana config)
   const aisgNodes = nodes.filter(n =>
@@ -705,25 +758,80 @@ const ClusterDashboard: React.FC = () => {
       </Card>
 
       {/* Wait Time Summary Stats - Table Display */}
-      <Card title="Average Wait Time per Queue" className="wait-time-title-card">
+      <Card className="wait-time-title-card">
+        <div className="card-header wait-time-card-header">
+          <span className="card-title">Average Wait Time per Queue ({summaryTimeRange})</span>
+          <div className="time-range-selector">
+            <button
+              className={`time-range-btn ${summaryTimeRange === 'Yesterday' ? 'active' : ''}`}
+              onClick={() => setSummaryTimeRange('Yesterday')}
+            >
+              Yesterday
+            </button>
+            <button
+              className={`time-range-btn ${summaryTimeRange === '7 Days' ? 'active' : ''}`}
+              onClick={() => setSummaryTimeRange('7 Days')}
+            >
+              Last 7 Days
+            </button>
+            <button
+              className={`time-range-btn ${summaryTimeRange === '30 Days' ? 'active' : ''}`}
+              onClick={() => setSummaryTimeRange('30 Days')}
+            >
+              Last 30 Days
+            </button>
+          </div>
+        </div>
         {summaryLoading ? (
           <div className="loading">Loading summaries...</div>
+        ) : getCombinedWaitTimeTableData().length === 0 ? (
+          <div className="data-table-empty">No queue data available for this time range</div>
         ) : (
           <div className="average-wait-time-table-container">
             <table className="average-wait-time-table">
               <thead>
                 <tr>
-                  <th>Time Range</th>
-                  <th>Queue Type</th>
-                  <th>Queue Name</th>
-                  <th>Average Wait Time</th>
-                  <th>Status</th>
+                  <th 
+                    onClick={() => {
+                      setSummarySortField('queueType');
+                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'queueType' ? 'desc' : 'asc');
+                    }}
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    Queue Type {summarySortField === 'queueType' && (summarySortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    onClick={() => {
+                      setSummarySortField('queueName');
+                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'queueName' ? 'desc' : 'asc');
+                    }}
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    Queue Name {summarySortField === 'queueName' && (summarySortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    onClick={() => {
+                      setSummarySortField('averageWaitTime');
+                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'averageWaitTime' ? 'desc' : 'asc');
+                    }}
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    Average Wait Time {summarySortField === 'averageWaitTime' && (summarySortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    onClick={() => {
+                      setSummarySortField('status');
+                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'status' ? 'desc' : 'asc');
+                    }}
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    Status {summarySortField === 'status' && (summarySortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {getCombinedWaitTimeTableData().map((row, index) => (
-                  <tr key={`${row.timeRange}-${row.queueName}-${index}`}>
-                    <td className="time-range-cell">{row.timeRange}</td>
+                  <tr key={`${row.queueType}-${row.queueName}-${index}`}>
                     <td className="queue-type-cell">{row.queueType}</td>
                     <td className="queue-name-cell">{row.queueName}</td>
                     <td className="wait-time-cell">
@@ -755,8 +863,31 @@ const ClusterDashboard: React.FC = () => {
         </Card>
 
         {/* GPU Usage by User Table */}
-        <Card title="GPU Usage by User (Last 7 Days)">
-          <GPUUsageTable data={gpuUsageByUser} loading={gpuUsageLoading} />
+        <Card>
+          <div className="card-header gpu-usage-card-header">
+            <span className="card-title">GPU Usage by User ({getGpuUsageTimeRangeLabel()})</span>
+            <div className="time-range-selector">
+              <button
+                className={`time-range-btn ${gpuUsageTimeRange === '1d' ? 'active' : ''}`}
+                onClick={() => setGpuUsageTimeRange('1d')}
+              >
+                Yesterday
+              </button>
+              <button
+                className={`time-range-btn ${gpuUsageTimeRange === '7d' ? 'active' : ''}`}
+                onClick={() => setGpuUsageTimeRange('7d')}
+              >
+                Last 7 Days
+              </button>
+              <button
+                className={`time-range-btn ${gpuUsageTimeRange === '30d' ? 'active' : ''}`}
+                onClick={() => setGpuUsageTimeRange('30d')}
+              >
+                Last 30 Days
+              </button>
+            </div>
+          </div>
+          <GPUUsageTable data={getGpuUsageData()} loading={false} />
         </Card>
       </div>
 

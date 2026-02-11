@@ -4,25 +4,26 @@
 
 echo "🛑 Stopping HPC Monitoring applications..."
 
-# Kill processes matching the patterns
-pkill -f "vite --host 0.0.0.0 --port 3000"
-pkill -f "node src/server.js"
+# Kill processes by port
+FRONTEND_PID=$(lsof -ti:3000)
+BACKEND_PID=$(lsof -ti:3001)
 
-# Also kill by specific PIDs if they exist in log files
-if [ -f frontend.log ]; then
-    FRONTEND_PID=$(lsof -ti:3000)
-    if [ ! -z "$FRONTEND_PID" ]; then
-        kill -9 $FRONTEND_PID 2>/dev/null
-        echo "✅ Stopped frontend (PID: $FRONTEND_PID)"
-    fi
+if [ ! -z "$FRONTEND_PID" ]; then
+    kill -9 $FRONTEND_PID 2>/dev/null
+    echo "✅ Stopped frontend (PID: $FRONTEND_PID, Port: 3000)"
+else
+    echo "ℹ️  Frontend not running (Port: 3000)"
 fi
 
-if [ -f backend.log ]; then
-    BACKEND_PID=$(lsof -ti:3003)
-    if [ ! -z "$BACKEND_PID" ]; then
-        kill -9 $BACKEND_PID 2>/dev/null
-        echo "✅ Stopped backend (PID: $BACKEND_PID)"
-    fi
+if [ ! -z "$BACKEND_PID" ]; then
+    kill -9 $BACKEND_PID 2>/dev/null
+    echo "✅ Stopped backend (PID: $BACKEND_PID, Port: 3001)"
+else
+    echo "ℹ️  Backend not running (Port: 3001)"
 fi
+
+# Also kill any remaining processes matching patterns
+pkill -f "vite.*3000" 2>/dev/null
+pkill -f "node src/server.js" 2>/dev/null
 
 echo "✅ All applications stopped"

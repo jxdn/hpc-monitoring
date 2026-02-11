@@ -16,7 +16,7 @@ export default defineConfig({
     allowedHosts: ['hopper2.nus.edu.sg'],
     proxy: {
       '/api': {
-        target: 'http://localhost:3003',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },

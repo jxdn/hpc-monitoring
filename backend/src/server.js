@@ -213,11 +213,14 @@ app.get('/api/analytics/gpu-occupation', async (req, res) => {
 /**
  * GET /api/analytics/gpu-usage-by-user
  * Get GPU usage statistics by user from cached data
- * Shows top 7 users by total GPU hours in the last 7 days
+ * Shows top 7 users by total GPU hours
+ * Query params: timeRange (1d, 7d, 30d)
  */
-app.get('/api/analytics/gpu-usage-by-user', async (req, res) => {
+ app.get('/api/analytics/gpu-usage-by-user', async (req, res) => {
   try {
-    const data = await cacheService.readCache('gpu-usage-by-user');
+    const timeRange = req.query.timeRange || '7d';
+    const cacheKey = `gpu-usage-by-user-${timeRange}`;
+    const data = await cacheService.readCache(cacheKey);
     if (!data) {
       return res.status(503).json({ error: 'Cache not available, please try again later' });
     }

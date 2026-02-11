@@ -56,27 +56,51 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+# Kill any existing processes on ports 3000 and 3001
+echo "🧹 Cleaning up existing processes..."
+lsof -ti:3000 | xargs kill -9 2>/dev/null
+lsof -ti:3001 | xargs kill -9 2>/dev/null
+sleep 2
+
 echo "🚀 Starting backend server..."
 cd backend
-npm run dev > ../backend.log 2>&1 &
+node src/server.js > ../backend.log 2>&1 &
 BACKEND_PID=$!
 cd ..
 
-# Wait a bit for backend to start
-sleep 3
+# Wait for backend to start
+sleep 4
 
 echo "🚀 Starting frontend server..."
 npm run dev > frontend.log 2>&1 &
 FRONTEND_PID=$!
+
+# Wait for frontend to start
+sleep 3
+echo "🔍 Checking frontend..."
+sleep 2
+
+# Verify servers are running
+if ! kill -0 $BACKEND_PID 2>/dev/null; then
+    echo "❌ Backend failed to start. Check backend.log for errors."
+    cat backend.log
+    exit 1
+fi
+
+if ! kill -0 $FRONTEND_PID 2>/dev/null; then
+    echo "❌ Frontend failed to start. Check frontend.log for errors."
+    cat frontend.log
+    exit 1
+fi
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
 echo "║  Servers Started Successfully!                           ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
-echo "📊 Frontend:  http://localhost:3000"
-echo "🔌 Backend:   http://localhost:3003"
-echo "💚 Health:    http://localhost:3003/api/health"
+echo "📊 Frontend:  http://localhost:3000/status/"
+echo "🔌 Backend:   http://localhost:3001"
+echo "💚 Health:    http://localhost:3001/api/health"
 echo ""
 echo "📝 Logs:"
 echo "   Frontend: tail -f frontend.log"
@@ -85,5 +109,11 @@ echo ""
 echo "Press Ctrl+C to stop all servers"
 echo ""
 
-# Wait for processes
+# Output process IDs
+echo "📌 Process IDs:"
+echo "   Backend PID:  $BACKEND_PID"
+echo "   Frontend PID: $FRONTEND_PID"
+echo ""
+
+# Keep script running to manage child processes
 wait $BACKEND_PID $FRONTEND_PID
