@@ -955,7 +955,7 @@
 }
 
 .average-wait-time-table tbody tr:hover {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #e6f2ff;
   transform: translateX(4px);
   box-shadow: var(--shadow-xs);
 }
