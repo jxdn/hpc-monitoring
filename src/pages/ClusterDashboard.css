@@ -1325,20 +1325,27 @@
   text-align: center;
 }
 
+.queue-details-toggle {
+  padding: var(--space-lg) 0;
+  text-align: center;
+  margin-top: var(--space-lg);
+  border-top: 1px solid var(--color-neutral-border);
+}
+
 .toggle-btn {
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-xl);
-  background: linear-gradient(135deg, var(--bg-gradient) 0%, #8b5cf6 100%);
+  padding: var(--space-md) var(--space-xl);
+  background: linear-gradient(135deg, #0066cc 0%, #0055bb 100%);
   color: white;
-  border: none;
+  border: 2px solid #0066cc;
   border-radius: var(--radius-lg);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-base) ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
 }
 
 .toggle-btn:hover {
