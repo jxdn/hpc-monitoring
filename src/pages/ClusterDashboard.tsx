@@ -527,7 +527,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
   // Top 5 queues
   const topQueues = jobs.byQueue.filter(q => q.count > 0).slice(0, 5);
 
-  // Prepare queue details with running/queued stats
+  // Build queue details from multiple data sources
   const getLatestWaitTimeForQueue = (queueName: string): number | undefined => {
     const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
       : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
@@ -542,16 +542,33 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return avgWait;
   };
 
-  const queueDetails = queues && queues.length > 0 ? queues.map(queue => {
+  // Get unique queue names from all available sources
+  const allQueueNames = new Set<string>();
+  
+  // From running jobs
+  jobs.byQueue?.forEach(q => allQueueNames.add(q.queue));
+  
+  // From wait time data (has all queues)
+  const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
+    : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
+    : mergedWaitTime30d;
+  currentWaitData?.forEach(d => allQueueNames.add(d.queueName));
+
+  // Build queue details
+  const queueDetails = Array.from(allQueueNames).map(queueName => {
+    const runningData = jobs.byQueue?.find(q => q.queue === queueName);
+    const waitData = currentWaitData?.filter(d => d.queueName === queueName);
+    const totalJobs = waitData?.reduce((sum, d) => sum + d.numJobs, 0) || 0;
+    
     return {
-      name: queue.name,
-      running: queue.runningJobs || 0,
-      queued: queue.queuedJobs || 0,
-      total: queue.totalJobs || 0,
-      avgWaitMinutes: getLatestWaitTimeForQueue(queue.name),
-      queueType: queue.name.toLowerCase().includes('aisg') ? 'AISG' as const : 'NUS-IT' as const,
+      name: queueName,
+      running: runningData?.count || 0,
+      queued: 0, // Would need separate metric
+      total: runningData?.count || totalJobs,
+      avgWaitMinutes: getLatestWaitTimeForQueue(queueName),
+      queueType: queueName.toLowerCase().includes('aisg') ? 'AISG' as const : 'NUS-IT' as const,
     };
-  }) : [];
+  }).filter(q => q.total > 0 || q.running > 0).sort((a, b) => b.total - a.total);
 
   // Prepare node data for heatmaps
   const nodeJobsData = nodes.map(n => ({

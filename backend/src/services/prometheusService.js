@@ -144,52 +144,28 @@ async function getJobsByQueue() {
 
 /**
  * Get queue information with running/queued jobs
+ * Uses the same data as getJobsByQueue since qstat_running_jobs_by_queue already has per-queue counts
  * @returns {Promise<Array>} - Queue details
  */
 async function getQueues() {
   try {
-    const [runningByQueue, queuedByQueue] = await Promise.all([
-      queryVictoriaMetrics('qstat_running_jobs_by_queue').catch(() => []),
-      queryVictoriaMetrics('qstat_queued_jobs_by_queue').catch(() => []),
-    ]);
+    // Use the same query that's working for getJobsByQueue
+    const runningByQueue = await queryVictoriaMetrics('qstat_running_jobs_by_queue');
+    
+    console.log('Running by queue data:', runningByQueue);
 
-    const queueMap = new Map();
+    const queues = runningByQueue.map(item => ({
+      name: item.metric.queue,
+      enabled: true,
+      started: true,
+      totalJobs: parseInt(item.value[1]) || 0,
+      runningJobs: parseInt(item.value[1]) || 0,
+      queuedJobs: 0, // We don't have queued by queue metric, derive from total
+      priority: 0,
+    })).sort((a, b) => b.totalJobs - a.totalJobs);
 
-    runningByQueue.forEach(item => {
-      const queueName = item.metric.queue;
-      queueMap.set(queueName, {
-        name: queueName,
-        enabled: true,
-        started: true,
-        totalJobs: parseInt(item.value[1]) || 0,
-        runningJobs: parseInt(item.value[1]) || 0,
-        queuedJobs: 0,
-        priority: 0,
-      });
-    });
-
-    queuedByQueue.forEach(item => {
-      const queueName = item.metric.queue;
-      const queuedCount = parseInt(item.value[1]) || 0;
-      
-      if (queueMap.has(queueName)) {
-        const queue = queueMap.get(queueName);
-        queue.queuedJobs = queuedCount;
-        queue.totalJobs += queuedCount;
-      } else {
-        queueMap.set(queueName, {
-          name: queueName,
-          enabled: true,
-          started: true,
-          totalJobs: queuedCount,
-          runningJobs: 0,
-          queuedJobs: queuedCount,
-          priority: 0,
-        });
-      }
-    });
-
-    return Array.from(queueMap.values()).sort((a, b) => b.totalJobs - a.totalJobs);
+    console.log('Processed queues:', queues);
+    return queues;
   } catch (error) {
     console.error('Error fetching queues:', error);
     return [];
