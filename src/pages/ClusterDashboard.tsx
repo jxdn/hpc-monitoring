@@ -240,7 +240,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     const fetchJobStats = async () => {
       try {
         setJobStatsLoading(true);
-        const data = await pbsApi.getJobStats('7d'); // Get 7 days of data
+        const data = await pbsApi.getJobStatsLast7Days('7d'); // Get 7 days of data
         setJobStatsLast7Days(data);
         setJobStatsError(null);
         
