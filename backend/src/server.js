@@ -163,6 +163,27 @@ app.get('/api/stats/cluster', async (req, res) => {
 });
 
 /**
+ * GET /api/queues
+ * Get queue information
+ */
+app.get('/api/queues', async (req, res) => {
+  try {
+    const cacheKey = 'queues';
+    let queues = cache.get(cacheKey);
+
+    if (!queues) {
+      queues = await pbsService.getQueues();
+      cache.set(cacheKey, queues);
+    }
+
+    res.json(queues);
+  } catch (error) {
+    console.error('Error fetching queues:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/analytics/jobs
  * Get job statistics over time from Prometheus
  * Query params: timeRange (1h, 24h, 7d, 30d)

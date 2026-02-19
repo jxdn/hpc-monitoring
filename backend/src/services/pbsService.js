@@ -90,17 +90,7 @@ async function getNode(nodeId) {
  */
 async function getQueues() {
   try {
-    const jobsByQueue = await prometheusService.getJobsByQueue();
-
-    return jobsByQueue.map(q => ({
-      name: q.queue,
-      enabled: true,
-      started: true,
-      totalJobs: q.count,
-      runningJobs: q.count,
-      queuedJobs: 0,
-      priority: 100,
-    }));
+    return await prometheusService.getQueues();
   } catch (error) {
     console.error('Error fetching queues:', error);
     return [];

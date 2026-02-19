@@ -143,6 +143,60 @@ async function getJobsByQueue() {
 }
 
 /**
+ * Get queue information with running/queued jobs
+ * @returns {Promise<Array>} - Queue details
+ */
+async function getQueues() {
+  try {
+    const [runningByQueue, queuedByQueue] = await Promise.all([
+      queryVictoriaMetrics('qstat_running_jobs_by_queue').catch(() => []),
+      queryVictoriaMetrics('qstat_queued_jobs_by_queue').catch(() => []),
+    ]);
+
+    const queueMap = new Map();
+
+    runningByQueue.forEach(item => {
+      const queueName = item.metric.queue;
+      queueMap.set(queueName, {
+        name: queueName,
+        enabled: true,
+        started: true,
+        totalJobs: parseInt(item.value[1]) || 0,
+        runningJobs: parseInt(item.value[1]) || 0,
+        queuedJobs: 0,
+        priority: 0,
+      });
+    });
+
+    queuedByQueue.forEach(item => {
+      const queueName = item.metric.queue;
+      const queuedCount = parseInt(item.value[1]) || 0;
+      
+      if (queueMap.has(queueName)) {
+        const queue = queueMap.get(queueName);
+        queue.queuedJobs = queuedCount;
+        queue.totalJobs += queuedCount;
+      } else {
+        queueMap.set(queueName, {
+          name: queueName,
+          enabled: true,
+          started: true,
+          totalJobs: queuedCount,
+          runningJobs: 0,
+          queuedJobs: queuedCount,
+          priority: 0,
+        });
+      }
+    });
+
+    return Array.from(queueMap.values()).sort((a, b) => b.totalJobs - a.totalJobs);
+  } catch (error) {
+    console.error('Error fetching queues:', error);
+    return [];
+  }
+}
+
+/**
  * Get node counts from VictoriaMetrics
  * @returns {Promise<Object>} - Node counts
  */
@@ -560,6 +614,7 @@ module.exports = {
   getJobStats,
   getJobsByUser,
   getJobsByQueue,
+  getQueues,
   getNodeCounts,
   getNodeDetails,
   getClusterStats,

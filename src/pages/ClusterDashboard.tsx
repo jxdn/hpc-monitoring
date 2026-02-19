@@ -493,11 +493,11 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
-  if (nodesLoading || jobsLoading || statsLoading || queuesLoading) {
+  if (nodesLoading || jobsLoading || statsLoading) {
     return <div className="loading">Loading cluster dashboard...</div>;
   }
 
-  if (!stats || !jobs || !queues) {
+  if (!stats || !jobs) {
     return <div className="error">No data available</div>;
   }
 
@@ -533,6 +533,8 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
       : mergedWaitTime30d;
     
+    if (!currentWaitData || currentWaitData.length === 0) return undefined;
+    
     const queueData = currentWaitData.filter(d => d.queueName === queueName);
     if (queueData.length === 0) return undefined;
     
@@ -540,16 +542,16 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return avgWait;
   };
 
-  const queueDetails = queues.map(queue => {
+  const queueDetails = queues && queues.length > 0 ? queues.map(queue => {
     return {
       name: queue.name,
-      running: queue.runningJobs,
-      queued: queue.queuedJobs,
-      total: queue.totalJobs,
+      running: queue.runningJobs || 0,
+      queued: queue.queuedJobs || 0,
+      total: queue.totalJobs || 0,
       avgWaitMinutes: getLatestWaitTimeForQueue(queue.name),
-      queueType: queue.name.includes('aisg') || queue.name.includes('AISG') ? 'AISG' as const : 'NUS-IT' as const,
+      queueType: queue.name.toLowerCase().includes('aisg') ? 'AISG' as const : 'NUS-IT' as const,
     };
-  }).filter(q => q.total > 0 || q.running > 0 || q.queued > 0);
+  }) : [];
 
   // Prepare node data for heatmaps
   const nodeJobsData = nodes.map(n => ({
@@ -603,9 +605,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       </div>
 
       {/* Queue Details */}
-      {queueDetails.length > 0 && (
-        <QueueDetailsCard queues={queueDetails} title="Queue Status - Real-time" />
-      )}
+      <QueueDetailsCard queues={queueDetails} title="Queue Status - Real-time" />
 
       {/* Monthly GPU Hours Chart */}
       <Card title="GPU Hours: Total (Last 2 Years)" className="gpu-hours-card">
