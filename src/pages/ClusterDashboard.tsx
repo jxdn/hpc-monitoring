@@ -868,7 +868,22 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <div className="wait-time-summary">
               {(() => {
                 const summary = getWaitTimeSummary();
-                if (!summary) return null;
+                const combinedData = getCombinedWaitTimeTableData();
+                console.log('Wait Time Summary Debug:', {
+                  summaryTimeRange,
+                  combinedDataLength: combinedData.length,
+                  summary: summary,
+                  aisgWaitTime1d: aisgWaitTime1d.length,
+                  nusitWaitTime1d: nusitWaitTime1d.length,
+                  aisgWaitTime7d: aisgWaitTime7d.length,
+                  nusitWaitTime7d: nusitWaitTime7d.length,
+                  aisgWaitTime30d: aisgWaitTime30d.length,
+                  nusitWaitTime30d: nusitWaitTime30d.length,
+                });
+                if (!summary) {
+                  console.log('Summary is null!');
+                  return null;
+                }
                 return (
                   <div className="wait-time-summary-grid">
                     <div className="summary-card">
