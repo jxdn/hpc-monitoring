@@ -7,11 +7,7 @@ const Navbar: React.FC = () => {
   const handleDownloadPDF = async () => {
     try {
       setIsGeneratingPDF(true);
-
-      // Get the current URL (where the user is viewing the dashboard)
       const currentUrl = window.location.href;
-
-      // Call the backend API to generate PDF with the current URL
       const response = await fetch(`/api/download-pdf?url=${encodeURIComponent(currentUrl)}`);
 
       if (!response.ok) {
@@ -19,25 +15,20 @@ const Navbar: React.FC = () => {
         throw new Error(errorData.error || 'Failed to generate PDF');
       }
 
-      // Get the PDF blob
       const blob = await response.blob();
 
-      // Verify it's a PDF and not an error JSON
       if (blob.type === 'application/json') {
         const text = await blob.text();
         const error = JSON.parse(text);
         throw new Error(error.error || 'Failed to generate PDF');
       }
 
-      // Create a download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `hpc-dashboard-${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(link);
       link.click();
-
-      // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
@@ -53,8 +44,15 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <h1>HPC Monitoring</h1>
-        <span className="navbar-subtitle">PBS Pro Dashboard</span>
+        <div className="navbar-logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <div className="navbar-title-group">
+          <h1 className="navbar-title">HPC Monitor</h1>
+          <span className="navbar-subtitle">PBS Pro Dashboard</span>
+        </div>
       </div>
       <div className="navbar-actions">
         <button
@@ -62,11 +60,23 @@ const Navbar: React.FC = () => {
           onClick={handleDownloadPDF}
           disabled={isGeneratingPDF}
         >
-          {isGeneratingPDF ? '⏳ Generating...' : '📄 Download PDF'}
+          {isGeneratingPDF ? (
+            <>
+              <span className="spinner"></span>
+              <span>Generating...</span>
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Download PDF</span>
+            </>
+          )}
         </button>
         <div className="status-indicator">
-          <span className="status-dot active"></span>
-          <span>Connected</span>
+          <span className="status-dot"></span>
+          <span className="status-text">Connected</span>
         </div>
       </div>
     </nav>

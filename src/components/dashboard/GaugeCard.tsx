@@ -8,47 +8,43 @@ interface GaugeCardProps {
 }
 
 const GaugeCard: React.FC<GaugeCardProps> = ({ title, value, unit = '%' }) => {
-  const getValueClass = (val: number) => {
-    if (val > 90) return 'critical-value';
-    if (val > 80) return 'high-value';
-    if (val > 50) return 'medium-value';
-    return 'low-value';
+  const getValueInfo = (val: number) => {
+    if (val > 90) return { className: 'critical', color: '#ef4444', label: 'Critical' };
+    if (val > 80) return { className: 'high', color: '#f97316', label: 'High' };
+    if (val > 50) return { className: 'medium', color: '#eab308', label: 'Medium' };
+    return { className: 'low', color: '#10b981', label: 'Normal' };
   };
 
-  const getValueColor = (val: number) => {
-    if (val > 90) return '#dc2626';      // Red
-    if (val > 80) return '#f97316';      // Orange
-    if (val > 50) return '#eab308';      // Yellow
-    return '#3fb950';                  // Green
-  };
-
-  const valueClass = getValueClass(value);
-  const color = getValueColor(value);
+  const { className, color, label } = getValueInfo(value);
 
   return (
-    <div className={`gauge-card ${valueClass}`}>
-      <h3 className="gauge-title">{title}</h3>
+    <div className={`gauge-card gauge-${className}`}>
+      <div className="gauge-header">
+        <h3 className="gauge-title">{title}</h3>
+        <span className={`gauge-status status-${className}`}>{label}</span>
+      </div>
       <div className="gauge-container">
         <svg viewBox="0 0 200 120" className="gauge-svg">
           <path
             d="M 20 100 A 80 80 0 0 1 180 100"
             fill="none"
             className="gauge-bg"
-            strokeWidth="12"
+            strokeWidth="14"
             strokeLinecap="round"
           />
           <path
             d="M 20 100 A 80 80 0 0 1 180 100"
             fill="none"
             stroke={color}
-            strokeWidth="12"
+            strokeWidth="14"
             strokeLinecap="round"
             strokeDasharray={`${(value / 100) * 251.2} 251.2`}
             className="gauge-fill"
           />
         </svg>
         <div className="gauge-value">
-          {value.toFixed(1)}{unit}
+          <span className="gauge-number">{value.toFixed(1)}</span>
+          <span className="gauge-unit">{unit}</span>
         </div>
       </div>
     </div>

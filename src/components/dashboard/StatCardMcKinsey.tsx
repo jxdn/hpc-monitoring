@@ -122,7 +122,7 @@ const StatCard: React.FC<StatCardProps> = ({
               color: getColor().text,
               fontWeight: '500',
               marginBottom: '8px',
-              margin: 0'
+              margin: '0'
             }}
           >
             {title}
@@ -150,6 +150,7 @@ const StatCard: React.FC<StatCardProps> = ({
             >
               {subtitle}
             </p>
+          )}
         </div>
         {icon && (
           <div

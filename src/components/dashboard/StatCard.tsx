@@ -25,13 +25,15 @@ const StatCard: React.FC<StatCardProps> = ({
         <span className="stat-card-title">{title}</span>
         {icon && <span className="stat-card-icon">{icon}</span>}
       </div>
-      <div className="stat-card-value">{value}</div>
-      {trend && (
-        <div className={`stat-card-trend ${trend.isPositive ? 'positive' : 'negative'}`}>
-          <span>{trend.isPositive ? '↑' : '↓'}</span>
-          <span>{Math.abs(trend.value)}%</span>
-        </div>
-      )}
+      <div className="stat-card-content">
+        <div className="stat-card-value">{value}</div>
+        {trend && (
+          <div className={`stat-card-trend ${trend.isPositive ? 'positive' : 'negative'}`}>
+            <span className="trend-arrow">{trend.isPositive ? '↑' : '↓'}</span>
+            <span className="trend-value">{Math.abs(trend.value)}%</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
