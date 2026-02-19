@@ -5,14 +5,15 @@ interface CardProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  variant?: 'default' | 'glass' | 'gradient';
 }
 
-const Card: React.FC<CardProps> = ({ title, children, className = '' }) => {
+const Card: React.FC<CardProps> = ({ title, children, className = '', variant = 'default' }) => {
   return (
-    <div className={`card ${className}`}>
+    <div className={`card card-${variant} ${className}`}>
       {title && (
         <div className="card-header">
-          <h2 className="card-title">{title}</h2>
+          <h3 className="card-title">{title}</h3>
         </div>
       )}
       <div className="card-body">{children}</div>

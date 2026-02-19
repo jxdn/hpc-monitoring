@@ -31,8 +31,6 @@ const Navbar: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      console.log('PDF downloaded successfully');
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -43,42 +41,51 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <div className="navbar-logo">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
+      <div className="navbar-inner">
+        <div className="navbar-brand">
+          <div className="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <div className="brand-text">
+            <span className="brand-title">HPC Monitor</span>
+            <span className="brand-subtitle">PBS Pro Cluster</span>
+          </div>
         </div>
-        <div className="navbar-title-group">
-          <h1 className="navbar-title">HPC Monitor</h1>
-          <span className="navbar-subtitle">PBS Pro Dashboard</span>
+
+        <div className="navbar-actions">
+          <button
+            className="download-btn"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+          >
+            {isGeneratingPDF ? (
+              <>
+                <div className="btn-spinner"></div>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <span>Export PDF</span>
+              </>
+            )}
+          </button>
+          
+          <div className="status-pill">
+            <div className="status-dot"></div>
+            <span>Live</span>
+          </div>
         </div>
       </div>
-      <div className="navbar-actions">
-        <button
-          className="pdf-download-btn"
-          onClick={handleDownloadPDF}
-          disabled={isGeneratingPDF}
-        >
-          {isGeneratingPDF ? (
-            <>
-              <span className="spinner"></span>
-              <span>Generating...</span>
-            </>
-          ) : (
-            <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>Download PDF</span>
-            </>
-          )}
-        </button>
-        <div className="status-indicator">
-          <span className="status-dot"></span>
-          <span className="status-text">Connected</span>
-        </div>
-      </div>
+      <div className="navbar-glow"></div>
     </nav>
   );
 };

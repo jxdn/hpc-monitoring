@@ -589,34 +589,41 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               month: item.month,
               gpuHours: parseFloat(item.gpuHours)
             }))}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
               <XAxis
                 dataKey="month"
-                stroke="#6b7280"
-                tick={{ fill: '#6b7280', fontSize: 12 }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 12 }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
               />
               <YAxis
-                stroke="#6b7280"
-                tick={{ fill: '#6b7280' }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b' }}
                 tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                label={{ value: 'GPU Hours: Total', angle: -90, position: 'insideLeft' }}
+                label={{ value: 'GPU Hours: Total', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  backgroundColor: '#1a2235',
+                  border: '1px solid rgba(148, 163, 184, 0.2)',
+                  borderRadius: '10px',
+                  color: '#f8fafc'
                 }}
                 formatter={(value: any) => [`${(value / 1000).toFixed(1)}k`, 'GPU Hours']}
               />
               <Bar
                 dataKey="gpuHours"
-                fill="#0ea5e9"
-                radius={[6, 6, 0, 0]}
+                fill="url(#barGradient)"
+                radius={[8, 8, 0, 0]}
               />
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
             </BarChart>
           </ResponsiveContainer>
           </>
@@ -712,28 +719,29 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       </div>
 
       {/* Job History Chart */}
-      <Card title="Total running job">
+      <Card title="Total Running Jobs">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={jobHistory}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
             <XAxis
               dataKey="timestamp"
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
+              stroke="#64748b"
+              tick={{ fill: '#64748b' }}
             />
-            <YAxis stroke="#6b7280" tick={{ fill: '#6b7280' }} />
+            <YAxis stroke="#64748b" tick={{ fill: '#64748b' }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
+                backgroundColor: '#1a2235',
+                border: '1px solid rgba(148, 163, 184, 0.2)',
+                borderRadius: '10px',
+                color: '#f8fafc'
               }}
             />
             <Legend />
             <Line
               type="monotone"
               dataKey="runningJobs"
-              stroke="#0ea5e9"
+              stroke="#3b82f6"
               strokeWidth={2.5}
               name="Running"
               dot={false}
@@ -754,24 +762,25 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       <Card title="GPU Occupation Rate">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={gpuOccupationHistory}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
             <XAxis
               dataKey="timestamp"
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
+              stroke="#64748b"
+              tick={{ fill: '#64748b' }}
             />
             <YAxis
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
+              stroke="#64748b"
+              tick={{ fill: '#64748b' }}
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}
-              label={{ value: 'Occupation Rate (%)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Occupation Rate (%)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
+                backgroundColor: '#1a2235',
+                border: '1px solid rgba(148, 163, 184, 0.2)',
+                borderRadius: '10px',
+                color: '#f8fafc'
               }}
               formatter={(value: any, name: string) => [Number(value).toFixed(1), name]}
             />
@@ -779,7 +788,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="overall"
-              stroke="#0ea5e9"
+              stroke="#3b82f6"
               strokeWidth={2.5}
               name="Overall"
               dot={false}
@@ -802,7 +811,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             />
           </LineChart>
         </ResponsiveContainer>
-</Card>
+      </Card>
 
       {/* Historical Data Section */}
       <div className="section-header">
@@ -850,27 +859,28 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
                 dataKey="date"
-                stroke="#6b7280"
-                tick={{ fill: '#6b7280' }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b' }}
               />
               <YAxis
                 yAxisId="left"
-                stroke="#6b7280"
-                tick={{ fill: '#6b7280' }}
-                label={{ value: 'Number of Jobs', angle: -90, position: 'insideLeft' }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b' }}
+                label={{ value: 'Number of Jobs', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#6b7280"
-                tick={{ fill: '#6b7280' }}
-                label={{ value: 'GPU Hours', angle: 90, position: 'insideRight' }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b' }}
+                label={{ value: 'GPU Hours', angle: 90, position: 'insideRight', fill: '#94a3b8' }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  backgroundColor: '#1a2235',
+                  border: '1px solid rgba(148, 163, 184, 0.2)',
+                  borderRadius: '10px',
+                  color: '#f8fafc'
                 }}
               />
               <Legend />
@@ -878,10 +888,10 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 yAxisId="left"
                 type="monotone"
                 dataKey="numJobs"
-                stroke="#0ea5e9"
+                stroke="#3b82f6"
                 strokeWidth={2.5}
                 name="Jobs Completed"
-                dot={{ r: 3 }}
+                dot={{ r: 3, fill: '#3b82f6' }}
               />
               <Line
                 yAxisId="right"
@@ -890,7 +900,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 stroke="#10b981"
                 strokeWidth={2.5}
                 name="Total GPU Hours"
-                dot={{ r: 3 }}
+                dot={{ r: 3, fill: '#10b981' }}
               />
             </LineChart>
           </ResponsiveContainer>
