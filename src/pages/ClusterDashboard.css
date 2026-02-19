@@ -1233,20 +1233,22 @@
 .wait-time-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-lg);
+  gap: var(--space-xl);
 }
 
 .summary-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-xl);
+  justify-content: center;
+  padding: var(--space-2xl);
   background: #ffffff;
   border: 2px solid #0066cc;
   border-radius: var(--radius-lg);
   text-align: center;
   transition: all var(--transition-fast) ease;
   box-shadow: var(--shadow-sm);
+  min-height: 140px;
 }
 
 .summary-card:hover {
@@ -1256,7 +1258,7 @@
 }
 
 .summary-label {
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   color: var(--color-text-secondary);
   font-weight: 500;
   text-transform: uppercase;
@@ -1265,10 +1267,10 @@
 }
 
 .summary-value {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
@@ -1285,10 +1287,10 @@
 }
 
 .summary-status {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
 }
 
 .summary-status.good {
@@ -1309,14 +1311,25 @@
 @media (max-width: 768px) {
   .wait-time-summary-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
   }
 
   .summary-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   .summary-card {
-    padding: var(--space-lg);
+    padding: var(--space-xl);
+    min-height: 120px;
+  }
+
+  .summary-label {
+    font-size: 0.8125rem;
+  }
+
+  .summary-status {
+    font-size: 0.75rem;
+    padding: 2px 8px;
   }
 }
 
