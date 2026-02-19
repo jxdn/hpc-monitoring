@@ -920,41 +920,35 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               </button>
             </div>
             {showQueueDetails && (
-              <div className="queue-details-table">
-                <table className="queue-table">
-                  <thead>
-                    <tr>
-                      <th>Queue Name</th>
-                      <th>Queue Type</th>
-                      <th>Average Wait Time</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(() => {
-                      const summary = getWaitTimeSummary();
-                      if (!summary || !summary.queues || summary.queues.length === 0) {
-                        return (
-                          <tr>
-                            <td colSpan={4} className="no-data">No queue data available</td>
-                          </tr>
-                        );
-                      }
-                      return summary.queues.map((queue, index) => (
-                        <tr key={`${queue.queueName}-${index}`}>
-                          <td className="queue-name-cell">{queue.queueName}</td>
-                          <td className="queue-type-cell">{queue.queueType}</td>
-                          <td className="wait-time-cell">{queue.formattedWaitTime}</td>
-                          <td>
-                            <span className={`status-badge status-badge-${queue.status}`}>
-                              {getWaitTimeStatusLabel(queue.status)}
-                            </span>
-                          </td>
-                        </tr>
-                      ));
-                    })()}
-                  </tbody>
-                </table>
+              <div className="queue-details-grid">
+                {(() => {
+                  const summary = getWaitTimeSummary();
+                  if (!summary || !summary.queues || summary.queues.length === 0) {
+                    return (
+                      <div className="no-data-message">No queue data available</div>
+                    );
+                  }
+                  return summary.queues.map((queue, index) => (
+                    <div key={`${queue.queueName}-${index}`} className={`queue-box queue-box-${queue.status}`}>
+                      <div className="queue-box-header">
+                        <div className="queue-box-name">{queue.queueName}</div>
+                        <div className="queue-box-type">{queue.queueType}</div>
+                      </div>
+                      <div className="queue-box-content">
+                        <div className="queue-box-wait-time">{queue.formattedWaitTime}</div>
+                        <span className={`status-badge status-badge-${queue.status}`}>
+                          {getWaitTimeStatusLabel(queue.status)}
+                        </span>
+                      </div>
+                      <div className="queue-box-meta">
+                        <div className="queue-box-meta-item">
+                          <span className="meta-label">Jobs:</span>
+                          <span className="meta-value">{queue.numJobs}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </>
