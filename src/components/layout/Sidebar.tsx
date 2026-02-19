@@ -32,6 +32,15 @@ const Sidebar: React.FC = () => {
         </svg>
       )
     },
+    { 
+      path: '/power', 
+      label: 'Power Consumption',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+        </svg>
+      )
+    },
   ];
 
   return (

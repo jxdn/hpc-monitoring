@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Job, Node, Queue, ClusterStats, JobStats, ResourceUtilization, AggregatedJobData } from '../types/pbs';
+import type { Job, Node, Queue, ClusterStats, JobStats, ResourceUtilization, AggregatedJobData, HardwareStatus, PowerStatus, PowerHistoryPoint } from '../types/pbs';
 
 const API_BASE_URL = '/api';
 
@@ -146,6 +146,23 @@ export const pbsApi = {
     gpuHours: string;
   }>> {
     const response = await longTimeoutApi.get('/analytics/monthly-gpu-hours');
+    return response.data;
+  },
+
+  async getHardwareStatus(): Promise<HardwareStatus> {
+    const response = await api.get<HardwareStatus>('/hardware/status');
+    return response.data;
+  },
+
+  async getPowerStatus(): Promise<PowerStatus> {
+    const response = await api.get<PowerStatus>('/hardware/power');
+    return response.data;
+  },
+
+  async getPowerHistory(range: '1d' | '7d' | '30d' = '7d'): Promise<PowerHistoryPoint[]> {
+    const response = await api.get<PowerHistoryPoint[]>('/hardware/power/history', {
+      params: { range },
+    });
     return response.data;
   },
 };

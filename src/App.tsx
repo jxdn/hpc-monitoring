@@ -7,6 +7,7 @@ import Jobs from './pages/Jobs';
 import Nodes from './pages/Nodes';
 import Analytics from './pages/Analytics';
 import HardwareStatus from './pages/HardwareStatus';
+import PowerStatus from './pages/PowerStatus';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
           <Route path="nodes" element={<Nodes />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="hardware" element={<HardwareStatus />} />
+          <Route path="power" element={<PowerStatus />} />
         </Route>
       </Routes>
     </Router>

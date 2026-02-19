@@ -87,3 +87,41 @@ export interface ResourceUtilization {
   memoryUtilization: number;
   nodeUtilization: number;
 }
+
+export interface HardwareNodeStatus {
+  node: string;
+  status: 'ok' | 'warning' | 'critical' | 'unknown' | 'other' | 'non-recoverable';
+  statusLabel: string;
+  statusValue: number;
+}
+
+export interface HardwareStatusSummary {
+  ok: number;
+  warning: number;
+  critical: number;
+  unknown: number;
+  other: number;
+  nonRecoverable: number;
+  total: number;
+}
+
+export interface HardwareStatus {
+  nodes: HardwareNodeStatus[];
+  summary: HardwareStatusSummary;
+}
+
+export interface PowerNodeStatus {
+  node: string;
+  watts: number;
+}
+
+export interface PowerStatus {
+  nodes: PowerNodeStatus[];
+  total: number;
+  timestamp: string;
+}
+
+export interface PowerHistoryPoint {
+  timestamp: string;
+  total: number;
+}

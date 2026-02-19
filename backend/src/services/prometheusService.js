@@ -610,6 +610,280 @@ function formatBytes(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + sizes[i];
 }
 
+let hardwareStatusHistory = [];
+const HARDWARE_STATUS_HISTORY_SIZE = 5;
+
+async function getHardwareStatus() {
+  try {
+    const result = await queryVictoriaMetrics('globalSystemStatus');
+    
+    const statusMap = { '1': 'other', '2': 'unknown', '3': 'ok', '4': 'warning', '5': 'critical', '6': 'non-recoverable' };
+    const statusLabelMap = { '1': 'Other', '2': 'Unknown', '3': 'OK', '4': 'Warning', '5': 'Critical', '6': 'Non-Recoverable' };
+    
+    const allNodes = Array.from({ length: 46 }, (_, i) => {
+      const num = i + 1;
+      return num < 10 ? `hopper-0${num}` : `hopper-${num}`;
+    });
+    
+    const nodeStatusMap = new Map();
+    result.forEach(item => {
+      const instance = item.metric.instance || item.metric.node || item.metric.host;
+      if (instance) {
+        let nodeName = instance.split(':')[0].split('.')[0];
+        const statusValue = item.value[1];
+        nodeStatusMap.set(nodeName, {
+          node: nodeName,
+          status: statusMap[statusValue] || 'unknown',
+          statusLabel: statusLabelMap[statusValue] || 'Unknown',
+          statusValue: parseInt(statusValue) || 0,
+        });
+      }
+    });
+    
+    const nodes = allNodes.map(nodeName => {
+      if (nodeStatusMap.has(nodeName)) {
+        return nodeStatusMap.get(nodeName);
+      }
+      return {
+        node: nodeName,
+        status: 'unknown',
+        statusLabel: 'No Data',
+        statusValue: -1,
+      };
+    });
+    
+    const summary = {
+      ok: nodes.filter(n => n.status === 'ok').length,
+      warning: nodes.filter(n => n.status === 'warning').length,
+      critical: nodes.filter(n => n.status === 'critical').length,
+      unknown: nodes.filter(n => n.status === 'unknown').length,
+      other: nodes.filter(n => n.status === 'other').length,
+      nonRecoverable: nodes.filter(n => n.status === 'critical' && n.statusLabel === 'Non-Recoverable').length,
+      total: nodes.length,
+    };
+    
+    return { nodes, summary };
+  } catch (error) {
+    console.error('Error fetching hardware status:', error);
+    throw error;
+  }
+}
+
+async function updateHardwareStatusCache() {
+  try {
+    const newStatus = await getHardwareStatus();
+    hardwareStatusHistory.unshift(newStatus);
+    if (hardwareStatusHistory.length > HARDWARE_STATUS_HISTORY_SIZE) {
+      hardwareStatusHistory.pop();
+    }
+    console.log('Hardware status cache updated:', newStatus.summary);
+    return newStatus;
+  } catch (error) {
+    console.error('Error updating hardware status cache:', error);
+    throw error;
+  }
+}
+
+function getCachedHardwareStatus() {
+  if (hardwareStatusHistory.length === 0) {
+    return null;
+  }
+  
+  const allNodes = Array.from({ length: 46 }, (_, i) => {
+    const num = i + 1;
+    return num < 10 ? `hopper-0${num}` : `hopper-${num}`;
+  });
+  
+  const mergedNodes = allNodes.map(nodeName => {
+    const statuses = hardwareStatusHistory
+      .map(h => h.nodes.find(n => n.node === nodeName))
+      .filter(n => n && n.status !== 'unknown');
+    
+    if (statuses.length === 0) {
+      return {
+        node: nodeName,
+        status: 'unknown',
+        statusLabel: 'No Data',
+        statusValue: -1,
+      };
+    }
+    
+    const severityOrder = ['critical', 'non-recoverable', 'warning', 'other', 'ok'];
+    for (const severity of severityOrder) {
+      const found = statuses.find(s => s.status === severity);
+      if (found) {
+        return found;
+      }
+    }
+    
+    return statuses[0];
+  });
+  
+  const summary = {
+    ok: mergedNodes.filter(n => n.status === 'ok').length,
+    warning: mergedNodes.filter(n => n.status === 'warning').length,
+    critical: mergedNodes.filter(n => n.status === 'critical').length,
+    unknown: mergedNodes.filter(n => n.status === 'unknown').length,
+    other: mergedNodes.filter(n => n.status === 'other').length,
+    nonRecoverable: mergedNodes.filter(n => n.status === 'critical' && n.statusLabel === 'Non-Recoverable').length,
+    total: mergedNodes.length,
+  };
+  
+  return { nodes: mergedNodes, summary };
+}
+
+let powerStatusHistory = [];
+const POWER_STATUS_HISTORY_SIZE = 3;
+
+async function getPowerStatus() {
+  try {
+    const result = await queryVictoriaMetrics('redfish_power_powercontrol_power_consumed_watts');
+    
+    const allNodes = Array.from({ length: 46 }, (_, i) => {
+      const num = i + 1;
+      return num < 10 ? `hopper-0${num}` : `hopper-${num}`;
+    });
+    
+    const nodePowerMap = new Map();
+    result.forEach(item => {
+      const source = item.metric.source;
+      if (source) {
+        const watts = parseInt(item.value[1]) || 0;
+        nodePowerMap.set(source, {
+          node: source,
+          watts: watts,
+        });
+      }
+    });
+    
+    const nodes = allNodes.map(nodeName => {
+      if (nodePowerMap.has(nodeName)) {
+        return nodePowerMap.get(nodeName);
+      }
+      return {
+        node: nodeName,
+        watts: 0,
+      };
+    });
+    
+    const total = nodes.reduce((sum, n) => sum + n.watts, 0);
+    
+    return {
+      nodes,
+      total,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Error fetching power status:', error);
+    throw error;
+  }
+}
+
+async function updatePowerStatusCache() {
+  try {
+    const newStatus = await getPowerStatus();
+    powerStatusHistory.unshift(newStatus);
+    if (powerStatusHistory.length > POWER_STATUS_HISTORY_SIZE) {
+      powerStatusHistory.pop();
+    }
+    console.log('Power status cache updated:', { total: newStatus.total, nodes: newStatus.nodes.length });
+    return newStatus;
+  } catch (error) {
+    console.error('Error updating power status cache:', error);
+    throw error;
+  }
+}
+
+function getCachedPowerStatus() {
+  if (powerStatusHistory.length === 0) {
+    return null;
+  }
+  
+  const allNodes = Array.from({ length: 46 }, (_, i) => {
+    const num = i + 1;
+    return num < 10 ? `hopper-0${num}` : `hopper-${num}`;
+  });
+  
+  const mergedNodes = allNodes.map(nodeName => {
+    for (const status of powerStatusHistory) {
+      const node = status.nodes.find(n => n.node === nodeName);
+      if (node && node.watts > 0) {
+        return node;
+      }
+    }
+    return {
+      node: nodeName,
+      watts: 0,
+    };
+  });
+  
+  const total = mergedNodes.reduce((sum, n) => sum + n.watts, 0);
+  
+  return {
+    nodes: mergedNodes,
+    total,
+    timestamp: powerStatusHistory[0]?.timestamp || new Date().toISOString(),
+  };
+}
+
+async function getPowerHistory(timeRange = '7d') {
+  try {
+    const { start, end, step } = parsePowerTimeRange(timeRange);
+    
+    const query = 'sum(redfish_power_powercontrol_power_consumed_watts)';
+    const result = await queryVictoriaMetricsRange(query, start, end, step);
+    
+    if (!result[0]?.values) {
+      return [];
+    }
+    
+    return result[0].values.map(([timestamp, value]) => ({
+      timestamp: formatPowerTimestamp(timestamp, timeRange),
+      total: Math.round(parseFloat(value)),
+    }));
+  } catch (error) {
+    console.error('Error fetching power history:', error);
+    return [];
+  }
+}
+
+function parsePowerTimeRange(timeRange) {
+  const now = Math.floor(Date.now() / 1000);
+  let start, step;
+  
+  switch (timeRange) {
+    case '1d':
+      start = now - 86400;
+      step = '1h';
+      break;
+    case '7d':
+      start = now - 604800;
+      step = '6h';
+      break;
+    case '30d':
+      start = now - 2592000;
+      step = '1d';
+      break;
+    default:
+      start = now - 604800;
+      step = '6h';
+  }
+  
+  return { start, end: now, step };
+}
+
+function formatPowerTimestamp(timestamp, timeRange) {
+  const date = new Date(timestamp * 1000);
+  
+  if (timeRange === '1d') {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  } else if (timeRange === '7d') {
+    return date.toLocaleDateString('en-US', { weekday: 'short', hour: '2-digit' });
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+}
+
 module.exports = {
   queryVictoriaMetrics,
   queryVictoriaMetricsRange,
@@ -623,4 +897,11 @@ module.exports = {
   getHistoricalJobStats,
   getHistoricalResourceStats,
   getHistoricalGPUOccupation,
+  getHardwareStatus,
+  updateHardwareStatusCache,
+  getCachedHardwareStatus,
+  getPowerStatus,
+  updatePowerStatusCache,
+  getCachedPowerStatus,
+  getPowerHistory,
 };

@@ -10,6 +10,7 @@ const pbsService = require('./services/pbsService');
 const xdmodService = require('./services/xdmodService');
 const cacheService = require('./services/cacheService');
 const pdfService = require('./services/pdfService');
+const prometheusService = require('./services/prometheusService');
 
 const app = express();
 const cache = new NodeCache({ stdTTL: config.cache.ttl / 1000 });
@@ -179,6 +180,60 @@ app.get('/api/queues', async (req, res) => {
     res.json(queues);
   } catch (error) {
     console.error('Error fetching queues:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/hardware/status
+ * Get hardware health status from iDRAC SNMP metrics
+ */
+app.get('/api/hardware/status', async (req, res) => {
+  try {
+    const data = prometheusService.getCachedHardwareStatus();
+    
+    if (!data) {
+      return res.status(503).json({ error: 'Hardware status not yet initialized' });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching hardware status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/hardware/power
+ * Get current power consumption per node
+ */
+app.get('/api/hardware/power', async (req, res) => {
+  try {
+    const data = prometheusService.getCachedPowerStatus();
+    
+    if (!data) {
+      return res.status(503).json({ error: 'Power status not yet initialized' });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching power status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/hardware/power/history
+ * Get power consumption history
+ * Query params: range (1d, 7d, 30d)
+ */
+app.get('/api/hardware/power/history', async (req, res) => {
+  try {
+    const range = req.query.range || '7d';
+    const data = await prometheusService.getPowerHistory(range);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching power history:', error);
     res.status(500).json({ error: error.message });
   }
 });

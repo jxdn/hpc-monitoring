@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { pbsApi } from '../services/pbsApi';
-import type { Job, Node, Queue, ClusterStats, AggregatedJobData } from '../types/pbs';
+import type { Node, Queue, ClusterStats, AggregatedJobData, HardwareStatus, PowerStatus, PowerHistoryPoint } from '../types/pbs';
 
 export const useJobs = (refreshInterval?: number) => {
   const [jobs, setJobs] = useState<AggregatedJobData | null>(null);
@@ -120,4 +120,89 @@ export const useClusterStats = (refreshInterval?: number) => {
   }, [refreshInterval]);
 
   return { stats, loading, error, refetch: fetchStats };
+};
+
+export const useHardwareStatus = (refreshInterval?: number) => {
+  const [hardwareStatus, setHardwareStatus] = useState<HardwareStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchHardwareStatus = async () => {
+    try {
+      setLoading(true);
+      const data = await pbsApi.getHardwareStatus();
+      setHardwareStatus(data);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHardwareStatus();
+
+    if (refreshInterval) {
+      const interval = setInterval(fetchHardwareStatus, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [refreshInterval]);
+
+  return { hardwareStatus, loading, error, refetch: fetchHardwareStatus };
+};
+
+export const usePowerStatus = (refreshInterval?: number) => {
+  const [powerStatus, setPowerStatus] = useState<PowerStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchPowerStatus = async () => {
+    try {
+      setLoading(true);
+      const data = await pbsApi.getPowerStatus();
+      setPowerStatus(data);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPowerStatus();
+
+    if (refreshInterval) {
+      const interval = setInterval(fetchPowerStatus, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [refreshInterval]);
+
+  return { powerStatus, loading, error, refetch: fetchPowerStatus };
+};
+
+export const usePowerHistory = (range: '1d' | '7d' | '30d' = '7d') => {
+  const [powerHistory, setPowerHistory] = useState<PowerHistoryPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchPowerHistory = async () => {
+    try {
+      setLoading(true);
+      const data = await pbsApi.getPowerHistory(range);
+      setPowerHistory(data);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPowerHistory();
+  }, [range]);
+
+  return { powerHistory, loading, error, refetch: fetchPowerHistory };
 };

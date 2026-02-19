@@ -7,6 +7,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const schedule = require('node-schedule');
 const xdmodService = require('./xdmodService');
+const prometheusService = require('./prometheusService');
 
 const CACHE_DIR = path.join(__dirname, '../../cache');
 
@@ -159,6 +160,20 @@ try {
       console.error('Error updating monthly-gpu-hours:', error.message);
     }
 
+    // Hardware Status (iDRAC SNMP)
+    try {
+      await prometheusService.updateHardwareStatusCache();
+    } catch (error) {
+      console.error('Error updating hardware status:', error.message);
+    }
+
+    // Power Status (Redfish)
+    try {
+      await prometheusService.updatePowerStatusCache();
+    } catch (error) {
+      console.error('Error updating power status:', error.message);
+    }
+
     console.log('Cache update completed successfully');
   } catch (error) {
     console.error('Error updating caches:', error);
@@ -181,7 +196,26 @@ async function initializeCacheService() {
     await updateAllCaches();
   });
 
+  // Schedule hardware status updates every 3 minutes
+  schedule.scheduleJob('*/3 * * * *', async () => {
+    try {
+      await prometheusService.updateHardwareStatusCache();
+    } catch (error) {
+      console.error('Error in scheduled hardware status update:', error.message);
+    }
+  });
+
+  // Schedule power status updates every 3 minutes
+  schedule.scheduleJob('*/3 * * * *', async () => {
+    try {
+      await prometheusService.updatePowerStatusCache();
+    } catch (error) {
+      console.error('Error in scheduled power status update:', error.message);
+    }
+  });
+
   console.log('Cache service initialized. Hourly updates scheduled at :00 of every hour.');
+  console.log('Hardware and power status updates scheduled every 3 minutes.');
 }
 
 module.exports = {
