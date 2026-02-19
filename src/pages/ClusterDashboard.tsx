@@ -447,7 +447,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       {/* GPU Occupation Rates */}
       <div className="gauge-grid">
         <GaugeCard
-          title="GPU Occupation rate (exc. 1-6)"
+          title="GPU Occupation rate"
           value={gpuOccupationRate}
         />
         <GaugeCard
@@ -657,7 +657,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 border: '1px solid #e5e7eb',
                 borderRadius: '8px',
               }}
-              formatter={(value: any) => [Number(value).toFixed(1), '']}
+              formatter={(value: any, name: string) => [Number(value).toFixed(1), name]}
             />
             <Legend />
             <Line
@@ -665,7 +665,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               dataKey="overall"
               stroke="#3b82f6"
               strokeWidth={3}
-              name="Overall (exc. 1-6)"
+              name="Overall"
               dot={false}
             />
             <Line
