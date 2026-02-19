@@ -1,7 +1,7 @@
 .cluster-dashboard {
   padding: var(--space-3xl);
   min-height: 100vh;
-  background: linear-gradient(180deg, #1a1f36 0%, #0f1219 100%);
+  background: #f8fafc;
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -11,11 +11,11 @@
   align-items: center;
   margin-bottom: var(--space-3xl);
   padding: var(--space-2xl) var(--space-3xl);
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, #fafbff 0%, #ffffff 100%);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+  border: var(--border-light);
   position: relative;
   overflow: hidden;
 }
@@ -27,7 +27,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #3b82f6 0%, #58a6ff 100%);
+  background: #0066cc;
 }
 
 .header-left {
@@ -40,9 +40,12 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text-primary);
   letter-spacing: -0.03em;
-  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  background: #0066cc;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .refresh-indicator {
@@ -50,15 +53,15 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-xs) var(--space-md);
-  background: rgba(88, 166, 255, 0.1);
-  border: 1px solid rgba(88, 166, 255, 0.2);
+  background: var(--color-primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-full);
   width: fit-content;
 }
 
 .refresh-icon {
   font-size: 1rem;
-  color: #58a6ff;
+  color: var(--color-primary);
   animation: spin 2s linear infinite;
 }
 
@@ -73,7 +76,7 @@
 
 .refresh-text {
   font-size: 0.75rem;
-  color: #58a6ff;
+  color: var(--color-primary);
   font-weight: 500;
 }
 
@@ -86,7 +89,7 @@
 
 .time-label {
   font-size: 0.75rem;
-  color: #8b949e;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -95,12 +98,12 @@
 .time-value {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #58a6ff;
+  color: var(--color-primary);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   padding: var(--space-sm) var(--space-md);
-  background: rgba(88, 166, 255, 0.1);
+  background: var(--color-primary-light);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(88, 166, 255, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .gauge-grid {
@@ -616,7 +619,7 @@
   margin: 0;
   font-size: 1.375rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -624,40 +627,40 @@
 .cluster-dashboard .time-range-selector {
   display: flex;
   gap: var(--space-sm);
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
   padding: var(--space-xs);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: var(--border-light);
   border-radius: var(--radius-lg);
   width: fit-content;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .cluster-dashboard .time-range-btn {
   padding: var(--space-sm) var(--space-xl);
   background: transparent;
-  color: #c9d1d9;
+  color: var(--color-text-secondary);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-fast) ease;
   min-width: 100px;
   position: relative;
   overflow: hidden;
 }
 
 .cluster-dashboard .time-range-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--color-neutral-100);
+  color: var(--color-text-primary);
 }
 
 .cluster-dashboard .time-range-btn.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #fff;
+  background: #0066cc;
+  color: white;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+  border-color: #0066cc;
 }
 
 /* Responsive styles for time-range-selector */
@@ -1187,7 +1190,7 @@
 .cluster-dashboard h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-primary);
   margin: var(--space-3xl) 0 var(--space-xl);
   letter-spacing: -0.01em;
 }

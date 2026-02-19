@@ -75,21 +75,21 @@ const Analytics: React.FC = () => {
               <Line
                 type="monotone"
                 dataKey="runningJobs"
-                stroke="#10b981"
+                stroke="#3b82f6"
                 strokeWidth={2}
                 name="Running Jobs"
               />
               <Line
                 type="monotone"
                 dataKey="queuedJobs"
-                stroke="#f59e0b"
+                stroke="#60a5fa"
                 strokeWidth={2}
                 name="Queued Jobs"
               />
               <Line
                 type="monotone"
                 dataKey="completedJobs"
-                stroke="#3b82f6"
+                stroke="#0ea5e9"
                 strokeWidth={2}
                 name="Completed Jobs"
               />
@@ -122,12 +122,12 @@ const Analytics: React.FC = () => {
               />
               <Bar
                 dataKey="memoryUtilization"
-                fill="#8b5cf6"
+                fill="#60a5fa"
                 name="Memory Utilization (%)"
               />
               <Bar
                 dataKey="nodeUtilization"
-                fill="#10b981"
+                fill="#0ea5e9"
                 name="Node Utilization (%)"
               />
             </BarChart>

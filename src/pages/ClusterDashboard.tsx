@@ -498,7 +498,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               />
               <Bar
                 dataKey="gpuHours"
-                fill="#3b82f6"
+                fill="#1d4ed8"
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>
@@ -617,7 +617,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="runningJobs"
-              stroke="#10b981"
+              stroke="#3b82f6"
               strokeWidth={3}
               name="Running"
               dot={false}
@@ -625,7 +625,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="queuedJobs"
-              stroke="#f59e0b"
+              stroke="#60a5fa"
               strokeWidth={3}
               name="Queued"
               dot={false}
@@ -671,7 +671,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="aisg"
-              stroke="#10b981"
+              stroke="#60a5fa"
               strokeWidth={3}
               name="AISG"
               dot={false}
@@ -679,7 +679,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="nonAisg"
-              stroke="#f59e0b"
+              stroke="#0ea5e9"
               strokeWidth={3}
               name="NON-AISG"
               dot={false}
@@ -748,7 +748,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 yAxisId="right"
                 type="monotone"
                 dataKey="totalGpuHours"
-                stroke="#10b981"
+                stroke="#60a5fa"
                 strokeWidth={3}
                 name="Total GPU Hours"
                 dot={{ r: 4 }}
