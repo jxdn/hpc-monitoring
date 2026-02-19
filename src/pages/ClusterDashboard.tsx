@@ -37,6 +37,7 @@ const ClusterDashboard: React.FC = () => {
   const [summarySortField, setSummarySortField] = useState<string>('status');
   const [summarySortOrder, setSummarySortOrder] = useState<'asc' | 'desc'>('asc');
   const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+  const [jobStatsTimeRange, setJobStatsTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
   const [gpuUsageData7d, setGpuUsageData7d] = useState<any[]>([]);
   const [gpuUsageData30d, setGpuUsageData30d] = useState<any[]>([]);
@@ -147,6 +148,19 @@ const ClusterDashboard: React.FC = () => {
     }
   };
 
+  const getJobStatsTimeRangeLabel = () => {
+    switch (jobStatsTimeRange) {
+      case '1d':
+        return 'Yesterday';
+      case '7d':
+        return 'Last 7 Days';
+      case '30d':
+        return 'Last 30 Days';
+      default:
+        return 'Last 7 Days';
+    }
+  };
+
   // Merge wait time data helper
   const mergeWaitTimeData = (aisgData: any[], nusitData: any[]) => {
     return [
@@ -235,12 +249,12 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch job statistics (7 days by default)
+// Fetch job statistics (7 days by default)
   useEffect(() => {
     const fetchJobStats = async () => {
       try {
         setJobStatsLoading(true);
-        const data = await pbsApi.getJobStatsLast7Days('7d'); // Get 7 days of data
+        const data = await pbsApi.getJobStatsLast7Days(jobStatsTimeRange); // Get data for selected time range
         setJobStatsLast7Days(data);
         setJobStatsError(null);
         
@@ -256,11 +270,11 @@ const getMergedWaitTimeTimeRangeLabel = () => {
         setJobStatsLoading(false);
       }
     };
-
+    
     fetchJobStats();
     const interval = setInterval(fetchJobStats, 60000); // Refresh every 1 minute
     return () => clearInterval(interval);
-  }, []);
+  }, [jobStatsTimeRange]);
 
   // Fetch all wait time summaries for Average Wait Time per Queue table
   useEffect(() => {
@@ -694,7 +708,30 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       </div>
 
       {/* Job Status Chart */}
-      <Card title="Job Completion History">
+      <Card>
+        <div className="card-header job-stats-card-header">
+          <span className="card-title">Job Completion History ({getJobStatsTimeRangeLabel()})</span>
+          <div className="time-range-selector">
+            <button
+              className={`time-range-btn ${jobStatsTimeRange === '1d' ? 'active' : ''}`}
+              onClick={() => setJobStatsTimeRange('1d')}
+            >
+              Yesterday
+            </button>
+            <button
+              className={`time-range-btn ${jobStatsTimeRange === '7d' ? 'active' : ''}`}
+              onClick={() => setJobStatsTimeRange('7d')}
+            >
+              Last 7 Days
+            </button>
+            <button
+              className={`time-range-btn ${jobStatsTimeRange === '30d' ? 'active' : ''}`}
+              onClick={() => setJobStatsTimeRange('30d')}
+            >
+              Last 30 Days
+            </button>
+          </div>
+        </div>
         {jobStatsLoading ? (
           <div className="loading">Loading job statistics...</div>
         ) : jobStatsError ? (
