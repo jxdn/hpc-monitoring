@@ -907,34 +907,6 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 );
               })()}
             </div>
-            <div className="queue-details-grid">
-              {(() => {
-                const summary = getWaitTimeSummary();
-                if (!summary || !summary.queues || summary.queues.length === 0) {
-                  return null;
-                }
-                return summary.queues.map((queue, index) => (
-                  <div key={`${queue.queueName}-${index}`} className={`queue-box queue-box-${queue.status}`}>
-                    <div className="queue-box-header">
-                      <div className="queue-box-name">{queue.queueName}</div>
-                      <div className="queue-box-type">{queue.queueType}</div>
-                    </div>
-                    <div className="queue-box-content">
-                      <div className="queue-box-wait-time">{queue.formattedWaitTime}</div>
-                      <span className={`status-badge status-badge-${queue.status}`}>
-                        {getWaitTimeStatusLabel(queue.status)}
-                      </span>
-                    </div>
-                    <div className="queue-box-meta">
-                      <div className="queue-box-meta-item">
-                        <span className="meta-label">Jobs:</span>
-                        <span className="meta-value">{queue.numJobs}</span>
-                      </div>
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
           </>
         )}
       </Card>
