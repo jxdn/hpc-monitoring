@@ -1,0 +1,139 @@
+.hardware-status {
+  padding: var(--space-lg);
+}
+
+.hardware-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.hardware-header h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  color: var(--color-text-primary);
+}
+
+.header-stats {
+  display: flex;
+  gap: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.hardware-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.overview-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overview-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.overview-value.used {
+  color: #10b981;
+}
+
+.overview-value.available {
+  color: #3b82f6;
+}
+
+.hardware-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.group-stats {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0 var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--color-neutral-border);
+}
+
+.node-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.node-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.node-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.node-info {
+  display: flex;
+  gap: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.node-state {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.node-state.free {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.node-state.busy {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.node-state.down {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.hardware-status h2 {
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  margin: var(--space-xl) 0 var(--space-md);
+}

@@ -15,6 +15,7 @@
   padding: var(--space-lg);
   overflow-y: auto;
   background-color: var(--bg-primary);
+  min-height: 0;
 }
 
 /* Print styles */

@@ -1,7 +1,7 @@
 .navbar {
   height: 64px;
-  background-color: var(--bg-primary);
-  border-bottom: 1px solid var(--color-neutral-border);
+  background: linear-gradient(180deg, #1a1f36 0%, #0f1219 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -9,7 +9,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 16px rgba(0, 0, 0, 0.12);
 }
 
 .navbar-brand {
@@ -19,25 +20,29 @@
 }
 
 .navbar-brand h1 {
-  font-size: 1.25rem;
+  font-size: 1.3125rem;
   margin: 0;
-  color: var(--color-text-primary);
-  font-weight: 600;
+  color: #fff;
+  font-weight: 700;
   letter-spacing: -0.02em;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
 }
 
 .navbar-brand svg {
-  color: var(--color-primary);
+  color: #3b82f6;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
 }
 
 .navbar-subtitle {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  font-weight: 400;
+  color: #8b949e;
+  font-weight: 500;
   margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .navbar-actions {
@@ -47,85 +52,124 @@
 }
 
 .navbar-link {
-  color: var(--color-text-secondary);
+  color: #c9d1d9;
   text-decoration: none;
   font-size: 0.875rem;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  border: 1px solid transparent;
 }
 
 .navbar-link:hover {
-  color: var(--color-text-primary);
-  background-color: var(--bg-secondary);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .navbar-link.active {
-  color: var(--color-primary-dark);
-  background-color: var(--color-success-bg);
+  color: #fff;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(56, 189, 248, 0.1) 100%);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .pdf-download-btn {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-primary);
-  color: #24292e;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.pdf-download-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .pdf-download-btn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pdf-download-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .pdf-download-btn:disabled {
-  background: var(--bg-tertiary);
-  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  color: #6e7681;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
   transform: none;
+  box-shadow: none;
+}
+
+.pdf-download-btn:disabled::before {
+  display: none;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--color-neutral-border);
-  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: #c9d1d9;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+.status-indicator span:last-child {
+  color: #8b949e;
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--color-text-muted);
+  background-color: #4a5667;
   flex-shrink: 0;
 }
 
 .status-dot.active {
-  background-color: var(--color-success);
-  animation: pulse 2s infinite;
+  background-color: #58a6ff;
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.6);
+  animation: pulse-dot 2s infinite;
 }
 
-@keyframes pulse {
+@keyframes pulse-dot {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(88, 166, 255, 0.6);
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.8;
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.8);
   }
 }
 
@@ -149,17 +193,22 @@
   }
 
   .pdf-download-btn {
-    padding: var(--space-xs) var(--space-sm);
+    padding: 8px 14px;
     font-size: 0.8125rem;
   }
 
   .status-indicator {
-    padding: var(--space-xs) var(--space-sm);
+    padding: 6px 12px;
     font-size: 0.8125rem;
   }
 
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+
   .navbar-link {
-    padding: var(--space-xs) var(--space-sm);
+    padding: 8px 12px;
     font-size: 0.8125rem;
   }
 }
@@ -169,10 +218,20 @@
   .navbar {
     position: static;
     border-bottom: none;
+    background: white;
   }
 
   .pdf-download-btn,
   .navbar-link {
     display: none !important;
+  }
+
+  .navbar-brand h1 {
+    color: #24292e;
+    text-shadow: none;
+  }
+
+  .navbar-subtitle {
+    color: #586069;
   }
 }

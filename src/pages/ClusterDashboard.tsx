@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { pbsApi } from '../services/pbsApi';
 import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
@@ -18,10 +18,6 @@ const ClusterDashboard: React.FC = () => {
   const [jobStatsLast7Days, setJobStatsLast7Days] = useState<any[]>([]);
   const [jobStatsLoading, setJobStatsLoading] = useState<boolean>(true);
   const [jobStatsError, setJobStatsError] = useState<string | null>(null);
-  const [aisgWaitTime, setAisgWaitTime] = useState<any[]>([]);
-  const [aisgWaitTimeLoading, setAisgWaitTimeLoading] = useState<boolean>(true);
-  const [nusitWaitTime, setNusitWaitTime] = useState<any[]>([]);
-  const [nusitWaitTimeLoading, setNusitWaitTimeLoading] = useState<boolean>(true);
   const [monthlyGPUHours, setMonthlyGPUHours] = useState<any[]>([]);
   const [monthlyGPUHoursLoading, setMonthlyGPUHoursLoading] = useState<boolean>(true);
   const [monthlyGPUHoursError, setMonthlyGPUHoursError] = useState<string | null>(null);
