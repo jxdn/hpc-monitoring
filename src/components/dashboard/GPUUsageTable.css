@@ -3,169 +3,154 @@
   overflow-x: auto;
   display: flex;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 0;
 }
 
 .gpu-usage-table {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.95rem;
-  background: white;
-  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .gpu-usage-table thead {
-  background: #0066cc;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
 }
 
 .gpu-usage-table th {
-  padding: 1.5rem 1rem;
+  padding: var(--space-4) var(--space-3);
   text-align: center;
   font-weight: 600;
   color: white;
-  font-size: 0.85rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
 }
 
 .gpu-usage-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.gpu-usage-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .gpu-usage-table tbody tr:hover {
-  background: #e6f2ff;
-  transform: scale(1.01);
-  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+  background: var(--color-primary-50);
+  transform: scale(1.002);
+  box-shadow: var(--shadow-sm);
 }
 
 .gpu-usage-table tbody tr.top-user {
-  background: #e6f2ff;
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, rgba(14, 165, 233, 0.1) 100%);
 }
 
 .gpu-usage-table tbody tr.top-user:hover {
-  background: #cce5ff;
+  background: var(--color-primary-light);
 }
 
 .gpu-usage-table td {
-  padding: 1.25rem 1rem;
-  color: var(--text-primary);
+  padding: var(--space-3) var(--space-3);
+  color: var(--color-text-primary);
+  text-align: center;
 }
 
 .username-cell {
   font-weight: 600;
-  color: #0066cc;
-  text-align: center;
-  font-size: 1rem;
-  text-transform: none;
-  letter-spacing: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-family: 'SF Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
 .number-cell {
-  text-align: center;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.95rem;
+  font-family: 'SF Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: var(--font-size-sm);
   font-weight: 500;
-  color: #4b5563;
-  position: relative;
-}
-
-.number-cell::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
-  background: #0066cc;
-  transition: width 0.3s ease;
-}
-
-.gpu-usage-table tbody tr:hover .number-cell::after {
-  width: 60%;
+  color: var(--color-text-secondary);
 }
 
 .number-cell.highlight {
   font-weight: 700;
-  color: #0066cc;
-  background: #0066cc;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 1rem;
+  color: var(--color-primary);
+  font-size: var(--font-size-base);
 }
 
 .gpu-usage-table tbody tr.top-user .number-cell {
-  color: #0066cc;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
-.gpu-usage-table tbody tr.top-user .number-cell.highlight {
-  color: #0066cc;
-  background: #0066cc;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.rank-cell {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  width: 50px;
+}
+
+.gpu-usage-table tbody tr:nth-child(1) .rank-cell {
+  color: #f59e0b;
+  font-size: var(--font-size-base);
+}
+
+.gpu-usage-table tbody tr:nth-child(2) .rank-cell {
+  color: #9ca3af;
+  font-size: var(--font-size-base);
+}
+
+.gpu-usage-table tbody tr:nth-child(3) .rank-cell {
+  color: #b45309;
+  font-size: var(--font-size-base);
 }
 
 .gpu-usage-loading,
 .gpu-usage-empty {
-  padding: 3rem;
+  padding: var(--space-8);
   text-align: center;
-  color: var(--text-secondary);
-  font-style: italic;
-  background: #e6f2ff;
-  border-radius: 12px;
-  border: 2px dashed #0066cc;
+  color: var(--color-text-muted);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-border);
 }
 
-/* Adjust for rank column */
-.gpu-usage-table th:first-child,
-.gpu-usage-table td:first-child {
-  padding-left: 1.5rem;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .gpu-usage-table {
-    font-size: 0.8rem;
-    border-radius: 8px;
+    font-size: var(--font-size-xs);
   }
 
   .gpu-usage-table th,
   .gpu-usage-table td {
-    padding: 0.75rem 0.5rem;
+    padding: var(--space-2);
   }
 
   .gpu-usage-table th {
-    font-size: 0.7rem;
-    padding: 1rem 0.5rem;
-    letter-spacing: 0.5px;
+    font-size: 0.65rem;
+    letter-spacing: 0.03em;
   }
 
   .username-cell {
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
   }
 
   .gpu-usage-table tbody tr:hover {
     transform: none;
   }
-  
-  .rank-cell {
-    font-size: 0.8rem;
-    width: 40px;
+}
+
+@media print {
+  .gpu-usage-table {
+    box-shadow: none;
+    border: 1px solid var(--color-border);
   }
-  
-  .gpu-usage-table tbody tr:nth-child(1) .rank-cell,
-  .gpu-usage-table tbody tr:nth-child(2) .rank-cell,
-  .gpu-usage-table tbody tr:nth-child(3) .rank-cell {
-    font-size: 0.85rem;
+
+  .gpu-usage-table thead {
+    background: var(--color-primary);
   }
 }

@@ -1,28 +1,27 @@
-/* Wait Time Table Specific Styles */
 .wait-time-table {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .wait-time-table thead {
-  background: #0066cc;
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
 }
 
 .wait-time-table thead th.sortable:hover {
-  background: #0055bb;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .wait-time-table thead th {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-3) var(--space-4);
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #ffffff;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .wait-time-table thead th:last-child {
@@ -31,223 +30,163 @@
 
 .wait-time-table thead th.sortable {
   cursor: pointer;
-  transition: background-color var(--transition-fast) ease;
+  transition: background-color var(--transition-fast);
   user-select: none;
 }
 
-.wait-time-table thead th.sortable:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.wait-time-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
 }
 
-.wait-time-table tbody tr {
-  border-bottom: var(--border-light);
-  transition: all var(--transition-fast) ease;
+.wait-time-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .wait-time-table tbody tr:hover {
-  background: #e6f2ff;
-  transform: translateX(4px);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-primary-50);
 }
 
 .wait-time-table tbody td {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-3) var(--space-4);
   color: var(--color-text-primary);
 }
 
-.wait-time-table tbody tr:hover .wait-time-badge {
-  transform: scale(1.05);
-  box-shadow: var(--shadow-md);
-}
-
-/* Queue Badge */
 .queue-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  background: #e6f2ff;
-  border: 1px solid #99c7ff;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-light);
   font-weight: 600;
-  font-size: 0.8125rem;
-  color: #0066cc;
-  transition: all 0.2s ease;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
 }
 
-/* Queue Type Badge */
 .queue-type-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  transition: all 0.2s ease;
+  letter-spacing: 0.05em;
+  transition: all var(--transition-fast);
 }
 
 .queue-type-badge.aisg,
 .queue-type-badge.nusit {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  transition: all 0.2s ease;
-  background: #0066cc;
+  background: var(--color-primary);
   color: white;
-  border: 1px solid #0055bb;
+  border: 1px solid var(--color-primary-hover);
 }
 
 .queue-type-cell {
   text-align: center;
 }
 
-.wait-time-table tbody tr:hover .queue-badge {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Wait Time Badge with McKinsey blue color coding */
 .wait-time-badge {
-  display: inline-block;
-  padding: 6px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-  min-width: 80px;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+  min-width: 70px;
   text-align: center;
   border: 2px solid transparent;
+  font-family: 'SF Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
 .wait-time-good {
-  background: #e6f2ff;
-  color: #0066cc;
-  border-color: #0066cc;
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .wait-time-good:hover {
-  background: #0066cc;
+  background: var(--color-success);
   color: white;
 }
 
 .wait-time-warning {
-  background: #cce5ff;
-  color: #0055bb;
-  border-color: #0055bb;
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border-color: var(--color-warning);
 }
 
 .wait-time-warning:hover {
-  background: #0055bb;
+  background: var(--color-warning);
   color: white;
 }
 
 .wait-time-danger {
-  background: #99c7ff;
-  color: #0044bb;
-  border-color: #0044bb;
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .wait-time-danger:hover {
-  background: #0044bb;
+  background: var(--color-danger);
   color: white;
 }
 
-/* Number cells styling */
 .number-header {
-  text-align: right;
+  text-align: center;
 }
 
 .wait-time-table tbody .number-cell {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: 'SF Mono', 'SFMono-Regular', Consolas, monospace;
   font-weight: 600;
+  font-size: var(--font-size-sm);
 }
 
-/* Date cell */
 .date-cell {
   font-weight: 500;
-}
-
-/* Pagination buttons with improved styling */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-lg);
-  border-top: var(--border-light);
-  background: #ffffff;
-}
-
-.pagination-btn {
-  padding: var(--space-sm) var(--space-xl);
-  background: #0066cc;
-  color: white;
-  border: 1px solid #0055bb;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all var(--transition-fast) ease;
-  box-shadow: var(--shadow-sm);
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #0055bb;
-  border-color: #0044bb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
-}
-
-.pagination-btn:disabled {
-  background: #e6f2ff;
-  color: #99c7ff;
-  border-color: #cce5ff;
-  cursor: not-allowed;
-  opacity: 0.7;
-  transform: none;
-}
-
-.pagination-info {
-  font-size: 0.875rem;
-  font-weight: 600;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
-/* Responsive styles */
+.wait-time-row:hover .queue-badge {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.wait-time-row:hover .wait-time-badge {
+  transform: scale(1.05);
+}
+
 @media (max-width: 768px) {
   .wait-time-table {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .wait-time-table thead th,
   .wait-time-table tbody td {
-    padding: var(--space-sm);
+    padding: var(--space-2);
   }
 
   .wait-time-table thead th {
-    font-size: 0.7rem;
+    font-size: 0.625rem;
   }
 
   .wait-time-badge {
-    padding: 4px 12px;
-    font-size: 0.75rem;
-    min-width: 60px;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-xs);
+    min-width: 50px;
   }
 
   .queue-badge {
-    padding: 2px 8px;
-    font-size: 0.75rem;
+    padding: 2px 6px;
+    font-size: 0.625rem;
   }
 
-  .pagination {
-    flex-direction: column;
-    gap: var(--space-md);
-  }
-
-  .pagination-btn {
-    width: 100%;
+  .queue-type-badge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
   }
 }

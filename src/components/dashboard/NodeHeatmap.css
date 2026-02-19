@@ -1,29 +1,42 @@
 .node-heatmap-container {
   background: var(--bg-primary);
-  border: var(--border-light);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
+  padding: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-base) ease;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-heatmap-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
 }
 
 .node-heatmap-container:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   border-color: var(--color-primary-light);
+  transform: translateY(-2px);
 }
 
 .heatmap-title {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-xl) 0;
+  margin: 0 0 var(--space-5) 0;
   letter-spacing: -0.01em;
 }
 
 .node-heatmap {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: var(--space-3);
 }
 
 .node-cell {
@@ -34,102 +47,101 @@
   justify-content: center;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition-base) ease;
-  border: var(--border-medium);
-  background: var(--bg-secondary);
+  transition: all var(--transition-fast);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-xs);
 }
 
-.node-cell::before {
+.node-cell::after {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   opacity: 0;
-  transition: opacity var(--transition-base) ease;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+  box-shadow: 0 0 20px currentColor;
 }
 
 .node-cell:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(1.05);
   box-shadow: var(--shadow-lg);
   z-index: 10;
 }
 
-.node-cell:hover::before {
-  opacity: 1;
+.node-cell:hover::after {
+  opacity: 0.3;
 }
 
 .node-name {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: var(--space-xs);
   text-align: center;
+  letter-spacing: 0.02em;
+  position: relative;
   z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .node-value {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--color-text-primary);
+  position: relative;
   z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'SF Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
-/* Heatmap color variations */
-.node-cell.level-0 {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  border-color: var(--color-success);
+.gpu-usage-loading,
+.gpu-usage-empty {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-border);
 }
 
-.node-cell.level-1 {
-  background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
-  border-color: #34d399;
-}
-
-.node-cell.level-2 {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-color: var(--color-warning);
-}
-
-.node-cell.level-3 {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-color: var(--color-danger);
-}
-
-.node-cell.level-4 {
-  background: var(--color-danger-bg);
-  border-color: var(--color-danger);
-}
-
-/* High usage cells get stronger border */
-.node-cell.level-4 .node-value {
-  color: var(--color-danger);
-}
-
-.node-cell.level-3 .node-value {
-  color: var(--color-warning);
-}
-
-.node-cell.level-0 .node-value,
-.node-cell.level-1 .node-value {
-  color: var(--color-success);
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto var(--space-3);
 }
 
 @media (max-width: 768px) {
   .node-heatmap-container {
-    padding: var(--space-md);
+    padding: var(--space-4);
   }
 
   .node-heatmap {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: var(--space-xs);
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: var(--space-2);
   }
 
   .node-name {
-    font-size: 0.65rem;
+    font-size: 0.625rem;
   }
 
   .node-value {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media print {
+  .node-heatmap-container {
+    box-shadow: none;
+    border: 1px solid var(--color-border);
+    break-inside: avoid;
+  }
+
+  .node-heatmap-container::before {
+    display: none;
   }
 }

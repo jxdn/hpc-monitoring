@@ -614,8 +614,8 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               />
               <Bar
                 dataKey="gpuHours"
-                fill="#1d4ed8"
-                radius={[4, 4, 0, 0]}
+                fill="#0ea5e9"
+                radius={[6, 6, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
@@ -733,16 +733,16 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="runningJobs"
-              stroke="#3b82f6"
-              strokeWidth={3}
+              stroke="#0ea5e9"
+              strokeWidth={2.5}
               name="Running"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="queuedJobs"
-              stroke="#60a5fa"
-              strokeWidth={3}
+              stroke="#f59e0b"
+              strokeWidth={2.5}
               name="Queued"
               dot={false}
             />
@@ -779,24 +779,24 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             <Line
               type="monotone"
               dataKey="overall"
-              stroke="#3b82f6"
-              strokeWidth={3}
+              stroke="#0ea5e9"
+              strokeWidth={2.5}
               name="Overall"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="aisg"
-              stroke="#60a5fa"
-              strokeWidth={3}
+              stroke="#10b981"
+              strokeWidth={2.5}
               name="AISG"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="nonAisg"
-              stroke="#0ea5e9"
-              strokeWidth={3}
+              stroke="#f59e0b"
+              strokeWidth={2.5}
               name="NON-AISG"
               dot={false}
             />
@@ -878,19 +878,19 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 yAxisId="left"
                 type="monotone"
                 dataKey="numJobs"
-                stroke="#3b82f6"
-                strokeWidth={3}
+                stroke="#0ea5e9"
+                strokeWidth={2.5}
                 name="Jobs Completed"
-                dot={{ r: 4 }}
+                dot={{ r: 3 }}
               />
               <Line
                 yAxisId="right"
                 type="monotone"
                 dataKey="totalGpuHours"
-                stroke="#60a5fa"
-                strokeWidth={3}
+                stroke="#10b981"
+                strokeWidth={2.5}
                 name="Total GPU Hours"
-                dot={{ r: 4 }}
+                dot={{ r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
