@@ -11,45 +11,84 @@ interface NodeHeatmapProps {
   title: string;
   nodes: NodeData[];
   valueLabel?: string;
-  isAvailability?: boolean; // If true, colors are inverted (0 = red/full, max = green/free)
+  isAvailability?: boolean;
 }
 
 const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'Jobs', isAvailability = false }) => {
-  const getColor = (value: number, maxValue: number) => {
-    if (maxValue === 0) return '#10b981'; // green for 0/0 (free)
+  const getColorData = (value: number, maxValue: number) => {
+    if (maxValue === 0) {
+      return {
+        bg: 'rgba(6, 182, 212, 0.3)',
+        border: 'rgba(6, 182, 212, 0.6)',
+        text: '#22d3ee',
+        glow: 'rgba(6, 182, 212, 0.4)'
+      };
+    }
 
-    // For availability: 0 means full (red), maxValue means free (green)
-    // For usage: 0 means free (green), maxValue means full (red)
     const ratio = isAvailability ? (1 - value / maxValue) : (value / maxValue);
 
-    if (ratio === 0) return '#10b981'; // green
-    if (ratio <= 0.125) return '#D3F9D8'; // super-light-green
-    if (ratio <= 0.25) return '#FEF3C7'; // super-light-yellow
-    if (ratio <= 0.375) return '#FCD34D'; // dark-yellow
-    if (ratio <= 0.5) return '#EAB839'; // yellow
-    if (ratio <= 0.75) return '#EF843C'; // dark-orange
-    if (ratio <= 0.875) return '#F87171'; // light-red
-    if (ratio < 1) return '#EF4444'; // red
-    return '#DC2626'; // dark-red
+    if (ratio === 0) {
+      return {
+        bg: 'rgba(6, 182, 212, 0.25)',
+        border: 'rgba(6, 182, 212, 0.5)',
+        text: '#22d3ee',
+        glow: 'rgba(6, 182, 212, 0.3)'
+      };
+    }
+    if (ratio <= 0.2) {
+      return {
+        bg: 'rgba(16, 185, 129, 0.25)',
+        border: 'rgba(16, 185, 129, 0.5)',
+        text: '#34d399',
+        glow: 'rgba(16, 185, 129, 0.3)'
+      };
+    }
+    if (ratio <= 0.4) {
+      return {
+        bg: 'rgba(59, 130, 246, 0.25)',
+        border: 'rgba(59, 130, 246, 0.5)',
+        text: '#60a5fa',
+        glow: 'rgba(59, 130, 246, 0.3)'
+      };
+    }
+    if (ratio <= 0.6) {
+      return {
+        bg: 'rgba(139, 92, 246, 0.25)',
+        border: 'rgba(139, 92, 246, 0.5)',
+        text: '#a78bfa',
+        glow: 'rgba(139, 92, 246, 0.3)'
+      };
+    }
+    if (ratio <= 0.8) {
+      return {
+        bg: 'rgba(245, 158, 11, 0.25)',
+        border: 'rgba(245, 158, 11, 0.5)',
+        text: '#fbbf24',
+        glow: 'rgba(245, 158, 11, 0.3)'
+      };
+    }
+    return {
+      bg: 'rgba(239, 68, 68, 0.25)',
+      border: 'rgba(239, 68, 68, 0.5)',
+      text: '#f87171',
+      glow: 'rgba(239, 68, 68, 0.3)'
+    };
   };
 
   const getTextValue = (value: number, maxValue: number) => {
     if (maxValue === 0) return 'Free';
 
     if (isAvailability) {
-      // For availability: 0 available = Full, maxValue available = Free/show number
       if (value === 0) return 'Full';
-      if (value === maxValue) return value.toString(); // Show 8 when all are available
+      if (value === maxValue) return value.toString();
       return value.toString();
     } else {
-      // For usage: value = maxValue means Full
       if (value === maxValue) return 'Full';
       return value.toString();
     }
   };
 
   const formatNodeName = (name: string) => {
-    // Extract node number and format with leading zero (e.g., "hopper-1" -> "hopper-01")
     const match = name.match(/hopper-(\d+)/);
     if (match) {
       const number = parseInt(match[1]);
@@ -60,15 +99,22 @@ const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'J
 
   return (
     <div className="node-heatmap-container">
-      <h3 className="heatmap-title">{title}</h3>
+      {title && <h3 className="heatmap-title">{title}</h3>}
       <div className="node-heatmap">
         {nodes.map((node) => {
           const displayName = formatNodeName(node.name);
+          const colorData = getColorData(node.value, node.maxValue);
+          
           return (
             <div
               key={node.name}
               className="node-cell"
-              style={{ backgroundColor: getColor(node.value, node.maxValue) }}
+              style={{
+                background: colorData.bg,
+                borderColor: colorData.border,
+                color: colorData.text,
+                '--cell-glow': colorData.glow
+              } as React.CSSProperties}
               title={`${displayName}: ${node.value}/${node.maxValue} ${valueLabel}`}
             >
               <div className="node-name">{displayName}</div>
@@ -76,6 +122,32 @@ const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'J
             </div>
           );
         })}
+      </div>
+      <div className="heatmap-legend">
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(6, 182, 212, 0.25)', borderColor: 'rgba(6, 182, 212, 0.5)' }}></div>
+          <span>Free</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(16, 185, 129, 0.25)', borderColor: 'rgba(16, 185, 129, 0.5)' }}></div>
+          <span>Low</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(59, 130, 246, 0.25)', borderColor: 'rgba(59, 130, 246, 0.5)' }}></div>
+          <span>Medium</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(139, 92, 246, 0.25)', borderColor: 'rgba(139, 92, 246, 0.5)' }}></div>
+          <span>High</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(245, 158, 11, 0.25)', borderColor: 'rgba(245, 158, 11, 0.5)' }}></div>
+          <span>Busy</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(239, 68, 68, 0.25)', borderColor: 'rgba(239, 68, 68, 0.5)' }}></div>
+          <span>Full</span>
+        </div>
       </div>
     </div>
   );
