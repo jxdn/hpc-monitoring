@@ -527,7 +527,17 @@ const getMergedWaitTimeTimeRangeLabel = () => {
   // Top 5 queues
   const topQueues = jobs.byQueue.filter(q => q.count > 0).slice(0, 5);
 
-  // Build queue details from multiple data sources
+  // Known queue names from PBS
+  const knownQueues = [
+    'interactive', 'medium', 'long', 'large', 'small', 'special',
+    'AISG_debug', 'AISG_large', 'AISG_guest'
+  ];
+
+  // Debug: log what we have
+  console.log('jobs.byQueue:', jobs.byQueue);
+  console.log('mergedWaitTimeData:', mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d : mergedWaitTime30d);
+
+  // Get wait time for a queue
   const getLatestWaitTimeForQueue = (queueName: string): number | undefined => {
     const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
       : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
@@ -542,33 +552,29 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return avgWait;
   };
 
-  // Get unique queue names from all available sources
-  const allQueueNames = new Set<string>();
-  
-  // From running jobs
-  jobs.byQueue?.forEach(q => allQueueNames.add(q.queue));
-  
-  // From wait time data (has all queues)
-  const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
-    : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
-    : mergedWaitTime30d;
-  currentWaitData?.forEach(d => allQueueNames.add(d.queueName));
-
-  // Build queue details
-  const queueDetails = Array.from(allQueueNames).map(queueName => {
+  // Build queue details using known queues + running job counts
+  const queueDetails = knownQueues.map(queueName => {
     const runningData = jobs.byQueue?.find(q => q.queue === queueName);
+    const running = runningData?.count || 0;
+    
+    // Get queued from wait time data numJobs minus running
+    const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
+      : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
+      : mergedWaitTime30d;
     const waitData = currentWaitData?.filter(d => d.queueName === queueName);
-    const totalJobs = waitData?.reduce((sum, d) => sum + d.numJobs, 0) || 0;
+    const totalFromWait = waitData?.reduce((sum, d) => sum + d.numJobs, 0) || 0;
     
     return {
       name: queueName,
-      running: runningData?.count || 0,
-      queued: 0, // Would need separate metric
-      total: runningData?.count || totalJobs,
+      running: running,
+      queued: Math.max(0, totalFromWait - running),
+      total: running,
       avgWaitMinutes: getLatestWaitTimeForQueue(queueName),
       queueType: queueName.toLowerCase().includes('aisg') ? 'AISG' as const : 'NUS-IT' as const,
     };
-  }).filter(q => q.total > 0 || q.running > 0).sort((a, b) => b.total - a.total);
+  }).filter(q => q.running > 0 || q.queued > 0);
+
+  console.log('queueDetails:', queueDetails);
 
   // Prepare node data for heatmaps
   const nodeJobsData = nodes.map(n => ({
