@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { pbsApi } from '../services/pbsApi';
-import { useNodes, useJobs, useClusterStats, useQueues } from '../hooks/usePbsData';
+import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
 import GaugeCard from '../components/dashboard/GaugeCard';
 import NodeHeatmap from '../components/dashboard/NodeHeatmap';
 import Card from '../components/dashboard/Card';
@@ -14,7 +14,6 @@ const ClusterDashboard: React.FC = () => {
   const { nodes, loading: nodesLoading } = useNodes(60000);
   const { jobs, loading: jobsLoading } = useJobs(60000);
   const { stats, loading: statsLoading } = useClusterStats(60000);
-  const { queues, loading: queuesLoading } = useQueues(60000);
   const [jobHistory, setJobHistory] = useState<any[]>([]);
   const [gpuOccupationHistory, setGpuOccupationHistory] = useState<any[]>([]);
   const [jobStatsLast7Days, setJobStatsLast7Days] = useState<any[]>([]);
@@ -674,7 +673,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
 
       {/* Stats Row */}
       <div className="stats-row">
-        <Card title="Queue - Statistic">
+        <Card title="Queue - Statistic" compact>
           <div className="queue-stats">
             {topQueues.map(q => (
               <div key={q.queue} className="queue-stat-item">
@@ -685,7 +684,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
           </div>
         </Card>
 
-        <Card title="Job Status">
+        <Card title="Job Status" compact>
           <div className="job-stats">
             <div className="stat-item">
               <span className="stat-name">Total</span>
@@ -706,7 +705,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
           </div>
         </Card>
 
-        <Card title="USER and Total jobs">
+        <Card title="USER and Total jobs" compact>
           <div className="user-stats">
             {topUsers.map(u => (
               <div key={u.user} className="user-stat-item">
@@ -717,7 +716,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
           </div>
         </Card>
 
-        <Card title="Node Status">
+        <Card title="Node Status" compact>
           <div className="node-stats">
             <div className="stat-item">
               <span className="stat-name">Available</span>

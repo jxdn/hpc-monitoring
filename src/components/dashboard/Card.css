@@ -52,6 +52,14 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
+.card-header.compact {
+  padding: 0.5rem 0.75rem;
+}
+
+.card-header.compact .card-title {
+  font-size: var(--text-xs);
+}
+
 .card-title {
   margin: 0;
   font-size: var(--text-base);
@@ -62,6 +70,10 @@
 
 .card-body {
   padding: 1.5rem;
+}
+
+.card-body.compact {
+  padding: 0.75rem;
 }
 
 .card-footer {
