@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { pbsApi } from '../services/pbsApi';
-import { useNodes, useJobs, useClusterStats } from '../hooks/usePbsData';
+import { useNodes, useJobs, useClusterStats, useQueues } from '../hooks/usePbsData';
 import GaugeCard from '../components/dashboard/GaugeCard';
 import NodeHeatmap from '../components/dashboard/NodeHeatmap';
 import Card from '../components/dashboard/Card';
 import GPUUsageTable from '../components/dashboard/GPUUsageTable';
 import WaitTimeTableWithPagination from '../components/dashboard/WaitTimeTableWithPagination';
+import QueueDetailsCard from '../components/dashboard/QueueDetailsCard';
 import './ClusterDashboard.css';
 
 const ClusterDashboard: React.FC = () => {
   const { nodes, loading: nodesLoading } = useNodes(60000);
   const { jobs, loading: jobsLoading } = useJobs(60000);
   const { stats, loading: statsLoading } = useClusterStats(60000);
+  const { queues, loading: queuesLoading } = useQueues(60000);
   const [jobHistory, setJobHistory] = useState<any[]>([]);
   const [gpuOccupationHistory, setGpuOccupationHistory] = useState<any[]>([]);
   const [jobStatsLast7Days, setJobStatsLast7Days] = useState<any[]>([]);
@@ -491,11 +493,11 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
-  if (nodesLoading || jobsLoading || statsLoading) {
+  if (nodesLoading || jobsLoading || statsLoading || queuesLoading) {
     return <div className="loading">Loading cluster dashboard...</div>;
   }
 
-  if (!stats || !jobs) {
+  if (!stats || !jobs || !queues) {
     return <div className="error">No data available</div>;
   }
 
@@ -524,6 +526,30 @@ const getMergedWaitTimeTimeRangeLabel = () => {
 
   // Top 5 queues
   const topQueues = jobs.byQueue.filter(q => q.count > 0).slice(0, 5);
+
+  // Prepare queue details with running/queued stats
+  const getLatestWaitTimeForQueue = (queueName: string): number | undefined => {
+    const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
+      : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
+      : mergedWaitTime30d;
+    
+    const queueData = currentWaitData.filter(d => d.queueName === queueName);
+    if (queueData.length === 0) return undefined;
+    
+    const avgWait = queueData.reduce((sum, d) => sum + d.avgWaitMinutes, 0) / queueData.length;
+    return avgWait;
+  };
+
+  const queueDetails = queues.map(queue => {
+    return {
+      name: queue.name,
+      running: queue.runningJobs,
+      queued: queue.queuedJobs,
+      total: queue.totalJobs,
+      avgWaitMinutes: getLatestWaitTimeForQueue(queue.name),
+      queueType: queue.name.includes('aisg') || queue.name.includes('AISG') ? 'AISG' as const : 'NUS-IT' as const,
+    };
+  }).filter(q => q.total > 0 || q.running > 0 || q.queued > 0);
 
   // Prepare node data for heatmaps
   const nodeJobsData = nodes.map(n => ({
@@ -575,6 +601,11 @@ const getMergedWaitTimeTimeRangeLabel = () => {
           value={aisgOccupation}
         />
       </div>
+
+      {/* Queue Details */}
+      {queueDetails.length > 0 && (
+        <QueueDetailsCard queues={queueDetails} title="Queue Status - Real-time" />
+      )}
 
       {/* Monthly GPU Hours Chart */}
       <Card title="GPU Hours: Total (Last 2 Years)" className="gpu-hours-card">
