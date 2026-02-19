@@ -34,8 +34,6 @@ const ClusterDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState<string>('30d');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [summaryTimeRange, setSummaryTimeRange] = useState<string>('Yesterday');
-  const [summarySortField, setSummarySortField] = useState<string>('status');
-  const [summarySortOrder, setSummarySortOrder] = useState<'asc' | 'desc'>('asc');
   const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [jobStatsTimeRange, setJobStatsTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
@@ -366,27 +364,52 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       allData = getAverageWaitTimeTableData(aisgWaitTime30d, nusitWaitTime30d, 'Last 30 Days');
     }
     
-    // Sort data
-    allData.sort((a: any, b: any) => {
-      let comparison = 0;
-      if (summarySortField === 'queueType') {
-        comparison = a.queueType.localeCompare(b.queueType);
-      } else if (summarySortField === 'queueName') {
-        comparison = a.queueName.localeCompare(b.queueName);
-      } else if (summarySortField === 'averageWaitTime') {
-        const parseTime = (timeStr: string) => {
-          if (timeStr === 'NA' || timeStr === undefined) return Infinity;
-          return parseFloat(timeStr || '0');
-        };
-        comparison = parseTime(a.averageWaitTime) - parseTime(b.averageWaitTime);
-      } else if (summarySortField === 'status') {
-        const order: Record<string, number> = { 'good': 1, 'warning': 2, 'danger': 3 };
-        comparison = (order[a.status as string] || 0) - (order[b.status as string] || 0);
-      }
-      return summarySortOrder === 'asc' ? comparison : -comparison;
-    });
-    
     return allData;
+  };
+
+  // Calculate summary averages instead of showing detailed table
+  const getWaitTimeSummary = () => {
+    const data = getCombinedWaitTimeTableData();
+    if (data.length === 0) return null;
+
+    const overallAvg = data.reduce((sum: number, item: any) => 
+      sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
+    ) / data.length;
+
+    const aisgData = data.filter((item: any) => item.queueType === 'AISG');
+    const aisgAvg = aisgData.length > 0 
+      ? aisgData.reduce((sum: number, item: any) => 
+          sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
+        ) / aisgData.length 
+      : 0;
+
+    const nusitData = data.filter((item: any) => item.queueType === 'NUS IT');
+    const nusitAvg = nusitData.length > 0 
+      ? nusitData.reduce((sum: number, item: any) => 
+          sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
+        ) / nusitData.length 
+      : 0;
+
+    const totalJobs = data.reduce((sum: number, item: any) => sum + (item.numJobs || 0), 0);
+    const totalGpuHours = data.reduce((sum: number, item: any) => 
+      sum + (item.totalGpuHours || 0), 0
+    );
+
+    return {
+      overallAvg: formatWaitTime(overallAvg),
+      aisgAvg: formatWaitTime(aisgAvg),
+      nusitAvg: formatWaitTime(nusitAvg),
+      totalJobs,
+      totalGpuHours: totalGpuHours.toFixed(2),
+      status: getWaitTimeStatus(overallAvg)
+    };
+  };
+
+  const formatWaitTime = (minutes: number): string => {
+    if (minutes < 60) return `${Math.round(minutes)}min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
   if (nodesLoading || jobsLoading || statsLoading) {
@@ -795,7 +818,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
         )}
       </Card>
 
-      {/* Wait Time Summary Stats - Table Display */}
+      {/* Wait Time Summary Stats - Summary Display */}
       <Card className="wait-time-title-card">
         <div className="card-header wait-time-card-header">
           <span className="card-title">Average Wait Time per Queue ({summaryTimeRange})</span>
@@ -825,67 +848,48 @@ const getMergedWaitTimeTimeRangeLabel = () => {
         ) : getCombinedWaitTimeTableData().length === 0 ? (
           <div className="data-table-empty">No queue data available for this time range</div>
         ) : (
-          <div className="average-wait-time-table-container">
-            <table className="average-wait-time-table">
-              <thead>
-                <tr>
-                  <th 
-                    onClick={() => {
-                      setSummarySortField('queueType');
-                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'queueType' ? 'desc' : 'asc');
-                    }}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    Queue Type {summarySortField === 'queueType' && (summarySortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    onClick={() => {
-                      setSummarySortField('queueName');
-                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'queueName' ? 'desc' : 'asc');
-                    }}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    Queue Name {summarySortField === 'queueName' && (summarySortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    onClick={() => {
-                      setSummarySortField('averageWaitTime');
-                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'averageWaitTime' ? 'desc' : 'asc');
-                    }}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    Average Wait Time {summarySortField === 'averageWaitTime' && (summarySortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    onClick={() => {
-                      setSummarySortField('status');
-                      setSummarySortOrder(prev => prev === 'asc' && summarySortField === 'status' ? 'desc' : 'asc');
-                    }}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    Status {summarySortField === 'status' && (summarySortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {getCombinedWaitTimeTableData().map((row, index) => (
-                  <tr key={`${row.queueType}-${row.queueName}-${index}`}>
-                    <td className="queue-type-cell">{row.queueType}</td>
-                    <td className="queue-name-cell">{row.queueName}</td>
-                    <td className="wait-time-cell">
-                      <span className={`wait-time-badge wait-time-badge-${row.status}`}>
-                        {row.averageWaitTime}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge status-badge-${row.status}`}>
-                        {getWaitTimeStatusLabel(row.status)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="wait-time-summary">
+            {(() => {
+              const summary = getWaitTimeSummary();
+              if (!summary) return null;
+              return (
+                <div className="wait-time-summary-grid">
+                  <div className="summary-card">
+                    <div className="summary-label">Overall Average</div>
+                    <div className={`summary-value summary-value-${summary.status}`}>
+                      {summary.overallAvg}
+                    </div>
+                    <div className="summary-status">
+                      {getWaitTimeStatusLabel(summary.status)}
+                    </div>
+                  </div>
+                  <div className="summary-card">
+                    <div className="summary-label">AISG Average</div>
+                    <div className="summary-value">
+                      {summary.aisgAvg}
+                    </div>
+                  </div>
+                  <div className="summary-card">
+                    <div className="summary-label">NUS IT Average</div>
+                    <div className="summary-value">
+                      {summary.nusitAvg}
+                    </div>
+                  </div>
+                  <div className="summary-card">
+                    <div className="summary-label">Total Jobs</div>
+                    <div className="summary-value">
+                      {summary.totalJobs}
+                    </div>
+                  </div>
+                  <div className="summary-card">
+                    <div className="summary-label">Total GPU Hours</div>
+                    <div className="summary-value">
+                      {summary.totalGpuHours}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </Card>
