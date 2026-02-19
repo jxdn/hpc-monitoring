@@ -34,6 +34,7 @@ const ClusterDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState<string>('30d');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [summaryTimeRange, setSummaryTimeRange] = useState<string>('Yesterday');
+  const [showQueueDetails, setShowQueueDetails] = useState(false);
   const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [jobStatsTimeRange, setJobStatsTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
@@ -401,7 +402,22 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       nusitAvg: formatWaitTime(nusitAvg),
       totalJobs,
       totalGpuHours: totalGpuHours.toFixed(2),
-      status: getWaitTimeStatus(overallAvg)
+      status: getWaitTimeStatus(overallAvg),
+      queues: data.map(item => ({
+        queueType: item.queueType,
+        queueName: item.queueName,
+        averageWaitTime: item.averageWaitTime,
+        formattedWaitTime: formatWaitTime(parseFloat(item.averageWaitTime || 0)),
+        status: item.status,
+        numJobs: item.numJobs || 0
+      })).sort((a, b) => {
+        // Sort by average wait time (longest first)
+        const parseTime = (timeStr: string) => {
+          if (timeStr === 'NA' || timeStr === undefined) return 0;
+          return parseFloat(timeStr || '0');
+        };
+        return parseTime(b.averageWaitTime) - parseTime(a.averageWaitTime);
+      })
     };
   };
 
@@ -843,54 +859,105 @@ const getMergedWaitTimeTimeRangeLabel = () => {
             </button>
           </div>
         </div>
-        {summaryLoading ? (
+{summaryLoading ? (
           <div className="loading">Loading summaries...</div>
         ) : getCombinedWaitTimeTableData().length === 0 ? (
           <div className="data-table-empty">No queue data available for this time range</div>
         ) : (
-          <div className="wait-time-summary">
-            {(() => {
-              const summary = getWaitTimeSummary();
-              if (!summary) return null;
-              return (
-                <div className="wait-time-summary-grid">
-                  <div className="summary-card">
-                    <div className="summary-label">Overall Average</div>
-                    <div className={`summary-value summary-value-${summary.status}`}>
-                      {summary.overallAvg}
+          <>
+            <div className="wait-time-summary">
+              {(() => {
+                const summary = getWaitTimeSummary();
+                if (!summary) return null;
+                return (
+                  <div className="wait-time-summary-grid">
+                    <div className="summary-card">
+                      <div className="summary-label">Overall Average</div>
+                      <div className={`summary-value summary-value-${summary.status}`}>
+                        {summary.overallAvg}
+                      </div>
+                      <div className={`summary-status status-badge-${summary.status}`}>
+                        {getWaitTimeStatusLabel(summary.status)}
+                      </div>
                     </div>
-                    <div className="summary-status">
-                      {getWaitTimeStatusLabel(summary.status)}
+                    <div className="summary-card">
+                      <div className="summary-label">AISG Average</div>
+                      <div className="summary-value">
+                        {summary.aisgAvg}
+                      </div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-label">NUS IT Average</div>
+                      <div className="summary-value">
+                        {summary.nusitAvg}
+                      </div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-label">Total Jobs</div>
+                      <div className="summary-value">
+                        {summary.totalJobs}
+                      </div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-label">Total GPU Hours</div>
+                      <div className="summary-value">
+                        {summary.totalGpuHours}
+                      </div>
                     </div>
                   </div>
-                  <div className="summary-card">
-                    <div className="summary-label">AISG Average</div>
-                    <div className="summary-value">
-                      {summary.aisgAvg}
-                    </div>
-                  </div>
-                  <div className="summary-card">
-                    <div className="summary-label">NUS IT Average</div>
-                    <div className="summary-value">
-                      {summary.nusitAvg}
-                    </div>
-                  </div>
-                  <div className="summary-card">
-                    <div className="summary-label">Total Jobs</div>
-                    <div className="summary-value">
-                      {summary.totalJobs}
-                    </div>
-                  </div>
-                  <div className="summary-card">
-                    <div className="summary-label">Total GPU Hours</div>
-                    <div className="summary-value">
-                      {summary.totalGpuHours}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
+                );
+              })()}
+            </div>
+            <div className="queue-details-toggle">
+              <button
+                className="toggle-btn"
+                onClick={() => setShowQueueDetails(!showQueueDetails)}
+              >
+                <span className="toggle-icon">{showQueueDetails ? '▲' : '▼'}</span>
+                <span className="toggle-text">
+                  {showQueueDetails ? 'Hide Queues' : `Show Queues (${getWaitTimeSummary()?.queues.length || 0})`}
+                </span>
+              </button>
+            </div>
+            {showQueueDetails && (
+              <div className="queue-details-table">
+                <table className="queue-table">
+                  <thead>
+                    <tr>
+                      <th>Queue Name</th>
+                      <th>Queue Type</th>
+                      <th>Average Wait Time</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      const summary = getWaitTimeSummary();
+                      if (!summary || !summary.queues || summary.queues.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={4} className="no-data">No queue data available</td>
+                          </tr>
+                        );
+                      }
+                      return summary.queues.map((queue, index) => (
+                        <tr key={`${queue.queueName}-${index}`}>
+                          <td className="queue-name-cell">{queue.queueName}</td>
+                          <td className="queue-type-cell">{queue.queueType}</td>
+                          <td className="wait-time-cell">{queue.formattedWaitTime}</td>
+                          <td>
+                            <span className={`status-badge status-badge-${queue.status}`}>
+                              {getWaitTimeStatusLabel(queue.status)}
+                            </span>
+                          </td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </Card>
 
