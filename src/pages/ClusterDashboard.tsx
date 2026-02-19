@@ -324,6 +324,20 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return 'danger';                     // >= 8 hours is danger
   };
 
+  // Helper function to get number of days based on time range
+  const getDaysCount = () => {
+    switch (summaryTimeRange) {
+      case 'Yesterday':
+        return 1;
+      case '7 Days':
+        return 7;
+      case '30 Days':
+        return 30;
+      default:
+        return 1;
+    }
+  };
+
   // Helper function to get data in table format
   const getAverageWaitTimeTableData = (aisgData: any[], nusitData: any[], timeRange: string) => {
     return [
@@ -367,33 +381,66 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     return allData;
   };
 
-  // Calculate summary averages instead of showing detailed table
+  // Calculate summary averages - Group by queue and calculate as sum/days
   const getWaitTimeSummary = () => {
     const data = getCombinedWaitTimeTableData();
     if (data.length === 0) return null;
 
-    const overallAvg = data.reduce((sum: number, item: any) => 
-      sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
-    ) / data.length;
+    const daysCount = getDaysCount();
 
-    const aisgData = data.filter((item: any) => item.queueType === 'AISG');
-    const aisgAvg = aisgData.length > 0 
-      ? aisgData.reduce((sum: number, item: any) => 
-          sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
-        ) / aisgData.length 
+    // Group data by queue name and aggregate
+    const queueMap = new Map<string, any>();
+
+    data.forEach(item => {
+      const key = `${item.queueName}-${item.queueType}`;
+      if (!queueMap.has(key)) {
+        queueMap.set(key, {
+          queueName: item.queueName,
+          queueType: item.queueType,
+          totalWaitTime: 0,
+          totalJobs: 0,
+          totalGpuHours: 0,
+          entries: 0
+        });
+      }
+      const queue = queueMap.get(key);
+      queue.totalWaitTime += parseFloat(item.averageWaitTime || 0);
+      queue.totalJobs += (item.numJobs || 0);
+      queue.totalGpuHours += (item.totalGpuHours || 0);
+      queue.entries++;
+    });
+
+    // Calculate per-queue average as sum(avgWaitMinutes) / daysCount
+    const queues = Array.from(queueMap.values()).map(queue => ({
+      queueType: queue.queueType,
+      queueName: queue.queueName,
+      averageWaitTime: (queue.totalWaitTime / daysCount).toFixed(2),
+      formattedWaitTime: formatWaitTime(queue.totalWaitTime / daysCount),
+      status: getWaitTimeStatus(queue.totalWaitTime / daysCount),
+      numJobs: queue.totalJobs,
+      totalGpuHours: queue.totalGpuHours.toFixed(2)
+    })).sort((a, b) => {
+      // Sort by average wait time (longest first)
+      return parseFloat(b.averageWaitTime) - parseFloat(a.averageWaitTime);
+    });
+
+    // Calculate overall averages
+    const overallAvg = queues.length > 0 
+      ? queues.reduce((sum: number, q: any) => sum + parseFloat(q.averageWaitTime), 0) / queues.length 
       : 0;
 
-    const nusitData = data.filter((item: any) => item.queueType === 'NUS IT');
-    const nusitAvg = nusitData.length > 0 
-      ? nusitData.reduce((sum: number, item: any) => 
-          sum + (item.averageWaitTime === 'NA' ? 0 : parseFloat(item.averageWaitTime || 0)), 0
-        ) / nusitData.length 
+    const aisgQueues = queues.filter((q: any) => q.queueType === 'AISG');
+    const aisgAvg = aisgQueues.length > 0 
+      ? aisgQueues.reduce((sum: number, q: any) => sum + parseFloat(q.averageWaitTime), 0) / aisgQueues.length 
       : 0;
 
-    const totalJobs = data.reduce((sum: number, item: any) => sum + (item.numJobs || 0), 0);
-    const totalGpuHours = data.reduce((sum: number, item: any) => 
-      sum + (item.totalGpuHours || 0), 0
-    );
+    const nusitQueues = queues.filter((q: any) => q.queueType === 'NUS IT');
+    const nusitAvg = nusitQueues.length > 0 
+      ? nusitQueues.reduce((sum: number, q: any) => sum + parseFloat(q.averageWaitTime), 0) / nusitQueues.length 
+      : 0;
+
+    const totalJobs = queues.reduce((sum: number, q: any) => sum + q.numJobs, 0);
+    const totalGpuHours = queues.reduce((sum: number, q: any) => sum + parseFloat(q.totalGpuHours), 0);
 
     return {
       overallAvg: formatWaitTime(overallAvg),
@@ -402,21 +449,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       totalJobs,
       totalGpuHours: totalGpuHours.toFixed(2),
       status: getWaitTimeStatus(overallAvg),
-      queues: data.map(item => ({
-        queueType: item.queueType,
-        queueName: item.queueName,
-        averageWaitTime: item.averageWaitTime,
-        formattedWaitTime: formatWaitTime(parseFloat(item.averageWaitTime || 0)),
-        status: item.status,
-        numJobs: item.numJobs || 0
-      })).sort((a, b) => {
-        // Sort by average wait time (longest first)
-        const parseTime = (timeStr: string) => {
-          if (timeStr === 'NA' || timeStr === undefined) return 0;
-          return parseFloat(timeStr || '0');
-        };
-        return parseTime(b.averageWaitTime) - parseTime(a.averageWaitTime);
-      })
+      queues
     };
   };
 
@@ -905,6 +938,28 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                     </div>
                   </div>
                 );
+              })()}
+            </div>
+            <div className="queue-details-grid">
+              {(() => {
+                const summary = getWaitTimeSummary();
+                if (!summary || !summary.queues || summary.queues.length === 0) {
+                  return null;
+                }
+                return summary.queues.map((queue, index) => (
+                  <div key={`${queue.queueName}-${queue.queueType}-${index}`} className={`queue-box queue-box-${queue.status}`}>
+                    <div className="queue-box-header">
+                      <div className="queue-box-name">{queue.queueName}</div>
+                      <div className="queue-box-type">{queue.queueType}</div>
+                    </div>
+                    <div className="queue-box-content">
+                      <div className="queue-box-wait-time">{queue.formattedWaitTime}</div>
+                      <span className={`status-badge status-badge-${queue.status}`}>
+                        {getWaitTimeStatusLabel(queue.status)}
+                      </span>
+                    </div>
+                  </div>
+                ));
               })()}
             </div>
           </>

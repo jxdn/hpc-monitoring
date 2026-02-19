@@ -1319,3 +1319,117 @@
     padding: var(--space-lg);
   }
 }
+
+/* Queue Details Grid - Individual Queue Boxes */
+.queue-details-grid {
+  margin-top: var(--space-2xl);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.queue-box {
+  background: #ffffff;
+  border: 2px solid #0066cc;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: all var(--transition-base) ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 100px;
+}
+
+.queue-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: #0055bb;
+}
+
+.queue-box-good {
+  border-left: 4px solid var(--color-success);
+}
+
+.queue-box-warning {
+  border-left: 4px solid var(--color-warning);
+}
+
+.queue-box-danger {
+  border-left: 4px solid var(--color-danger);
+}
+
+.queue-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-neutral-border);
+}
+
+.queue-box-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.queue-box-type {
+  font-size: 0.6875rem;
+  padding: 2px var(--space-xs);
+  background: linear-gradient(135deg, #0066cc 0%, #0055bb 100%);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.queue-box-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: var(--space-xs) 0;
+}
+
+.queue-box-wait-time {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .queue-details-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .queue-box {
+    padding: var(--space-sm);
+    min-height: 85px;
+  }
+
+  .queue-box-name {
+    font-size: 0.8125rem;
+  }
+
+  .queue-box-type {
+    font-size: 0.625rem;
+  }
+
+  .queue-box-wait-time {
+    font-size: 1.125rem;
+  }
+}
