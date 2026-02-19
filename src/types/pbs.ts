@@ -29,6 +29,8 @@ export interface AggregatedJobData {
   byQueue: Array<{
     queue: string;
     count: number;
+    running: number;
+    queued: number;
   }>;
 }
 

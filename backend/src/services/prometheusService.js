@@ -128,14 +128,40 @@ async function getJobsByUser() {
  */
 async function getJobsByQueue() {
   try {
-    const result = await queryVictoriaMetrics('qstat_running_jobs_by_queue');
+    const [runningByQueue, queuedByQueue] = await Promise.all([
+      queryVictoriaMetrics('qstat_running_jobs_by_queue').catch(() => []),
+      queryVictoriaMetrics('qstat_que_by_queue').catch(() => []),
+    ]);
 
-    return result
-      .map(item => ({
-        queue: item.metric.queue,
-        count: parseInt(item.value[1]),
-      }))
-      .sort((a, b) => b.count - a.count);
+    const queueMap = new Map();
+
+    runningByQueue.forEach(item => {
+      const queueName = item.metric.queue;
+      queueMap.set(queueName, {
+        queue: queueName,
+        count: parseInt(item.value[1]) || 0,
+        running: parseInt(item.value[1]) || 0,
+        queued: 0,
+      });
+    });
+
+    queuedByQueue.forEach(item => {
+      const queueName = item.metric.queue;
+      const queuedCount = parseInt(item.value[1]) || 0;
+      if (queueMap.has(queueName)) {
+        queueMap.get(queueName).queued = queuedCount;
+        queueMap.get(queueName).count += queuedCount;
+      } else {
+        queueMap.set(queueName, {
+          queue: queueName,
+          count: queuedCount,
+          running: 0,
+          queued: queuedCount,
+        });
+      }
+    });
+
+    return Array.from(queueMap.values()).sort((a, b) => b.count - a.count);
   } catch (error) {
     console.error('Error fetching jobs by queue:', error);
     return [];
