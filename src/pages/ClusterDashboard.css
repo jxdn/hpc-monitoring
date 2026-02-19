@@ -1333,11 +1333,11 @@
   }
 }
 
-/* Queue Details Grid - Individual Queue Boxes */
+/* Queue Details Grid - Individual Queue Boxes - Fixed 7 Columns */
 .queue-details-grid {
   margin-top: var(--space-2xl);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   gap: var(--space-md);
   animation: fadeIn 0.3s ease-out;
 }
@@ -1357,13 +1357,13 @@
   background: #ffffff;
   border: 2px solid #0066cc;
   border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: var(--space-sm);
   transition: all var(--transition-base) ease;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  min-height: 100px;
+  gap: var(--space-xs);
+  min-height: 75px;
 }
 
 .queue-box:hover {
@@ -1388,19 +1388,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: var(--space-xs);
+  padding-bottom: 2px;
+  margin-bottom: 2px;
   border-bottom: 1px solid var(--color-neutral-border);
 }
 
 .queue-box-name {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .queue-box-type {
-  font-size: 0.6875rem;
-  padding: 2px var(--space-xs);
+  font-size: 0.625rem;
+  padding: 1px 4px;
   background: linear-gradient(135deg, #0066cc 0%, #0055bb 100%);
   color: white;
   border-radius: var(--radius-sm);
@@ -1413,36 +1414,46 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: var(--space-xs) 0;
+  margin: 2px 0;
 }
 
 .queue-box-wait-time {
-  font-size: 1.25rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   color: var(--color-text-primary);
 }
 
+.queue-box .status-badge {
+  font-size: 0.625rem;
+  padding: 2px 6px;
+}
+
 @media (max-width: 768px) {
   .queue-details-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: var(--space-sm);
   }
 
   .queue-box {
-    padding: var(--space-sm);
-    min-height: 85px;
+    padding: var(--space-xs);
+    min-height: 65px;
   }
 
   .queue-box-name {
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
   }
 
   .queue-box-type {
-    font-size: 0.625rem;
+    font-size: 0.5625rem;
+    padding: 1px 3px;
   }
 
   .queue-box-wait-time {
-    font-size: 1.125rem;
+    font-size: 0.8125rem;
+  }
+
+  .queue-box .status-badge {
+    font-size: 0.5625rem;
+    padding: 2px 4px;
   }
 }

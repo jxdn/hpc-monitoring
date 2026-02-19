@@ -388,6 +388,17 @@ const getMergedWaitTimeTimeRangeLabel = () => {
 
     const daysCount = getDaysCount();
 
+    // Define fixed queue list with 7 queues
+    const fixedQueueList = [
+      { name: 'small', type: 'NUS IT' },
+      { name: 'medium', type: 'NUS IT' },
+      { name: 'large', type: 'NUS IT' },
+      { name: 'AISG_large', type: 'AISG' },
+      { name: 'AISG_debug', type: 'AISG' },
+      { name: 'interactive', type: 'NUS IT' },
+      { name: 'special', type: 'NUS IT' }
+    ];
+
     // Group data by queue name and aggregate
     const queueMap = new Map<string, any>();
 
@@ -410,18 +421,38 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       queue.entries++;
     });
 
-    // Calculate per-queue average as sum(avgWaitMinutes) / daysCount
-    const queues = Array.from(queueMap.values()).map(queue => ({
-      queueType: queue.queueType,
-      queueName: queue.queueName,
-      averageWaitTime: (queue.totalWaitTime / daysCount).toFixed(2),
-      formattedWaitTime: formatWaitTime(queue.totalWaitTime / daysCount),
-      status: getWaitTimeStatus(queue.totalWaitTime / daysCount),
-      numJobs: queue.totalJobs,
-      totalGpuHours: queue.totalGpuHours.toFixed(2)
-    })).sort((a, b) => {
-      // Sort by average wait time (longest first)
-      return parseFloat(b.averageWaitTime) - parseFloat(a.averageWaitTime);
+    // Create array from map for easy lookup
+    const existingQueues = Array.from(queueMap.values());
+
+    // Build fixed queue list - always return exactly 7 queues in fixed order
+    const queues = fixedQueueList.map(fixedQueue => {
+      const existing = existingQueues.find(
+        q => q.queueName === fixedQueue.name && q.queueType === fixedQueue.type
+      );
+
+      if (existing) {
+        // Queue has data
+        return {
+          queueType: existing.queueType,
+          queueName: existing.queueName,
+          averageWaitTime: (existing.totalWaitTime / daysCount).toFixed(2),
+          formattedWaitTime: formatWaitTime(existing.totalWaitTime / daysCount),
+          status: getWaitTimeStatus(existing.totalWaitTime / daysCount),
+          numJobs: existing.totalJobs,
+          totalGpuHours: existing.totalGpuHours.toFixed(2)
+        };
+      } else {
+        // Queue has no data - create placeholder
+        return {
+          queueType: fixedQueue.type,
+          queueName: fixedQueue.name,
+          averageWaitTime: '0',
+          formattedWaitTime: '0min',
+          status: 'good',
+          numJobs: 0,
+          totalGpuHours: '0'
+        };
+      }
     });
 
     // Calculate overall averages
