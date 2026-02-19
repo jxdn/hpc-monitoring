@@ -33,9 +33,8 @@ const ClusterDashboard: React.FC = () => {
 
   const [timeRange, setTimeRange] = useState<string>('30d');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [summaryTimeRange, setSummaryTimeRange] = useState<string>('Yesterday');
-  const [showQueueDetails, setShowQueueDetails] = useState(false);
-  const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+const [summaryTimeRange, setSummaryTimeRange] = useState<string>('Yesterday');
+const [gpuUsageTimeRange, setGpuUsageTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [jobStatsTimeRange, setJobStatsTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [gpuUsageData1d, setGpuUsageData1d] = useState<any[]>([]);
   const [gpuUsageData7d, setGpuUsageData7d] = useState<any[]>([]);
@@ -908,49 +907,34 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                 );
               })()}
             </div>
-            <div className="queue-details-toggle">
-              <button
-                className="toggle-btn"
-                onClick={() => setShowQueueDetails(!showQueueDetails)}
-              >
-                <span className="toggle-icon">{showQueueDetails ? '▲' : '▼'}</span>
-                <span className="toggle-text">
-                  {showQueueDetails ? 'Hide Queues' : `Show Queues (${getWaitTimeSummary()?.queues.length || 0})`}
-                </span>
-              </button>
-            </div>
-            {showQueueDetails && (
-              <div className="queue-details-grid">
-                {(() => {
-                  const summary = getWaitTimeSummary();
-                  if (!summary || !summary.queues || summary.queues.length === 0) {
-                    return (
-                      <div className="no-data-message">No queue data available</div>
-                    );
-                  }
-                  return summary.queues.map((queue, index) => (
-                    <div key={`${queue.queueName}-${index}`} className={`queue-box queue-box-${queue.status}`}>
-                      <div className="queue-box-header">
-                        <div className="queue-box-name">{queue.queueName}</div>
-                        <div className="queue-box-type">{queue.queueType}</div>
-                      </div>
-                      <div className="queue-box-content">
-                        <div className="queue-box-wait-time">{queue.formattedWaitTime}</div>
-                        <span className={`status-badge status-badge-${queue.status}`}>
-                          {getWaitTimeStatusLabel(queue.status)}
-                        </span>
-                      </div>
-                      <div className="queue-box-meta">
-                        <div className="queue-box-meta-item">
-                          <span className="meta-label">Jobs:</span>
-                          <span className="meta-value">{queue.numJobs}</span>
-                        </div>
+            <div className="queue-details-grid">
+              {(() => {
+                const summary = getWaitTimeSummary();
+                if (!summary || !summary.queues || summary.queues.length === 0) {
+                  return null;
+                }
+                return summary.queues.map((queue, index) => (
+                  <div key={`${queue.queueName}-${index}`} className={`queue-box queue-box-${queue.status}`}>
+                    <div className="queue-box-header">
+                      <div className="queue-box-name">{queue.queueName}</div>
+                      <div className="queue-box-type">{queue.queueType}</div>
+                    </div>
+                    <div className="queue-box-content">
+                      <div className="queue-box-wait-time">{queue.formattedWaitTime}</div>
+                      <span className={`status-badge status-badge-${queue.status}`}>
+                        {getWaitTimeStatusLabel(queue.status)}
+                      </span>
+                    </div>
+                    <div className="queue-box-meta">
+                      <div className="queue-box-meta-item">
+                        <span className="meta-label">Jobs:</span>
+                        <span className="meta-value">{queue.numJobs}</span>
                       </div>
                     </div>
-                  ));
-                })()}
-              </div>
-            )}
+                  </div>
+                ));
+              })()}
+            </div>
           </>
         )}
       </Card>
