@@ -343,6 +343,55 @@
   margin-top: 0.25rem;
 }
 
+.health-node-uptime {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.recently-rebooted-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.rebooted-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  border: 2px solid;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  cursor: default;
+}
+
+.rebooted-node:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.rebooted-node-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rebooted-node-uptime {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: #f59e0b;
+  margin-top: 0.25rem;
+}
+
+.rebooted-node-status {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
 .problem-nodes-list {
   display: flex;
   flex-direction: column;
@@ -435,4 +484,69 @@
 
 .summary-item.power .summary-icon {
   color: #10b981;
+}
+
+.uptime-chart {
+  margin-top: 1rem;
+}
+
+.uptime-tooltip {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.uptime-tooltip-node {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.uptime-tooltip-value {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.latest-reboot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.latest-reboot-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.latest-reboot-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent-primary);
+  transform: translateX(4px);
+}
+
+.latest-reboot-node {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 100px;
+}
+
+.latest-reboot-uptime {
+  font-weight: 700;
+  color: #f59e0b;
+  min-width: 80px;
+}
+
+.latest-reboot-status {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
 }

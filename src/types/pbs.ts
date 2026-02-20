@@ -93,6 +93,8 @@ export interface HardwareNodeStatus {
   status: 'ok' | 'warning' | 'critical' | 'unknown' | 'other' | 'non-recoverable';
   statusLabel: string;
   statusValue: number;
+  uptimeSeconds: number;
+  uptimeFormatted: string;
 }
 
 export interface HardwareStatusSummary {

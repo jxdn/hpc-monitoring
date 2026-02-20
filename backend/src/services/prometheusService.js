@@ -612,10 +612,30 @@ function formatBytes(bytes) {
 
 let hardwareStatusHistory = [];
 const HARDWARE_STATUS_HISTORY_SIZE = 5;
+let lastKnownUptimes = new Map();
+
+function formatUptime(seconds) {
+  if (!seconds || seconds <= 0) return 'N/A';
+  
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
 
 async function getHardwareStatus() {
   try {
-    const result = await queryVictoriaMetrics('globalSystemStatus');
+    const [statusResult, uptimeResult] = await Promise.all([
+      queryVictoriaMetrics('globalSystemStatus'),
+      queryVictoriaMetrics('systemPowerUpTime'),
+    ]);
     
     const statusMap = { '1': 'other', '2': 'unknown', '3': 'ok', '4': 'warning', '5': 'critical', '6': 'non-recoverable' };
     const statusLabelMap = { '1': 'Other', '2': 'Unknown', '3': 'OK', '4': 'Warning', '5': 'Critical', '6': 'Non-Recoverable' };
@@ -626,7 +646,7 @@ async function getHardwareStatus() {
     });
     
     const nodeStatusMap = new Map();
-    result.forEach(item => {
+    statusResult.forEach(item => {
       const instance = item.metric.instance || item.metric.node || item.metric.host;
       if (instance) {
         let nodeName = instance.split(':')[0].split('.')[0];
@@ -636,7 +656,35 @@ async function getHardwareStatus() {
           status: statusMap[statusValue] || 'unknown',
           statusLabel: statusLabelMap[statusValue] || 'Unknown',
           statusValue: parseInt(statusValue) || 0,
+          uptimeSeconds: lastKnownUptimes.get(nodeName) || 0,
+          uptimeFormatted: formatUptime(lastKnownUptimes.get(nodeName) || 0),
         });
+      }
+    });
+    
+    uptimeResult.forEach(item => {
+      const instance = item.metric.instance;
+      if (instance) {
+        let nodeName = instance.split(':')[0].split('.')[0];
+        const uptimeSeconds = parseInt(item.value[1]) || 0;
+        if (uptimeSeconds > 0) {
+          lastKnownUptimes.set(nodeName, uptimeSeconds);
+        }
+        if (nodeStatusMap.has(nodeName)) {
+          const currentUptime = uptimeSeconds > 0 ? uptimeSeconds : (lastKnownUptimes.get(nodeName) || 0);
+          nodeStatusMap.get(nodeName).uptimeSeconds = currentUptime;
+          nodeStatusMap.get(nodeName).uptimeFormatted = formatUptime(currentUptime);
+        } else {
+          const currentUptime = uptimeSeconds > 0 ? uptimeSeconds : (lastKnownUptimes.get(nodeName) || 0);
+          nodeStatusMap.set(nodeName, {
+            node: nodeName,
+            status: 'unknown',
+            statusLabel: 'No Data',
+            statusValue: -1,
+            uptimeSeconds: currentUptime,
+            uptimeFormatted: formatUptime(currentUptime),
+          });
+        }
       }
     });
     
@@ -644,11 +692,14 @@ async function getHardwareStatus() {
       if (nodeStatusMap.has(nodeName)) {
         return nodeStatusMap.get(nodeName);
       }
+      const lastUptime = lastKnownUptimes.get(nodeName) || 0;
       return {
         node: nodeName,
         status: 'unknown',
         statusLabel: 'No Data',
         statusValue: -1,
+        uptimeSeconds: lastUptime,
+        uptimeFormatted: formatUptime(lastUptime),
       };
     });
     
@@ -700,11 +751,14 @@ function getCachedHardwareStatus() {
       .filter(n => n && n.status !== 'unknown');
     
     if (statuses.length === 0) {
+      const lastUptime = lastKnownUptimes.get(nodeName) || 0;
       return {
         node: nodeName,
         status: 'unknown',
         statusLabel: 'No Data',
         statusValue: -1,
+        uptimeSeconds: lastUptime,
+        uptimeFormatted: formatUptime(lastUptime),
       };
     }
     
@@ -712,6 +766,11 @@ function getCachedHardwareStatus() {
     for (const severity of severityOrder) {
       const found = statuses.find(s => s.status === severity);
       if (found) {
+        if (!found.uptimeSeconds || found.uptimeSeconds === 0) {
+          const lastUptime = lastKnownUptimes.get(nodeName) || 0;
+          found.uptimeSeconds = lastUptime;
+          found.uptimeFormatted = formatUptime(lastUptime);
+        }
         return found;
       }
     }
@@ -849,9 +908,14 @@ async function getPowerHistory(timeRange = '7d') {
 
 function parsePowerTimeRange(timeRange) {
   const now = Math.floor(Date.now() / 1000);
-  let start, step;
+  let start, end, step;
   
   switch (timeRange) {
+    case 'yesterday':
+      start = now - 2 * 86400;
+      end = now - 86400;
+      step = '1h';
+      break;
     case '1d':
       start = now - 86400;
       step = '1h';
@@ -869,7 +933,7 @@ function parsePowerTimeRange(timeRange) {
       step = '6h';
   }
   
-  return { start, end: now, step };
+  return { start, end: end || now, step };
 }
 
 function formatPowerTimestamp(timestamp, timeRange) {

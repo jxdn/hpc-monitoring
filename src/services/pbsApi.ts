@@ -159,7 +159,7 @@ export const pbsApi = {
     return response.data;
   },
 
-  async getPowerHistory(range: '1d' | '7d' | '30d' = '7d'): Promise<PowerHistoryPoint[]> {
+  async getPowerHistory(range: 'yesterday' | '1d' | '7d' | '30d' = '7d'): Promise<PowerHistoryPoint[]> {
     const response = await api.get<PowerHistoryPoint[]>('/hardware/power/history', {
       params: { range },
     });

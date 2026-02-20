@@ -10,6 +10,10 @@ const PowerStatusPage: React.FC = () => {
   const [powerTimeRange, setPowerTimeRange] = useState<TimeRange>('7d');
   const { powerStatus, loading: powerLoading, error: powerError } = usePowerStatus(180000);
   const { powerHistory, loading: historyLoading } = usePowerHistory(powerTimeRange);
+  const { powerHistory: historyYesterday } = usePowerHistory('yesterday');
+  const { powerHistory: history1d } = usePowerHistory('1d');
+  const { powerHistory: history7d } = usePowerHistory('7d');
+  const { powerHistory: history30d } = usePowerHistory('30d');
 
   if (powerLoading) {
     return <div className="loading">Loading power status...</div>;
@@ -44,6 +48,13 @@ const PowerStatusPage: React.FC = () => {
     return `${watts} W`;
   };
 
+  const formatEnergy = (kwh: number) => {
+    if (kwh >= 1000) {
+      return `${(kwh / 1000).toFixed(1)} MWh`;
+    }
+    return `${Math.round(kwh).toLocaleString()} kWh`;
+  };
+
   const avgPower = powerHistory.length > 0
     ? Math.round(powerHistory.reduce((sum, p) => sum + p.total, 0) / powerHistory.length)
     : 0;
@@ -52,6 +63,19 @@ const PowerStatusPage: React.FC = () => {
     : 0;
   const minPower = powerHistory.length > 0
     ? Math.min(...powerHistory.map(p => p.total))
+    : 0;
+
+  const totalKwhYesterday = historyYesterday.length > 0
+    ? historyYesterday.reduce((sum, p) => sum + p.total, 0) / 1000
+    : 0;
+  const totalKwhToday = history1d.length > 0
+    ? history1d.reduce((sum, p) => sum + p.total, 0) / 1000
+    : 0;
+  const totalKwh7d = history7d.length > 0
+    ? history7d.reduce((sum, p) => sum + p.total * 6, 0) / 1000
+    : 0;
+  const totalKwh30d = history30d.length > 0
+    ? history30d.reduce((sum, p) => sum + p.total * 24, 0) / 1000
     : 0;
 
   return (
@@ -112,6 +136,61 @@ const PowerStatusPage: React.FC = () => {
               <div className="summary-content">
                 <span className="summary-value">{formatPower(minPower)}</span>
                 <span className="summary-label">Minimum</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="health-summary">
+        <Card title="Energy Consumption">
+          <div className="summary-grid">
+            <div className="summary-item power">
+              <div className="summary-icon" style={{ color: '#f59e0b' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">{formatEnergy(totalKwhYesterday)}</span>
+                <span className="summary-label">Yesterday</span>
+              </div>
+            </div>
+            <div className="summary-item power">
+              <div className="summary-icon" style={{ color: '#10b981' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">{formatEnergy(totalKwhToday)}</span>
+                <span className="summary-label">Today</span>
+              </div>
+            </div>
+            <div className="summary-item power">
+              <div className="summary-icon" style={{ color: '#3b82f6' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">{formatEnergy(totalKwh7d)}</span>
+                <span className="summary-label">Last 7 Days</span>
+              </div>
+            </div>
+            <div className="summary-item power">
+              <div className="summary-icon" style={{ color: '#8b5cf6' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                </svg>
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">{formatEnergy(totalKwh30d)}</span>
+                <span className="summary-label">Last 30 Days</span>
               </div>
             </div>
           </div>

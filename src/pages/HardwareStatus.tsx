@@ -1,4 +1,5 @@
 import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useHardwareStatus } from '../hooks/usePbsData';
 import Card from '../components/dashboard/Card';
 import './HardwareStatus.css';
@@ -52,6 +53,43 @@ const HardwareStatusPage: React.FC = () => {
       default:
         return 'rgba(107, 114, 128, 0.15)';
     }
+  };
+
+  const getUptimeColor = (seconds: number) => {
+    if (seconds <= 0) return '#6b7280';
+    const days = seconds / 86400;
+    if (days < 1) return '#ef4444';
+    if (days < 7) return '#f59e0b';
+    if (days < 30) return '#10b981';
+    return '#3b82f6';
+  };
+
+  const formatUptimeTooltip = (seconds: number) => {
+    if (seconds <= 0) return 'N/A';
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    return `${days}d ${hours}h`;
+  };
+
+  const chartData = nodes
+    .map((node) => ({
+      ...node,
+      nodeNum: node.node.replace('hopper-', ''),
+      uptimeDays: Math.round((node.uptimeSeconds / 86400) * 10) / 10,
+    }))
+    .sort((a, b) => parseInt(a.nodeNum) - parseInt(b.nodeNum));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="uptime-tooltip">
+          <div className="uptime-tooltip-node">{data.node}</div>
+          <div className="uptime-tooltip-value">Uptime: {formatUptimeTooltip(data.uptimeSeconds)}</div>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -120,6 +158,33 @@ const HardwareStatusPage: React.FC = () => {
         </Card>
       </div>
 
+      <h2>Node Uptime</h2>
+      <Card title="">
+        <div className="uptime-chart">
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis
+                dataKey="nodeNum"
+                stroke="#9ca3af"
+                fontSize={11}
+              />
+              <YAxis
+                stroke="#9ca3af"
+                fontSize={12}
+                tickFormatter={(v) => `${v}d`}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="uptimeDays" radius={[4, 4, 0, 0]}>
+                {chartData.map((node) => (
+                  <Cell key={node.node} fill={getUptimeColor(node.uptimeSeconds)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
       <h2>Global Status Overview</h2>
       <Card title="">
         <div className="node-health-grid">
@@ -140,8 +205,71 @@ const HardwareStatusPage: React.FC = () => {
               >
                 {node.statusLabel}
               </span>
+              <span className="health-node-uptime">{node.uptimeFormatted}</span>
             </div>
           ))}
+        </div>
+      </Card>
+
+      {(() => {
+        const recentlyRebooted = nodes
+          .filter((n) => n.uptimeSeconds > 0 && n.uptimeSeconds < 86400)
+          .sort((a, b) => a.uptimeSeconds - b.uptimeSeconds);
+        
+        if (recentlyRebooted.length === 0) return null;
+        
+        return (
+          <>
+            <h2>Recently Rebooted (&lt;24h)</h2>
+            <Card title="">
+              <div className="recently-rebooted-grid">
+                {recentlyRebooted.map((node) => (
+                  <div
+                    key={node.node}
+                    className="rebooted-node"
+                    style={{
+                      backgroundColor: getStatusBg(node.status),
+                      borderColor: '#f59e0b',
+                    }}
+                  >
+                    <span className="rebooted-node-name">{node.node}</span>
+                    <span className="rebooted-node-uptime">{node.uptimeFormatted}</span>
+                    <span
+                      className="rebooted-node-status"
+                      style={{ color: getStatusColor(node.status) }}
+                    >
+                      {node.statusLabel}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </>
+        );
+      })()}
+
+      <h2>Latest Reboot</h2>
+      <Card title="">
+        <div className="latest-reboot-list">
+          {nodes
+            .filter((n) => n.uptimeSeconds > 0)
+            .sort((a, b) => a.uptimeSeconds - b.uptimeSeconds)
+            .slice(0, 10)
+            .map((node) => (
+              <div
+                key={node.node}
+                className="latest-reboot-item"
+              >
+                <span className="latest-reboot-node">{node.node}</span>
+                <span className="latest-reboot-uptime">{node.uptimeFormatted}</span>
+                <span
+                  className="latest-reboot-status"
+                  style={{ color: getStatusColor(node.status) }}
+                >
+                  {node.statusLabel}
+                </span>
+              </div>
+            ))}
         </div>
       </Card>
 

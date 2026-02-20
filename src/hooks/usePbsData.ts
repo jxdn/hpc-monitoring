@@ -182,7 +182,7 @@ export const usePowerStatus = (refreshInterval?: number) => {
   return { powerStatus, loading, error, refetch: fetchPowerStatus };
 };
 
-export const usePowerHistory = (range: '1d' | '7d' | '30d' = '7d') => {
+export const usePowerHistory = (range: 'yesterday' | '1d' | '7d' | '30d' = '7d') => {
   const [powerHistory, setPowerHistory] = useState<PowerHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
