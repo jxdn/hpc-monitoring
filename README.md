@@ -116,6 +116,19 @@ Terminal 2 - Frontend:
 npm run dev
 ```
 
+**For external access (nginx proxy, remote access):**
+
+Frontend:
+```bash
+npx vite --host 0.0.0.0
+```
+
+Backend:
+```bash
+cd backend
+API_HOST=0.0.0.0 node src/server.js
+```
+
 4. **Access Application**
 
 Open browser: `http://localhost:3000`

@@ -766,8 +766,8 @@ function getCachedHardwareStatus() {
     for (const severity of severityOrder) {
       const found = statuses.find(s => s.status === severity);
       if (found) {
+        const lastUptime = lastKnownUptimes.get(nodeName) || 0;
         if (!found.uptimeSeconds || found.uptimeSeconds === 0) {
-          const lastUptime = lastKnownUptimes.get(nodeName) || 0;
           found.uptimeSeconds = lastUptime;
           found.uptimeFormatted = formatUptime(lastUptime);
         }
@@ -775,7 +775,15 @@ function getCachedHardwareStatus() {
       }
     }
     
-    return statuses[0];
+    const lastUptime = lastKnownUptimes.get(nodeName) || 0;
+    if (statuses.length > 0) {
+      const node = statuses[0];
+      if (!node.uptimeSeconds || node.uptimeSeconds === 0) {
+        node.uptimeSeconds = lastUptime;
+        node.uptimeFormatted = formatUptime(lastUptime);
+      }
+      return node;
+    }
   });
   
   const summary = {
