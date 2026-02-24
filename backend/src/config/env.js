@@ -16,7 +16,7 @@ const config = {
     url: process.env.PROMETHEUS_URL || 'http://localhost:9090',
     timeout: parseInt(process.env.PROMETHEUS_TIMEOUT) || 10000,
     prefix: process.env.PBS_EXPORTER_PREFIX || '',
-    // Authentication (optional)
+    jobName: process.env.PBS_EXPORTER_JOB_NAME || 'pbs-exporter',
     username: process.env.PROMETHEUS_USERNAME,
     password: process.env.PROMETHEUS_PASSWORD,
     token: process.env.PROMETHEUS_TOKEN,

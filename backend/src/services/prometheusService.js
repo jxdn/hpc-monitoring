@@ -27,6 +27,12 @@ if (config.prometheus.token) {
 
 const prometheusClient = axios.create(clientConfig);
 
+const JOB_FILTER = `{job="${config.prometheus.jobName}"}`;
+
+function withJobFilter(metric) {
+  return `${metric}${JOB_FILTER}`;
+}
+
 /**
  * Query VictoriaMetrics with PromQL
  * @param {string} query - PromQL query string
@@ -85,9 +91,9 @@ async function queryVictoriaMetricsRange(query, start, end, step = '5m') {
 async function getJobStats() {
   try {
     const [runningJobs, queuedJobs, holdJobs] = await Promise.all([
-      queryVictoriaMetrics('qstat_total_r_jobs'),
-      queryVictoriaMetrics('qstat_total_q_jobs'),
-      queryVictoriaMetrics('qstat_total_h_jobs'),
+      queryVictoriaMetrics(withJobFilter('qstat_total_r_jobs')),
+      queryVictoriaMetrics(withJobFilter('qstat_total_q_jobs')),
+      queryVictoriaMetrics(withJobFilter('qstat_total_h_jobs')),
     ]);
 
     return {
@@ -107,7 +113,7 @@ async function getJobStats() {
  */
 async function getJobsByUser() {
   try {
-    const result = await queryVictoriaMetrics('qstat_running_jobs_by_user');
+    const result = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_user'));
 
     return result
       .map(item => ({
@@ -129,8 +135,8 @@ async function getJobsByUser() {
 async function getJobsByQueue() {
   try {
     const [runningByQueue, queuedByQueue] = await Promise.all([
-      queryVictoriaMetrics('qstat_running_jobs_by_queue').catch(() => []),
-      queryVictoriaMetrics('qstat_que_by_queue').catch(() => []),
+      queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue')).catch(() => []),
+      queryVictoriaMetrics(withJobFilter('qstat_que_by_queue')).catch(() => []),
     ]);
 
     const queueMap = new Map();
@@ -176,7 +182,7 @@ async function getJobsByQueue() {
 async function getQueues() {
   try {
     // Use the same query that's working for getJobsByQueue
-    const runningByQueue = await queryVictoriaMetrics('qstat_running_jobs_by_queue');
+    const runningByQueue = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue'));
     
     console.log('Running by queue data:', runningByQueue);
 
@@ -205,10 +211,10 @@ async function getQueues() {
 async function getNodeCounts() {
   try {
     const [freeNodes, busyNodes, offlineNodes, downNodes] = await Promise.all([
-      queryVictoriaMetrics('pbs_node_count_free'),
-      queryVictoriaMetrics('pbs_node_count_busy'),
-      queryVictoriaMetrics('pbs_node_count_offline'),
-      queryVictoriaMetrics('pbs_node_count_down'),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_free')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_busy')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_offline')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_down')),
     ]);
 
     return {
@@ -230,12 +236,12 @@ async function getNodeCounts() {
 async function getNodeDetails() {
   try {
     const [nodeStates, gpusTotal, gpusUsed, memTotal, memUsed, nodeJobs] = await Promise.all([
-      queryVictoriaMetrics('pbs_node_state'),
-      queryVictoriaMetrics('pbs_node_gpus_total'),
-      queryVictoriaMetrics('pbs_node_gpus_used'),
-      queryVictoriaMetrics('pbs_node_mem_total'),
-      queryVictoriaMetrics('pbs_node_mem_used'),
-      queryVictoriaMetrics('pbs_node_jobs').catch(() => []), // Fallback to empty array if metric doesn't exist
+      queryVictoriaMetrics(withJobFilter('pbs_node_state')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_total')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_used')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_mem_total')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_mem_used')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_jobs')).catch(() => []),
     ]);
 
     // Create a map of node data
@@ -323,8 +329,8 @@ async function getClusterStats() {
       getJobStats(),
       getNodeCounts(),
       Promise.all([
-        queryVictoriaMetrics('sum(pbs_node_gpus_total)'),
-        queryVictoriaMetrics('sum(pbs_node_gpus_used)'),
+        queryVictoriaMetrics(`sum(pbs_node_gpus_total${JOB_FILTER})`),
+        queryVictoriaMetrics(`sum(pbs_node_gpus_used${JOB_FILTER})`),
       ]),
     ]);
 
@@ -359,8 +365,8 @@ async function getHistoricalJobStats(timeRange = '24h') {
     const { start, end, step } = parseTimeRange(timeRange);
 
     const [runningJobs, queuedJobs] = await Promise.all([
-      queryVictoriaMetricsRange('qstat_total_r_jobs', start, end, step),
-      queryVictoriaMetricsRange('qstat_total_q_jobs', start, end, step),
+      queryVictoriaMetricsRange(withJobFilter('qstat_total_r_jobs'), start, end, step),
+      queryVictoriaMetricsRange(withJobFilter('qstat_total_q_jobs'), start, end, step),
     ]);
 
     // Merge the results by timestamp
@@ -410,9 +416,9 @@ async function getHistoricalResourceStats(timeRange = '24h') {
   try {
     const { start, end, step } = parseTimeRange(timeRange);
 
-    const gpuUtilQuery = '(sum(pbs_node_gpus_used) / sum(pbs_node_gpus_total)) * 100';
-    const memUtilQuery = '(sum(pbs_node_mem_used) / sum(pbs_node_mem_total)) * 100';
-    const nodeUtilQuery = '(pbs_node_count_busy / (pbs_node_count_free + pbs_node_count_busy)) * 100';
+    const gpuUtilQuery = `(sum(pbs_node_gpus_used${JOB_FILTER}) / sum(pbs_node_gpus_total${JOB_FILTER})) * 100`;
+    const memUtilQuery = `(sum(pbs_node_mem_used${JOB_FILTER}) / sum(pbs_node_mem_total${JOB_FILTER})) * 100`;
+    const nodeUtilQuery = `(pbs_node_count_busy${JOB_FILTER} / (pbs_node_count_free${JOB_FILTER} + pbs_node_count_busy${JOB_FILTER})) * 100`;
 
     const [gpuUtil, memUtil, nodeUtil] = await Promise.all([
       queryVictoriaMetricsRange(gpuUtilQuery, start, end, step),
@@ -481,20 +487,18 @@ async function getHistoricalGPUOccupation(timeRange = '24h') {
 
     // Overall GPU occupation rate (excluding hopper-1 to hopper-6)
     const overallQuery = `(
-      sum(pbs_node_gpus_used{node!~"hopper-[1-6]"}) /
-      sum(pbs_node_gpus_total{node!~"hopper-[1-6]"})
+      sum(pbs_node_gpus_used{node!~"hopper-[1-6]",job="${config.prometheus.jobName}"}) /
+      sum(pbs_node_gpus_total{node!~"hopper-[1-6]",job="${config.prometheus.jobName}"})
     ) * 100`;
 
-    // AISG GPU occupation rate (hopper-31 to hopper-46)
     const aisgQuery = `(
-      sum(pbs_node_gpus_used{node=~"${aisgNodes.join('|')}"}) /
-      sum(pbs_node_gpus_total{node=~"${aisgNodes.join('|')}"})
+      sum(pbs_node_gpus_used{node=~"${aisgNodes.join('|')}",job="${config.prometheus.jobName}"}) /
+      sum(pbs_node_gpus_total{node=~"${aisgNodes.join('|')}",job="${config.prometheus.jobName}"})
     ) * 100`;
 
-    // NON-AISG GPU occupation rate (hopper-07 to hopper-30 only)
     const nonAisgQuery = `(
-      sum(pbs_node_gpus_used{node=~"${nonAisgNodes.join('|')}"}) /
-      sum(pbs_node_gpus_total{node=~"${nonAisgNodes.join('|')}"})
+      sum(pbs_node_gpus_used{node=~"${nonAisgNodes.join('|')}",job="${config.prometheus.jobName}"}) /
+      sum(pbs_node_gpus_total{node=~"${nonAisgNodes.join('|')}",job="${config.prometheus.jobName}"})
     ) * 100`;
 
     const [overallData, aisgData, nonAisgData] = await Promise.all([
