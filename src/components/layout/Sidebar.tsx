@@ -1,27 +1,20 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useMatch } from 'react-router-dom';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
+  const isIndexActive = useMatch({ path: '/', end: true });
+
+  const globalStatusChildren = [
+    { path: '/hopper', label: 'Hopper' },
+    { path: '/vanda', label: 'Vanda' },
+  ];
 
   const menuItems = [
-    { 
-      path: '/', 
-      label: 'Global Status',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M3 3V21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          <path d="M7 16V12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-          <path d="M11 16V8" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-          <path d="M15 16V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-          <path d="M19 16V10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-        </svg>
-      )
-    },
-    { 
-      path: '/hardware', 
+    {
+      path: '/hardware',
       label: 'Hardware Status',
       icon: (
         <svg viewBox="0 0 24 24" fill="none">
@@ -32,8 +25,8 @@ const Sidebar: React.FC = () => {
         </svg>
       )
     },
-    { 
-      path: '/power', 
+    {
+      path: '/power',
       label: 'Power Consumption',
       icon: (
         <svg viewBox="0 0 24 24" fill="none">
@@ -48,12 +41,41 @@ const Sidebar: React.FC = () => {
       <div className="sidebar-header">
         <span className="sidebar-label">Navigation</span>
       </div>
-      
+
       <nav className="sidebar-nav">
+        <div className="nav-group">
+          <Link to="/" className={`nav-group-header nav-item ${isIndexActive ? 'active' : ''}`}>
+            <div className="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 3V21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M7 16V12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M11 16V8" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M15 16V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M19 16V10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="nav-label">Executive Summary</span>
+            {isIndexActive && <div className="nav-active-indicator" />}
+          </Link>
+          <div className="nav-group-children">
+            {globalStatusChildren.map((child) => (
+              <Link
+                key={child.path}
+                to={child.path}
+                className={`nav-item nav-child ${isActive(child.path) ? 'active' : ''}`}
+              >
+                <span className="nav-child-bullet">›</span>
+                <span className="nav-label">{child.label}</span>
+                {isActive(child.path) && <div className="nav-active-indicator" />}
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {menuItems.map((item) => (
-          <Link 
+          <Link
             key={item.path}
-            to={item.path} 
+            to={item.path}
             className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
           >
             <div className="nav-icon">{item.icon}</div>

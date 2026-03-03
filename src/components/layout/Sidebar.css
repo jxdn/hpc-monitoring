@@ -102,6 +102,37 @@
   z-index: 1;
 }
 
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-group-header {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav-group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 0.5rem;
+}
+
+.nav-child {
+  gap: 0.5rem;
+  padding: 0.625rem 1rem 0.625rem 1.25rem;
+}
+
+.nav-child-bullet {
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid var(--border-subtle);

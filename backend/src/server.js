@@ -387,7 +387,7 @@ app.get('/api/analytics/monthly-gpu-hours', async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Error fetching monthly GPU hours:', error);
-    res.status(500).json({ error: error.message });
+    res.json([]);
   }
 });
 
