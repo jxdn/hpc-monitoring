@@ -35,7 +35,7 @@ const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'J
         glow: 'rgba(6, 182, 212, 0.3)'
       };
     }
-    if (ratio <= 0.2) {
+    if (ratio < 0.5) {
       return {
         bg: 'rgba(16, 185, 129, 0.25)',
         border: 'rgba(16, 185, 129, 0.5)',
@@ -43,35 +43,27 @@ const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'J
         glow: 'rgba(16, 185, 129, 0.3)'
       };
     }
-    if (ratio <= 0.4) {
+    if (ratio < 0.7) {
       return {
-        bg: 'rgba(59, 130, 246, 0.25)',
-        border: 'rgba(59, 130, 246, 0.5)',
-        text: '#60a5fa',
-        glow: 'rgba(59, 130, 246, 0.3)'
+        bg: 'rgba(249, 115, 22, 0.25)',
+        border: 'rgba(249, 115, 22, 0.5)',
+        text: '#fb923c',
+        glow: 'rgba(249, 115, 22, 0.3)'
       };
     }
-    if (ratio <= 0.6) {
+    if (ratio < 0.85) {
       return {
-        bg: 'rgba(139, 92, 246, 0.25)',
-        border: 'rgba(139, 92, 246, 0.5)',
-        text: '#a78bfa',
-        glow: 'rgba(139, 92, 246, 0.3)'
-      };
-    }
-    if (ratio <= 0.8) {
-      return {
-        bg: 'rgba(245, 158, 11, 0.25)',
-        border: 'rgba(245, 158, 11, 0.5)',
-        text: '#fbbf24',
-        glow: 'rgba(245, 158, 11, 0.3)'
+        bg: 'rgba(239, 68, 68, 0.25)',
+        border: 'rgba(239, 68, 68, 0.5)',
+        text: '#f87171',
+        glow: 'rgba(239, 68, 68, 0.3)'
       };
     }
     return {
-      bg: 'rgba(239, 68, 68, 0.25)',
-      border: 'rgba(239, 68, 68, 0.5)',
-      text: '#f87171',
-      glow: 'rgba(239, 68, 68, 0.3)'
+      bg: 'rgba(185, 28, 28, 0.35)',
+      border: 'rgba(185, 28, 28, 0.6)',
+      text: '#fca5a5',
+      glow: 'rgba(185, 28, 28, 0.4)'
     };
   };
 
@@ -130,23 +122,19 @@ const NodeHeatmap: React.FC<NodeHeatmapProps> = ({ title, nodes, valueLabel = 'J
         </div>
         <div className="legend-item">
           <div className="legend-color" style={{ background: 'rgba(16, 185, 129, 0.25)', borderColor: 'rgba(16, 185, 129, 0.5)' }}></div>
-          <span>Low</span>
+          <span>&lt; 50%</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ background: 'rgba(59, 130, 246, 0.25)', borderColor: 'rgba(59, 130, 246, 0.5)' }}></div>
-          <span>Medium</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color" style={{ background: 'rgba(139, 92, 246, 0.25)', borderColor: 'rgba(139, 92, 246, 0.5)' }}></div>
-          <span>High</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color" style={{ background: 'rgba(245, 158, 11, 0.25)', borderColor: 'rgba(245, 158, 11, 0.5)' }}></div>
-          <span>Busy</span>
+          <div className="legend-color" style={{ background: 'rgba(249, 115, 22, 0.25)', borderColor: 'rgba(249, 115, 22, 0.5)' }}></div>
+          <span>50-70%</span>
         </div>
         <div className="legend-item">
           <div className="legend-color" style={{ background: 'rgba(239, 68, 68, 0.25)', borderColor: 'rgba(239, 68, 68, 0.5)' }}></div>
-          <span>Full</span>
+          <span>70-85%</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ background: 'rgba(185, 28, 28, 0.35)', borderColor: 'rgba(185, 28, 28, 0.6)' }}></div>
+          <span>&gt; 85%</span>
         </div>
       </div>
     </div>

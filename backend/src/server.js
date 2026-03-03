@@ -391,6 +391,102 @@ app.get('/api/analytics/monthly-gpu-hours', async (req, res) => {
   }
 });
 
+app.get('/api/analytics/total-jobs-by-cluster', async (req, res) => {
+  try {
+    const data = await cacheService.readCache('total-jobs-by-cluster');
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching total jobs by cluster:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/total-cpu-hours-by-cluster', async (req, res) => {
+  try {
+    const data = await cacheService.readCache('total-cpu-hours-by-cluster');
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching total CPU hours by cluster:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/total-gpu-hours-by-cluster', async (req, res) => {
+  try {
+    const data = await cacheService.readCache('total-gpu-hours-by-cluster');
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching total GPU hours by cluster:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/executive-summary', async (req, res) => {
+  try {
+    const [jobsCache, cpuCache, gpuCache] = await Promise.all([
+      cacheService.readCache('total-jobs-by-cluster'),
+      cacheService.readCache('total-cpu-hours-by-cluster'),
+      cacheService.readCache('total-gpu-hours-by-cluster'),
+    ]);
+
+    const [hopperStats, vandaStats] = await Promise.all([
+      pbsService.getClusterStats(),
+      pbsService.getClusterStats(VANDA_JOB_NAME),
+    ]);
+
+    const hopperJobs = jobsCache?.find(d => d.cluster === 'hopper')?.totalJobs || 0;
+    const vandaJobs = jobsCache?.find(d => d.cluster === 'vanda')?.totalJobs || 0;
+    const hopperCpuHours = cpuCache?.find(d => d.cluster === 'hopper')?.totalCpuHours || 0;
+    const vandaCpuHours = cpuCache?.find(d => d.cluster === 'vanda')?.totalCpuHours || 0;
+    const hopperGpuHours = gpuCache?.find(d => d.cluster === 'hopper')?.totalGpuHours || 0;
+    const vandaGpuHours = gpuCache?.find(d => d.cluster === 'vanda')?.totalGpuHours || 0;
+
+    const hopperWeightedUtil = (hopperStats.cpuUtilization * hopperStats.totalCpus + hopperStats.gpuUtilization * hopperStats.totalGpus) / (hopperStats.totalCpus + hopperStats.totalGpus);
+    const vandaWeightedUtil = (vandaStats.cpuUtilization * vandaStats.totalCpus + vandaStats.gpuUtilization * vandaStats.totalGpus) / (vandaStats.totalCpus + vandaStats.totalGpus);
+
+    res.json({
+      hopper: {
+        totalJobs: hopperJobs,
+        totalCpuHours: hopperCpuHours,
+        totalGpuHours: hopperGpuHours,
+        runningJobs: hopperStats.runningJobs,
+        queuedJobs: hopperStats.queuedJobs,
+        cpuUtilization: hopperStats.cpuUtilization,
+        gpuUtilization: hopperStats.gpuUtilization,
+        totalCpus: hopperStats.totalCpus,
+        totalGpus: hopperStats.totalGpus,
+        totalNodes: hopperStats.totalNodes,
+        weightedUtilization: hopperWeightedUtil,
+      },
+      vanda: {
+        totalJobs: vandaJobs,
+        totalCpuHours: vandaCpuHours,
+        totalGpuHours: vandaGpuHours,
+        runningJobs: vandaStats.runningJobs,
+        queuedJobs: vandaStats.queuedJobs,
+        cpuUtilization: vandaStats.cpuUtilization,
+        gpuUtilization: vandaStats.gpuUtilization,
+        totalCpus: vandaStats.totalCpus,
+        totalGpus: vandaStats.totalGpus,
+        totalNodes: vandaStats.totalNodes,
+        weightedUtilization: vandaWeightedUtil,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching executive summary:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /**
  * GET /api/download-pdf
  * Generate and download dashboard as PDF

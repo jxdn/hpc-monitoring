@@ -280,6 +280,34 @@ async function updateAllCaches() {
       console.error('Error updating power status:', error.message);
     }
 
+    // =========================================================
+    // Executive Summary (cross-cluster statistics)
+    // =========================================================
+
+    try {
+      const data = await xdmodService.getTotalJobsByCluster();
+      await writeCache('total-jobs-by-cluster', data);
+      console.log('Cache updated: total-jobs-by-cluster');
+    } catch (error) {
+      console.error('Error updating total-jobs-by-cluster:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getTotalCpuHoursByCluster();
+      await writeCache('total-cpu-hours-by-cluster', data);
+      console.log('Cache updated: total-cpu-hours-by-cluster');
+    } catch (error) {
+      console.error('Error updating total-cpu-hours-by-cluster:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getTotalGpuHoursByCluster();
+      await writeCache('total-gpu-hours-by-cluster', data);
+      console.log('Cache updated: total-gpu-hours-by-cluster');
+    } catch (error) {
+      console.error('Error updating total-gpu-hours-by-cluster:', error.message);
+    }
+
     console.log('Cache update completed successfully');
   } catch (error) {
     console.error('Error updating caches:', error);

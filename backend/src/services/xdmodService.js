@@ -353,6 +353,84 @@ async function closePool() {
   await pool.end();
 }
 
+async function getTotalJobsByCluster() {
+  try {
+    const query = `
+      SELECT 
+        rf.code AS cluster,
+        rf.name AS cluster_name,
+        COUNT(*) AS total_jobs
+      FROM modw.job_tasks jt
+      JOIN modw.resourcefact rf ON jt.resource_id = rf.id
+      WHERE rf.code IN ('hopper', 'vanda')
+      GROUP BY rf.code, rf.name
+    `;
+
+    const [rows] = await pool.query(query);
+
+    return rows.map(row => ({
+      cluster: row.cluster,
+      clusterName: row.cluster_name,
+      totalJobs: parseInt(row.total_jobs),
+    }));
+  } catch (error) {
+    console.error('Error fetching total jobs by cluster:', error);
+    throw error;
+  }
+}
+
+async function getTotalCpuHoursByCluster() {
+  try {
+    const query = `
+      SELECT 
+        rf.code AS cluster,
+        rf.name AS cluster_name,
+        SUM(jt.cpu_time) / 3600.0 AS total_cpu_hours
+      FROM modw.job_tasks jt
+      JOIN modw.resourcefact rf ON jt.resource_id = rf.id
+      WHERE rf.code IN ('hopper', 'vanda')
+      GROUP BY rf.code, rf.name
+    `;
+
+    const [rows] = await pool.query(query);
+
+    return rows.map(row => ({
+      cluster: row.cluster,
+      clusterName: row.cluster_name,
+      totalCpuHours: parseFloat(row.total_cpu_hours),
+    }));
+  } catch (error) {
+    console.error('Error fetching total CPU hours by cluster:', error);
+    throw error;
+  }
+}
+
+async function getTotalGpuHoursByCluster() {
+  try {
+    const query = `
+      SELECT 
+        rf.code AS cluster,
+        rf.name AS cluster_name,
+        SUM(jt.gpu_time) / 3600.0 AS total_gpu_hours
+      FROM modw.job_tasks jt
+      JOIN modw.resourcefact rf ON jt.resource_id = rf.id
+      WHERE rf.code IN ('hopper', 'vanda')
+      GROUP BY rf.code, rf.name
+    `;
+
+    const [rows] = await pool.query(query);
+
+    return rows.map(row => ({
+      cluster: row.cluster,
+      clusterName: row.cluster_name,
+      totalGpuHours: parseFloat(row.total_gpu_hours),
+    }));
+  } catch (error) {
+    console.error('Error fetching total GPU hours by cluster:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   testConnection,
   tableExists,
@@ -363,5 +441,8 @@ module.exports = {
   getAISGWaitTime,
   getNUSITWaitTime,
   getMonthlyGPUHours,
+  getTotalJobsByCluster,
+  getTotalCpuHoursByCluster,
+  getTotalGpuHoursByCluster,
   closePool,
 };

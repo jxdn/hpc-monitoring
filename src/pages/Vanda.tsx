@@ -461,7 +461,7 @@ const VandaDashboard: React.FC = () => {
   });
 
   // Heatmap data
-  const nodeJobsData = nodes.map(n => ({ name: n.name, value: n.jobs.length, maxValue: 8 }));
+  const nodeCpuUsageData = nodes.map(n => ({ name: n.name, value: n.usedCpus, maxValue: n.totalCpus }));
   const gpuNodes = nodes.filter(n => VANDA_GPU_NODE_NAMES.includes(n.name));
   const nodeGPUUsageData = gpuNodes.map(n => ({ name: n.name, value: n.usedGpus, maxValue: n.totalGpus }));
   const nodeGPUAvailData = gpuNodes.map(n => ({ name: n.name, value: n.totalGpus - n.usedGpus, maxValue: n.totalGpus }));
@@ -816,8 +816,8 @@ const VandaDashboard: React.FC = () => {
       </div>
 
       {/* Node Heatmaps */}
-      <h2>PBS JOB per Node</h2>
-      <NodeHeatmap title="" nodes={nodeJobsData} valueLabel="Jobs" />
+      <h2>CPU Usage per Node</h2>
+      <NodeHeatmap title="" nodes={nodeCpuUsageData} valueLabel="CPUs" />
 
       <h2>GPU USAGE HEATMAP - REALTIME (A40 nodes)</h2>
       <NodeHeatmap title="" nodes={nodeGPUUsageData} valueLabel="GPUs" />

@@ -237,10 +237,12 @@ async function getNodeCounts(jobName) {
  */
 async function getNodeDetails(jobName) {
   try {
-    const [nodeStates, gpusTotal, gpusUsed, memTotal, memUsed, nodeJobs] = await Promise.all([
+    const [nodeStates, gpusTotal, gpusUsed, cpusTotal, cpusUsed, memTotal, memUsed, nodeJobs] = await Promise.all([
       queryVictoriaMetrics(withJobFilter('pbs_node_state', jobName)),
       queryVictoriaMetrics(withJobFilter('pbs_node_gpus_total', jobName)),
       queryVictoriaMetrics(withJobFilter('pbs_node_gpus_used', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_cpus_total', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_cpus_used', jobName)),
       queryVictoriaMetrics(withJobFilter('pbs_node_mem_total', jobName)),
       queryVictoriaMetrics(withJobFilter('pbs_node_mem_used', jobName)),
       queryVictoriaMetrics(withJobFilter('pbs_node_jobs', jobName)).catch(() => []),
@@ -283,6 +285,21 @@ async function getNodeDetails(jobName) {
       const nodeName = item.metric.node;
       if (nodeMap.has(nodeName)) {
         nodeMap.get(nodeName).usedGpus = parseInt(item.value[1]);
+      }
+    });
+
+    // Add CPU data
+    cpusTotal.forEach(item => {
+      const nodeName = item.metric.node;
+      if (nodeMap.has(nodeName)) {
+        nodeMap.get(nodeName).totalCpus = parseInt(item.value[1]);
+      }
+    });
+
+    cpusUsed.forEach(item => {
+      const nodeName = item.metric.node;
+      if (nodeMap.has(nodeName)) {
+        nodeMap.get(nodeName).usedCpus = parseInt(item.value[1]);
       }
     });
 
