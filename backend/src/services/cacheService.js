@@ -64,110 +64,216 @@ async function updateAllCaches() {
   console.log('Starting cache update...');
 
   try {
-    // GPU Usage by User for different time ranges
+    // =========================================================
+    // HOPPER caches
+    // =========================================================
+
+    // GPU Usage by User
     try {
-      const gpuUsageByUser1d = await xdmodService.getGPUUsageByUser(1);
-      await writeCache('gpu-usage-by-user-1d', gpuUsageByUser1d);
+      const data = await xdmodService.getGPUUsageByUser(1, 'hopper');
+      await writeCache('gpu-usage-by-user-1d', data);
     } catch (error) {
       console.error('Error updating gpu-usage-by-user-1d:', error.message);
     }
 
     try {
-      const gpuUsageByUser7d = await xdmodService.getGPUUsageByUser(7);
-      await writeCache('gpu-usage-by-user-7d', gpuUsageByUser7d);
+      const data = await xdmodService.getGPUUsageByUser(7, 'hopper');
+      await writeCache('gpu-usage-by-user-7d', data);
     } catch (error) {
       console.error('Error updating gpu-usage-by-user-7d:', error.message);
     }
 
     try {
-      const gpuUsageByUser30d = await xdmodService.getGPUUsageByUser(30);
-      await writeCache('gpu-usage-by-user-30d', gpuUsageByUser30d);
+      const data = await xdmodService.getGPUUsageByUser(30, 'hopper');
+      await writeCache('gpu-usage-by-user-30d', data);
     } catch (error) {
       console.error('Error updating gpu-usage-by-user-30d:', error.message);
     }
 
-    // Job Stats for different time ranges
-try {
-      const jobStats1d = await xdmodService.getJobStatsLast7Days(1);
-      await writeCache('job-stats-1d', jobStats1d);
+    // Job Stats
+    try {
+      const data = await xdmodService.getJobStatsLast7Days(1, 'hopper');
+      await writeCache('job-stats-1d', data);
     } catch (error) {
       console.error('Error updating job-stats-1d:', error.message);
     }
 
     try {
-      const jobStats7d = await xdmodService.getJobStatsLast7Days(7);
-      await writeCache('job-stats-7d', jobStats7d);
+      const data = await xdmodService.getJobStatsLast7Days(7, 'hopper');
+      await writeCache('job-stats-7d', data);
     } catch (error) {
       console.error('Error updating job-stats-7d:', error.message);
     }
 
     try {
-      const jobStats30d = await xdmodService.getJobStatsLast7Days(30);
-      await writeCache('job-stats-30d', jobStats30d);
+      const data = await xdmodService.getJobStatsLast7Days(30, 'hopper');
+      await writeCache('job-stats-30d', data);
     } catch (error) {
       console.error('Error updating job-stats-30d:', error.message);
     }
 
-    // AISG Wait Time for different time ranges
+    // AISG Wait Time
     try {
-      const aisgWaitTime1d = await xdmodService.getAISGWaitTime(1);
-      await writeCache('aisg-wait-time-1d', aisgWaitTime1d);
+      const data = await xdmodService.getAISGWaitTime(1, 'hopper');
+      await writeCache('aisg-wait-time-1d', data);
     } catch (error) {
       console.error('Error updating aisg-wait-time-1d:', error.message);
     }
 
     try {
-      const aisgWaitTime7d = await xdmodService.getAISGWaitTime(7);
-      await writeCache('aisg-wait-time-7d', aisgWaitTime7d);
+      const data = await xdmodService.getAISGWaitTime(7, 'hopper');
+      await writeCache('aisg-wait-time-7d', data);
     } catch (error) {
       console.error('Error updating aisg-wait-time-7d:', error.message);
     }
 
     try {
-      const aisgWaitTime30d = await xdmodService.getAISGWaitTime(30);
-      await writeCache('aisg-wait-time-30d', aisgWaitTime30d);
+      const data = await xdmodService.getAISGWaitTime(30, 'hopper');
+      await writeCache('aisg-wait-time-30d', data);
     } catch (error) {
       console.error('Error updating aisg-wait-time-30d:', error.message);
     }
 
-    // NUS IT Wait Time for different time ranges
+    // NUS IT Wait Time
     try {
-      const nusitWaitTime1d = await xdmodService.getNUSITWaitTime(1);
-      await writeCache('nusit-wait-time-1d', nusitWaitTime1d);
+      const data = await xdmodService.getNUSITWaitTime(1, 'hopper');
+      await writeCache('nusit-wait-time-1d', data);
     } catch (error) {
       console.error('Error updating nusit-wait-time-1d:', error.message);
     }
 
     try {
-      const nusitWaitTime7d = await xdmodService.getNUSITWaitTime(7);
-      await writeCache('nusit-wait-time-7d', nusitWaitTime7d);
+      const data = await xdmodService.getNUSITWaitTime(7, 'hopper');
+      await writeCache('nusit-wait-time-7d', data);
     } catch (error) {
       console.error('Error updating nusit-wait-time-7d:', error.message);
     }
 
     try {
-      const nusitWaitTime30d = await xdmodService.getNUSITWaitTime(30);
-      await writeCache('nusit-wait-time-30d', nusitWaitTime30d);
+      const data = await xdmodService.getNUSITWaitTime(30, 'hopper');
+      await writeCache('nusit-wait-time-30d', data);
     } catch (error) {
       console.error('Error updating nusit-wait-time-30d:', error.message);
     }
 
     // Monthly GPU Hours
     try {
-      const monthlyGPUHours = await xdmodService.getMonthlyGPUHours();
-      await writeCache('monthly-gpu-hours', monthlyGPUHours);
+      const data = await xdmodService.getMonthlyGPUHours('hopper');
+      await writeCache('monthly-gpu-hours', data);
     } catch (error) {
       console.error('Error updating monthly-gpu-hours:', error.message);
     }
 
-    // Hardware Status (iDRAC SNMP)
+    // =========================================================
+    // VANDA caches
+    // =========================================================
+
+    // GPU Usage by User
+    try {
+      const data = await xdmodService.getGPUUsageByUser(1, 'vanda');
+      await writeCache('vanda-gpu-usage-by-user-1d', data);
+    } catch (error) {
+      console.error('Error updating vanda-gpu-usage-by-user-1d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getGPUUsageByUser(7, 'vanda');
+      await writeCache('vanda-gpu-usage-by-user-7d', data);
+    } catch (error) {
+      console.error('Error updating vanda-gpu-usage-by-user-7d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getGPUUsageByUser(30, 'vanda');
+      await writeCache('vanda-gpu-usage-by-user-30d', data);
+    } catch (error) {
+      console.error('Error updating vanda-gpu-usage-by-user-30d:', error.message);
+    }
+
+    // CPU Usage by User
+    try {
+      const data = await xdmodService.getCPUUsageByUser(1, 'vanda');
+      await writeCache('vanda-cpu-usage-by-user-1d', data);
+    } catch (error) {
+      console.error('Error updating vanda-cpu-usage-by-user-1d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getCPUUsageByUser(7, 'vanda');
+      await writeCache('vanda-cpu-usage-by-user-7d', data);
+    } catch (error) {
+      console.error('Error updating vanda-cpu-usage-by-user-7d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getCPUUsageByUser(30, 'vanda');
+      await writeCache('vanda-cpu-usage-by-user-30d', data);
+    } catch (error) {
+      console.error('Error updating vanda-cpu-usage-by-user-30d:', error.message);
+    }
+
+    // Job Stats
+    try {
+      const data = await xdmodService.getJobStatsLast7Days(1, 'vanda');
+      await writeCache('vanda-job-stats-1d', data);
+    } catch (error) {
+      console.error('Error updating vanda-job-stats-1d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getJobStatsLast7Days(7, 'vanda');
+      await writeCache('vanda-job-stats-7d', data);
+    } catch (error) {
+      console.error('Error updating vanda-job-stats-7d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getJobStatsLast7Days(30, 'vanda');
+      await writeCache('vanda-job-stats-30d', data);
+    } catch (error) {
+      console.error('Error updating vanda-job-stats-30d:', error.message);
+    }
+
+    // GPU Queue Wait Time (maps to "AISG" slot for Vanda: batch_gpu, gpu, gpu_amd, interactive_gpu)
+    try {
+      const data = await xdmodService.getAISGWaitTime(1, 'vanda');
+      await writeCache('vanda-aisg-wait-time-1d', data);
+    } catch (error) {
+      console.error('Error updating vanda-aisg-wait-time-1d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getAISGWaitTime(7, 'vanda');
+      await writeCache('vanda-aisg-wait-time-7d', data);
+    } catch (error) {
+      console.error('Error updating vanda-aisg-wait-time-7d:', error.message);
+    }
+
+    try {
+      const data = await xdmodService.getAISGWaitTime(30, 'vanda');
+      await writeCache('vanda-aisg-wait-time-30d', data);
+    } catch (error) {
+      console.error('Error updating vanda-aisg-wait-time-30d:', error.message);
+    }
+
+    // Monthly GPU Hours
+    try {
+      const data = await xdmodService.getMonthlyGPUHours('vanda');
+      await writeCache('vanda-monthly-gpu-hours', data);
+    } catch (error) {
+      console.error('Error updating vanda-monthly-gpu-hours:', error.message);
+    }
+
+    // =========================================================
+    // Hardware & Power (shared, not cluster-specific)
+    // =========================================================
+
     try {
       await prometheusService.updateHardwareStatusCache();
     } catch (error) {
       console.error('Error updating hardware status:', error.message);
     }
 
-    // Power Status (Redfish)
     try {
       await prometheusService.updatePowerStatusCache();
     } catch (error) {

@@ -1,7 +1,7 @@
 /**
-  * XDMoD Database Service
-  * Queries the XDMoD MySQL database for job and usage statistics
-  */
+ * XDMoD Database Service
+ * Queries the XDMoD MySQL database for job and usage statistics
+ */
 
 const mysql = require('mysql2/promise');
 const config = require('../config/env');
@@ -45,7 +45,7 @@ async function testConnection() {
 async function tableExists(tableName) {
   try {
     const [rows] = await pool.query(
-      `SELECT COUNT(*) as count FROM information_schema.tables 
+      `SELECT COUNT(*) as count FROM information_schema.tables
        WHERE table_schema = 'modw' AND table_name = ?`,
       [tableName]
     );
@@ -63,9 +63,9 @@ async function tableExists(tableName) {
 async function findAvailableTables() {
   try {
     const [rows] = await pool.query(
-      `SELECT table_name FROM information_schema.tables 
-       WHERE table_schema = 'modw' 
-       AND (table_name LIKE '%job%' OR table_name LIKE '%wait%') 
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'modw'
+       AND (table_name LIKE '%job%' OR table_name LIKE '%wait%')
        ORDER BY table_name`
     );
     const tables = rows.map(row => row.table_name);
@@ -80,9 +80,10 @@ async function findAvailableTables() {
 /**
    * GPU usage statistics by user for the last N days
    * @param {number} days - Number of days (1, 7, or 30)
+   * @param {string} resource - Resource code: 'hopper' or 'vanda'
    * @returns {Promise<Array>}
   */
- async function getGPUUsageByUser(days = 7) {
+async function getGPUUsageByUser(days = 7, resource = 'hopper') {
   try {
     const query = `
       SELECT
@@ -95,9 +96,11 @@ async function findAvailableTables() {
       FROM
         modw.job_tasks jt
         JOIN modw.systemaccount sa ON jt.systemaccount_id = sa.id
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
       WHERE
         FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
         AND jt.gpu_count > 0
+        AND rf.code = '${resource}'
       GROUP BY
         sa.username
       ORDER BY
@@ -121,23 +124,67 @@ async function findAvailableTables() {
   }
 }
 
-/**
-  * Job statistics for the last N days
-  * @param {number} days - Number of days (1, 7, or 30)
-  * @returns {Promise<Array>}
-  */
-async function getJobStatsLast7Days(days = 7) {
+async function getCPUUsageByUser(days = 7, resource = 'hopper') {
   try {
     const query = `
       SELECT
-        DATE(FROM_UNIXTIME(end_time_ts)) AS job_date,
+        sa.username,
         COUNT(*) AS num_jobs,
-        COALESCE(SUM(gpu_time), 0) / 3600.0 AS total_gpu_hours
+        COALESCE(SUM(jt.processor_count), 0) AS total_cpus_used,
+        COALESCE(AVG(jt.processor_count), 0) AS avg_cpus_per_job,
+        COALESCE(SUM(jt.cpu_time), 0) / 3600.0 AS total_cpu_hours,
+        COALESCE(AVG(jt.cpu_time), 0) / 3600.0 AS avg_cpu_hours_per_job
       FROM
-        modw.job_tasks
+        modw.job_tasks jt
+        JOIN modw.systemaccount sa ON jt.systemaccount_id = sa.id
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
       WHERE
-        FROM_UNIXTIME(end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
-        AND gpu_count > 0
+        FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
+        AND jt.processor_count > 0
+        AND rf.code = '${resource}'
+      GROUP BY
+        sa.username
+      ORDER BY
+        total_cpu_hours DESC
+      LIMIT 7
+    `;
+
+    const [rows] = await pool.query(query);
+
+    return rows.map(row => ({
+      username: row.username,
+      numJobs: parseInt(row.num_jobs),
+      totalCpusUsed: parseInt(row.total_cpus_used),
+      avgCpusPerJob: parseFloat(row.avg_cpus_per_job).toFixed(2),
+      totalCpuHours: parseFloat(row.total_cpu_hours).toFixed(2),
+      avgCpuHoursPerJob: parseFloat(row.avg_cpu_hours_per_job).toFixed(2),
+    }));
+  } catch (error) {
+    console.error('Error fetching CPU usage by user:', error);
+    throw error;
+  }
+}
+
+/**
+   * Job statistics for the last N days
+  * @param {number} days - Number of days (1, 7, or 30)
+  * @param {string} resource - Resource code: 'hopper' or 'vanda'
+  * @returns {Promise<Array>}
+  */
+async function getJobStatsLast7Days(days = 7, resource = 'hopper') {
+  try {
+    const query = `
+      SELECT
+        DATE(FROM_UNIXTIME(jt.end_time_ts)) AS job_date,
+        COUNT(*) AS num_jobs,
+        COALESCE(SUM(jt.gpu_time), 0) / 3600.0 AS total_gpu_hours
+      FROM
+        modw.job_tasks jt
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
+      WHERE
+        FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
+        AND jt.gpu_count > 0
+        AND rf.code = '${resource}'
       GROUP BY
         job_date
       ORDER BY
@@ -154,15 +201,21 @@ async function getJobStatsLast7Days(days = 7) {
   } catch (error) {
     console.error(`Error fetching job stats for last ${days} days:`, error);
     throw error;
-}
+  }
 }
 
 /**
- * NUS IT queue wait time statistics
+ * NUS IT queue wait time statistics (Hopper only)
+ * For Vanda, returns empty array (no NUS-IT queues)
  * @param {number} days - Number of days (1, 7, or 30)
+ * @param {string} resource - Resource code: 'hopper' or 'vanda'
  * @returns {Promise<Array>}
  */
-async function getNUSITWaitTime(days = 7) {
+async function getNUSITWaitTime(days = 7, resource = 'hopper') {
+  if (resource === 'vanda') {
+    return [];
+  }
+
   try {
     const query = `
       SELECT
@@ -175,9 +228,11 @@ async function getNUSITWaitTime(days = 7) {
       FROM
         modw.job_tasks jt
         INNER JOIN modw.job_records jr ON jt.job_record_id = jr.job_record_id
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
       WHERE
         FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
         AND jt.gpu_count > 0
+        AND rf.code = '${resource}'
         AND jr.queue IN ('small', 'interactive', 'medium', 'special', 'large')
       GROUP BY
         date, jr.queue
@@ -203,10 +258,17 @@ async function getNUSITWaitTime(days = 7) {
 
 /**
  * AISG queue wait time statistics
+ * For Hopper: AISG_large, AISG_debug, AISG_guest queues
+ * For Vanda: GPU queues (batch_gpu, gpu, gpu_amd, interactive_gpu)
  * @param {number} days - Number of days (1, 7, or 30)
+ * @param {string} resource - Resource code: 'hopper' or 'vanda'
  * @returns {Promise<Array>}
  */
-async function getAISGWaitTime(days = 7) {
+async function getAISGWaitTime(days = 7, resource = 'hopper') {
+  const queues = resource === 'vanda'
+    ? "'batch_gpu', 'gpu', 'gpu_amd', 'interactive_gpu'"
+    : "'AISG_large', 'AISG_debug', 'AISG_guest'";
+
   try {
     const query = `
       SELECT
@@ -219,10 +281,12 @@ async function getAISGWaitTime(days = 7) {
       FROM
         modw.job_tasks jt
         INNER JOIN modw.job_records jr ON jt.job_record_id = jr.job_record_id
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
       WHERE
         FROM_UNIXTIME(jt.end_time_ts) >= CURDATE() - INTERVAL ${days} DAY
         AND jt.gpu_count > 0
-        AND jr.queue IN ('AISG_large', 'AISG_debug', 'AISG_guest')
+        AND rf.code = '${resource}'
+        AND jr.queue IN (${queues})
       GROUP BY
         date, jr.queue
       ORDER BY
@@ -246,38 +310,38 @@ async function getAISGWaitTime(days = 7) {
 }
 
 /**
-  }
-}
-
-/**
  * Monthly GPU hours for the last 2 years
+ * @param {string} resource - Resource code: 'hopper' or 'vanda'
  * @returns {Promise<Array>}
  */
-async function getMonthlyGPUHours() {
+async function getMonthlyGPUHours(resource = 'hopper') {
   try {
     const query = `
       SELECT
-        DATE_FORMAT(FROM_UNIXTIME(end_time_ts), '%b %Y') AS month,
-        SUM(gpu_count * (end_time_ts - start_time_ts) / 3600.0) AS gpu_hours
+        DATE_FORMAT(FROM_UNIXTIME(jt.end_time_ts), '%b %Y') AS month,
+        SUM(jt.gpu_count * (jt.end_time_ts - jt.start_time_ts) / 3600.0) AS gpu_hours,
+        SUM(jt.cpu_time / 3600.0) AS cpu_hours
       FROM
-        modw.job_tasks
+        modw.job_tasks jt
+        INNER JOIN modw.resourcefact rf ON jt.resource_id = rf.id
       WHERE
-        end_time_ts >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))
-        AND gpu_count > 0
+        jt.end_time_ts >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))
+        AND rf.code = '${resource}'
       GROUP BY
-        DATE_FORMAT(FROM_UNIXTIME(end_time_ts), '%Y-%m')
+        DATE_FORMAT(FROM_UNIXTIME(jt.end_time_ts), '%Y-%m')
       ORDER BY
-        FROM_UNIXTIME(end_time_ts)
+        FROM_UNIXTIME(jt.end_time_ts)
     `;
 
     const [rows] = await pool.query(query);
 
     return rows.map(row => ({
       month: row.month,
-      gpuHours: parseFloat(row.gpu_hours).toFixed(1),
+      gpuHours: parseFloat(row.gpu_hours || 0).toFixed(1),
+      cpuHours: parseFloat(row.cpu_hours || 0).toFixed(1),
     }));
   } catch (error) {
-    console.error('Error fetching monthly GPU hours:', error);
+    console.error('Error fetching monthly resource hours:', error);
     throw error;
   }
 }
@@ -294,6 +358,7 @@ module.exports = {
   tableExists,
   findAvailableTables,
   getGPUUsageByUser,
+  getCPUUsageByUser,
   getJobStatsLast7Days,
   getAISGWaitTime,
   getNUSITWaitTime,

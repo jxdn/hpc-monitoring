@@ -1,0 +1,125 @@
+.cpu-usage-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.cpu-usage-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  background: var(--bg-overlay);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.cpu-usage-table thead {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.cpu-usage-table th {
+  padding: 1rem 0.875rem;
+  text-align: center;
+  font-weight: 600;
+  color: white;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.cpu-usage-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all var(--transition-base);
+}
+
+.cpu-usage-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.cpu-usage-table tbody tr:hover {
+  background: var(--bg-elevated);
+}
+
+.cpu-usage-table tbody tr.top-user {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.cpu-usage-table tbody tr.top-user:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.cpu-usage-table td {
+  padding: 0.875rem;
+  text-align: center;
+}
+
+.cpu-usage-table .username-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent-tertiary);
+  font-size: var(--text-sm);
+}
+
+.cpu-usage-table .number-cell {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.cpu-usage-table .number-cell.highlight {
+  font-weight: 700;
+  color: #10b981;
+  font-size: var(--text-base);
+}
+
+.cpu-usage-table .rank-cell {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  width: 50px;
+}
+
+.cpu-usage-table tbody tr:nth-child(1) .rank-cell {
+  color: #fbbf24;
+}
+
+.cpu-usage-table tbody tr:nth-child(2) .rank-cell {
+  color: #9ca3af;
+}
+
+.cpu-usage-table tbody tr:nth-child(3) .rank-cell {
+  color: #d97706;
+}
+
+.cpu-usage-loading,
+.cpu-usage-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-overlay);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-default);
+}
+
+@media (max-width: 768px) {
+  .cpu-usage-table {
+    font-size: var(--text-xs);
+  }
+  
+  .cpu-usage-table th,
+  .cpu-usage-table td {
+    padding: 0.625rem 0.5rem;
+  }
+}
+
+@media print {
+  .cpu-usage-table {
+    background: white;
+  }
+  
+  .cpu-usage-table thead {
+    background: #10b981;
+  }
+}

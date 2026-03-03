@@ -383,7 +383,7 @@ app.get('/api/analytics/monthly-gpu-hours', async (req, res) => {
     }
 
     // If no cache, fetch from database
-    const data = await xdmodService.getMonthlyGPUHours();
+    const data = await xdmodService.getMonthlyGPUHours('hopper');
     res.json(data);
   } catch (error) {
     console.error('Error fetching monthly GPU hours:', error);
@@ -436,6 +436,172 @@ app.post('/api/analytics/refresh-cache', async (req, res) => {
   } catch (error) {
     console.error('Error refreshing cache:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// =============================================================================
+// VANDA CLUSTER ENDPOINTS (/api/vanda/*)
+// =============================================================================
+const VANDA_JOB_NAME = 'pbs-exporter-vanda';
+
+app.get('/api/vanda/jobs', async (req, res) => {
+  try {
+    const cacheKey = 'vanda-jobs';
+    let jobs = cache.get(cacheKey);
+    if (!jobs) {
+      jobs = await pbsService.getJobs(VANDA_JOB_NAME);
+      cache.set(cacheKey, jobs);
+    }
+    res.json(jobs);
+  } catch (error) {
+    console.error('Error fetching Vanda jobs:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/nodes', async (req, res) => {
+  try {
+    const cacheKey = 'vanda-nodes';
+    let nodes = cache.get(cacheKey);
+    if (!nodes) {
+      nodes = await pbsService.getNodes(VANDA_JOB_NAME);
+      cache.set(cacheKey, nodes);
+    }
+    res.json(nodes);
+  } catch (error) {
+    console.error('Error fetching Vanda nodes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/stats/cluster', async (req, res) => {
+  try {
+    const cacheKey = 'vanda-cluster-stats';
+    let stats = cache.get(cacheKey);
+    if (!stats) {
+      stats = await pbsService.getClusterStats(VANDA_JOB_NAME);
+      cache.set(cacheKey, stats);
+    }
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching Vanda cluster stats:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/queues', async (req, res) => {
+  try {
+    const cacheKey = 'vanda-queues';
+    let queues = cache.get(cacheKey);
+    if (!queues) {
+      queues = await pbsService.getQueues(VANDA_JOB_NAME);
+      cache.set(cacheKey, queues);
+    }
+    res.json(queues);
+  } catch (error) {
+    console.error('Error fetching Vanda queues:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/jobs', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '24h';
+    const data = await pbsService.getJobAnalytics(timeRange, VANDA_JOB_NAME);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda job analytics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/gpu-occupation', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '24h';
+    const data = await prometheusService.getSimpleGPUOccupation(timeRange, VANDA_JOB_NAME);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda GPU occupation:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/gpu-usage-by-user', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '7d';
+    const cacheKey = `vanda-gpu-usage-by-user-${timeRange}`;
+    const data = await cacheService.readCache(cacheKey);
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda GPU usage by user:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/job-stats', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '7d';
+    const cacheKey = `vanda-job-stats-${timeRange}`;
+    const data = await cacheService.readCache(cacheKey);
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda job stats:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/aisg-wait-time', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '7d';
+    const cacheKey = `vanda-aisg-wait-time-${timeRange}`;
+    const data = await cacheService.readCache(cacheKey);
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda wait time:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/nusit-wait-time', async (req, res) => {
+  // Vanda has no NUS-IT queues — always return empty array
+  res.json([]);
+});
+
+app.get('/api/vanda/analytics/cpu-usage-by-user', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || '7d';
+    const cacheKey = `vanda-cpu-usage-by-user-${timeRange}`;
+    const data = await cacheService.readCache(cacheKey);
+    if (!data) {
+      return res.status(503).json({ error: 'Cache not available, please try again later' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda CPU usage by user:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/vanda/analytics/monthly-gpu-hours', async (req, res) => {
+  try {
+    const cachedData = await cacheService.readCache('vanda-monthly-gpu-hours');
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+    const data = await xdmodService.getMonthlyGPUHours('vanda');
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching Vanda monthly GPU hours:', error);
+    res.json([]);
   }
 });
 

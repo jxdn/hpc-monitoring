@@ -5,17 +5,12 @@
 
 const prometheusService = require('./prometheusService');
 
-/**
- * Get aggregated job summary
- * Note: Prometheus provides aggregated metrics, not individual job details
- * @returns {Promise<Object>} - Job summary with statistics
- */
-async function getJobs() {
+async function getJobs(jobName) {
   try {
     const [jobStats, jobsByUser, jobsByQueue] = await Promise.all([
-      prometheusService.getJobStats(),
-      prometheusService.getJobsByUser(),
-      prometheusService.getJobsByQueue(),
+      prometheusService.getJobStats(jobName),
+      prometheusService.getJobsByUser(jobName),
+      prometheusService.getJobsByQueue(jobName),
     ]);
 
     return {
@@ -34,13 +29,6 @@ async function getJobs() {
   }
 }
 
-/**
- * Get specific job details
- * Note: Individual job details are not available from Prometheus metrics
- * This returns a message indicating the limitation
- * @param {string} jobId - Job ID
- * @returns {Promise<Object>} - Error message
- */
 async function getJob(jobId) {
   throw new Error(
     'Individual job details are not available when using Prometheus data source. ' +
@@ -49,27 +37,18 @@ async function getJob(jobId) {
   );
 }
 
-/**
- * Get all nodes with details
- * @returns {Promise<Array>} - List of nodes with resource information
- */
-async function getNodes() {
+async function getNodes(jobName) {
   try {
-    return await prometheusService.getNodeDetails();
+    return await prometheusService.getNodeDetails(jobName);
   } catch (error) {
     console.error('Error fetching nodes:', error);
     throw error;
   }
 }
 
-/**
- * Get specific node details
- * @param {string} nodeId - Node ID
- * @returns {Promise<Object>} - Node details
- */
-async function getNode(nodeId) {
+async function getNode(nodeId, jobName) {
   try {
-    const nodes = await prometheusService.getNodeDetails();
+    const nodes = await prometheusService.getNodeDetails(jobName);
     const node = nodes.find(n => n.id === nodeId || n.name === nodeId);
 
     if (!node) {
@@ -83,81 +62,51 @@ async function getNode(nodeId) {
   }
 }
 
-/**
- * Get queue information
- * Note: Queue details are derived from job metrics
- * @returns {Promise<Array>} - List of queues
- */
-async function getQueues() {
+async function getQueues(jobName) {
   try {
-    return await prometheusService.getQueues();
+    return await prometheusService.getQueues(jobName);
   } catch (error) {
     console.error('Error fetching queues:', error);
     return [];
   }
 }
 
-/**
- * Get cluster statistics
- * @returns {Promise<Object>} - Cluster statistics
- */
-async function getClusterStats() {
+async function getClusterStats(jobName) {
   try {
-    return await prometheusService.getClusterStats();
+    return await prometheusService.getClusterStats(jobName);
   } catch (error) {
     console.error('Error fetching cluster stats:', error);
     throw error;
   }
 }
 
-/**
- * Get historical job statistics
- * @param {string} timeRange - Time range (1h, 24h, 7d, 30d)
- * @returns {Promise<Array>} - Historical job statistics
- */
-async function getJobAnalytics(timeRange = '24h') {
+async function getJobAnalytics(timeRange = '24h', jobName) {
   try {
-    return await prometheusService.getHistoricalJobStats(timeRange);
+    return await prometheusService.getHistoricalJobStats(timeRange, jobName);
   } catch (error) {
     console.error('Error fetching job analytics:', error);
     throw error;
   }
 }
 
-/**
- * Get historical resource utilization
- * @param {string} timeRange - Time range (1h, 24h, 7d, 30d)
- * @returns {Promise<Array>} - Historical resource utilization
- */
-async function getResourceAnalytics(timeRange = '24h') {
+async function getResourceAnalytics(timeRange = '24h', jobName) {
   try {
-    return await prometheusService.getHistoricalResourceStats(timeRange);
+    return await prometheusService.getHistoricalResourceStats(timeRange, jobName);
   } catch (error) {
     console.error('Error fetching resource analytics:', error);
     throw error;
   }
 }
 
-/**
- * Get historical GPU occupation rates for node groups
- * @param {string} timeRange - Time range (24h, 7d, 30d)
- * @returns {Promise<Object>} - Average GPU occupation rates
- */
-async function getGPUOccupation(timeRange = '24h') {
+async function getGPUOccupation(timeRange = '24h', jobName) {
   try {
-    return await prometheusService.getHistoricalGPUOccupation(timeRange);
+    return await prometheusService.getHistoricalGPUOccupation(timeRange, jobName);
   } catch (error) {
     console.error('Error fetching GPU occupation:', error);
     throw error;
   }
 }
 
-/**
- * Delete a job
- * Note: Job control operations are not available through Prometheus
- * @param {string} jobId - Job ID to delete
- * @returns {Promise<void>}
- */
 async function deleteJob(jobId) {
   throw new Error(
     'Job control operations (delete, hold, release) are not available when using Prometheus data source. ' +
@@ -166,12 +115,6 @@ async function deleteJob(jobId) {
   );
 }
 
-/**
- * Hold a job
- * Note: Job control operations are not available through Prometheus
- * @param {string} jobId - Job ID to hold
- * @returns {Promise<void>}
- */
 async function holdJob(jobId) {
   throw new Error(
     'Job control operations (delete, hold, release) are not available when using Prometheus data source. ' +
@@ -180,12 +123,6 @@ async function holdJob(jobId) {
   );
 }
 
-/**
- * Release a job
- * Note: Job control operations are not available through Prometheus
- * @param {string} jobId - Job ID to release
- * @returns {Promise<void>}
- */
 async function releaseJob(jobId) {
   throw new Error(
     'Job control operations (delete, hold, release) are not available when using Prometheus data source. ' +

@@ -27,10 +27,12 @@ if (config.prometheus.token) {
 
 const prometheusClient = axios.create(clientConfig);
 
-const JOB_FILTER = `{job="${config.prometheus.jobName}"}`;
+function getJobFilter(jobName) {
+  return `{job="${jobName || config.prometheus.jobName}"}`;
+}
 
-function withJobFilter(metric) {
-  return `${metric}${JOB_FILTER}`;
+function withJobFilter(metric, jobName) {
+  return `${metric}${getJobFilter(jobName)}`;
 }
 
 /**
@@ -88,12 +90,12 @@ async function queryVictoriaMetricsRange(query, start, end, step = '5m') {
  * Get job statistics from VictoriaMetrics
  * @returns {Promise<Object>} - Job statistics
  */
-async function getJobStats() {
+async function getJobStats(jobName) {
   try {
     const [runningJobs, queuedJobs, holdJobs] = await Promise.all([
-      queryVictoriaMetrics(withJobFilter('qstat_total_r_jobs')),
-      queryVictoriaMetrics(withJobFilter('qstat_total_q_jobs')),
-      queryVictoriaMetrics(withJobFilter('qstat_total_h_jobs')),
+      queryVictoriaMetrics(withJobFilter('qstat_total_r_jobs', jobName)),
+      queryVictoriaMetrics(withJobFilter('qstat_total_q_jobs', jobName)),
+      queryVictoriaMetrics(withJobFilter('qstat_total_h_jobs', jobName)),
     ]);
 
     return {
@@ -111,9 +113,9 @@ async function getJobStats() {
  * Get jobs by user from VictoriaMetrics
  * @returns {Promise<Array>} - Jobs by user (top 5 running jobs)
  */
-async function getJobsByUser() {
+async function getJobsByUser(jobName) {
   try {
-    const result = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_user'));
+    const result = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_user', jobName));
 
     return result
       .map(item => ({
@@ -132,11 +134,11 @@ async function getJobsByUser() {
  * Get jobs by queue from VictoriaMetrics
  * @returns {Promise<Array>} - Jobs by queue
  */
-async function getJobsByQueue() {
+async function getJobsByQueue(jobName) {
   try {
     const [runningByQueue, queuedByQueue] = await Promise.all([
-      queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue')).catch(() => []),
-      queryVictoriaMetrics(withJobFilter('qstat_que_by_queue')).catch(() => []),
+      queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue', jobName)).catch(() => []),
+      queryVictoriaMetrics(withJobFilter('qstat_que_by_queue', jobName)).catch(() => []),
     ]);
 
     const queueMap = new Map();
@@ -179,10 +181,10 @@ async function getJobsByQueue() {
  * Uses the same data as getJobsByQueue since qstat_running_jobs_by_queue already has per-queue counts
  * @returns {Promise<Array>} - Queue details
  */
-async function getQueues() {
+async function getQueues(jobName) {
   try {
     // Use the same query that's working for getJobsByQueue
-    const runningByQueue = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue'));
+    const runningByQueue = await queryVictoriaMetrics(withJobFilter('qstat_running_jobs_by_queue', jobName));
     
     console.log('Running by queue data:', runningByQueue);
 
@@ -208,13 +210,13 @@ async function getQueues() {
  * Get node counts from VictoriaMetrics
  * @returns {Promise<Object>} - Node counts
  */
-async function getNodeCounts() {
+async function getNodeCounts(jobName) {
   try {
     const [freeNodes, busyNodes, offlineNodes, downNodes] = await Promise.all([
-      queryVictoriaMetrics(withJobFilter('pbs_node_count_free')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_count_busy')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_count_offline')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_count_down')),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_free', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_busy', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_offline', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_count_down', jobName)),
     ]);
 
     return {
@@ -233,15 +235,15 @@ async function getNodeCounts() {
  * Get node details from VictoriaMetrics
  * @returns {Promise<Array>} - Node details
  */
-async function getNodeDetails() {
+async function getNodeDetails(jobName) {
   try {
     const [nodeStates, gpusTotal, gpusUsed, memTotal, memUsed, nodeJobs] = await Promise.all([
-      queryVictoriaMetrics(withJobFilter('pbs_node_state')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_total')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_used')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_mem_total')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_mem_used')),
-      queryVictoriaMetrics(withJobFilter('pbs_node_jobs')).catch(() => []),
+      queryVictoriaMetrics(withJobFilter('pbs_node_state', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_total', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_gpus_used', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_mem_total', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_mem_used', jobName)),
+      queryVictoriaMetrics(withJobFilter('pbs_node_jobs', jobName)).catch(() => []),
     ]);
 
     // Create a map of node data
@@ -323,19 +325,26 @@ async function getNodeDetails() {
  * Get cluster statistics
  * @returns {Promise<Object>} - Cluster statistics
  */
-async function getClusterStats() {
+async function getClusterStats(jobName) {
   try {
-    const [jobStats, nodeCounts, gpuData] = await Promise.all([
-      getJobStats(),
-      getNodeCounts(),
+    const jf = getJobFilter(jobName);
+    const [jobStats, nodeCounts, gpuData, cpuData] = await Promise.all([
+      getJobStats(jobName),
+      getNodeCounts(jobName),
       Promise.all([
-        queryVictoriaMetrics(`sum(pbs_node_gpus_total${JOB_FILTER})`),
-        queryVictoriaMetrics(`sum(pbs_node_gpus_used${JOB_FILTER})`),
+        queryVictoriaMetrics(`sum(pbs_node_gpus_total${jf})`),
+        queryVictoriaMetrics(`sum(pbs_node_gpus_used${jf})`),
+      ]),
+      Promise.all([
+        queryVictoriaMetrics(`sum(pbs_node_cpus_total${jf})`),
+        queryVictoriaMetrics(`sum(pbs_node_cpus_used${jf})`),
       ]),
     ]);
 
     const totalGpus = gpuData[0][0]?.value?.[1] ? parseInt(gpuData[0][0].value[1]) : 0;
     const usedGpus = gpuData[1][0]?.value?.[1] ? parseInt(gpuData[1][0].value[1]) : 0;
+    const totalCpus = cpuData[0][0]?.value?.[1] ? parseInt(cpuData[0][0].value[1]) : 0;
+    const usedCpus = cpuData[1][0]?.value?.[1] ? parseInt(cpuData[1][0].value[1]) : 0;
 
     return {
       totalNodes: nodeCounts.free + nodeCounts.busy + nodeCounts.offline + nodeCounts.down,
@@ -348,6 +357,9 @@ async function getClusterStats() {
       totalGpus,
       usedGpus,
       gpuUtilization: totalGpus > 0 ? (usedGpus / totalGpus) * 100 : 0,
+      totalCpus,
+      usedCpus,
+      cpuUtilization: totalCpus > 0 ? (usedCpus / totalCpus) * 100 : 0,
     };
   } catch (error) {
     console.error('Error fetching cluster stats:', error);
@@ -360,13 +372,13 @@ async function getClusterStats() {
  * @param {string} timeRange - Time range (1h, 24h, 7d, 30d)
  * @returns {Promise<Array>} - Historical job statistics
  */
-async function getHistoricalJobStats(timeRange = '24h') {
+async function getHistoricalJobStats(timeRange = '24h', jobName) {
   try {
     const { start, end, step } = parseTimeRange(timeRange);
 
     const [runningJobs, queuedJobs] = await Promise.all([
-      queryVictoriaMetricsRange(withJobFilter('qstat_total_r_jobs'), start, end, step),
-      queryVictoriaMetricsRange(withJobFilter('qstat_total_q_jobs'), start, end, step),
+      queryVictoriaMetricsRange(withJobFilter('qstat_total_r_jobs', jobName), start, end, step),
+      queryVictoriaMetricsRange(withJobFilter('qstat_total_q_jobs', jobName), start, end, step),
     ]);
 
     // Merge the results by timestamp
@@ -412,13 +424,14 @@ async function getHistoricalJobStats(timeRange = '24h') {
  * @param {string} timeRange - Time range (1h, 24h, 7d, 30d)
  * @returns {Promise<Array>} - Historical resource utilization
  */
-async function getHistoricalResourceStats(timeRange = '24h') {
+async function getHistoricalResourceStats(timeRange = '24h', jobName) {
   try {
     const { start, end, step } = parseTimeRange(timeRange);
+    const jf = getJobFilter(jobName);
 
-    const gpuUtilQuery = `(sum(pbs_node_gpus_used${JOB_FILTER}) / sum(pbs_node_gpus_total${JOB_FILTER})) * 100`;
-    const memUtilQuery = `(sum(pbs_node_mem_used${JOB_FILTER}) / sum(pbs_node_mem_total${JOB_FILTER})) * 100`;
-    const nodeUtilQuery = `(pbs_node_count_busy${JOB_FILTER} / (pbs_node_count_free${JOB_FILTER} + pbs_node_count_busy${JOB_FILTER})) * 100`;
+    const gpuUtilQuery = `(sum(pbs_node_gpus_used${jf}) / sum(pbs_node_gpus_total${jf})) * 100`;
+    const memUtilQuery = `(sum(pbs_node_mem_used${jf}) / sum(pbs_node_mem_total${jf})) * 100`;
+    const nodeUtilQuery = `(pbs_node_count_busy${jf} / (pbs_node_count_free${jf} + pbs_node_count_busy${jf})) * 100`;
 
     const [gpuUtil, memUtil, nodeUtil] = await Promise.all([
       queryVictoriaMetricsRange(gpuUtilQuery, start, end, step),
@@ -471,34 +484,35 @@ async function getHistoricalResourceStats(timeRange = '24h') {
  * @param {string} timeRange - Time range (24h, 7d, 30d)
  * @returns {Promise<Array>} - Time series GPU occupation rates
  */
-async function getHistoricalGPUOccupation(timeRange = '24h') {
+async function getHistoricalGPUOccupation(timeRange = '24h', jobName) {
   try {
     const { start, end, step } = parseTimeRange(timeRange);
+    const jn = jobName || config.prometheus.jobName;
 
     // Define node groups
     const aisgNodes = ['hopper-46', 'hopper-43', 'hopper-45', 'hopper-44', 'hopper-42',
                       'hopper-41', 'hopper-40', 'hopper-39', 'hopper-38', 'hopper-37',
                       'hopper-36', 'hopper-34', 'hopper-33', 'hopper-32', 'hopper-31', 'hopper-35'];
-    
+
     // NON-AISG nodes (hopper-07 to hopper-30): 24 nodes × 8 GPUs = 192 GPUs total
-    const nonAisgNodes = Array.from({ length: 24 }, (_, i) => i + 7).map(i => 
+    const nonAisgNodes = Array.from({ length: 24 }, (_, i) => i + 7).map(i =>
       i < 10 ? `hopper-0${i}` : `hopper-${i}`
     );
 
     // Overall GPU occupation rate (excluding hopper-1 to hopper-6)
     const overallQuery = `(
-      sum(pbs_node_gpus_used{node!~"hopper-[1-6]",job="${config.prometheus.jobName}"}) /
-      sum(pbs_node_gpus_total{node!~"hopper-[1-6]",job="${config.prometheus.jobName}"})
+      sum(pbs_node_gpus_used{node!~"hopper-[1-6]",job="${jn}"}) /
+      sum(pbs_node_gpus_total{node!~"hopper-[1-6]",job="${jn}"})
     ) * 100`;
 
     const aisgQuery = `(
-      sum(pbs_node_gpus_used{node=~"${aisgNodes.join('|')}",job="${config.prometheus.jobName}"}) /
-      sum(pbs_node_gpus_total{node=~"${aisgNodes.join('|')}",job="${config.prometheus.jobName}"})
+      sum(pbs_node_gpus_used{node=~"${aisgNodes.join('|')}",job="${jn}"}) /
+      sum(pbs_node_gpus_total{node=~"${aisgNodes.join('|')}",job="${jn}"})
     ) * 100`;
 
     const nonAisgQuery = `(
-      sum(pbs_node_gpus_used{node=~"${nonAisgNodes.join('|')}",job="${config.prometheus.jobName}"}) /
-      sum(pbs_node_gpus_total{node=~"${nonAisgNodes.join('|')}",job="${config.prometheus.jobName}"})
+      sum(pbs_node_gpus_used{node=~"${nonAisgNodes.join('|')}",job="${jn}"}) /
+      sum(pbs_node_gpus_total{node=~"${nonAisgNodes.join('|')}",job="${jn}"})
     ) * 100`;
 
     const [overallData, aisgData, nonAisgData] = await Promise.all([
@@ -543,6 +557,43 @@ async function getHistoricalGPUOccupation(timeRange = '24h') {
     return Array.from(dataMap.values());
   } catch (error) {
     console.error('Error fetching historical GPU occupation:', error);
+    return [];
+  }
+}
+
+/**
+ * Get historical GPU occupation for a single cluster (no subgroups)
+ * Used for Vanda which has one GPU pool (gn-a40-XXX nodes)
+ * @param {string} timeRange - Time range (24h, 7d, 30d)
+ * @param {string} jobName - VictoriaMetrics job label
+ * @returns {Promise<Array>} - Time series with { timestamp, overall }
+ */
+async function getSimpleGPUOccupation(timeRange = '24h', jobName) {
+  try {
+    const { start, end, step } = parseTimeRange(timeRange);
+    const jn = jobName || config.prometheus.jobName;
+
+    const overallQuery = `(sum(pbs_node_gpus_used{job="${jn}"}) / sum(pbs_node_gpus_total{job="${jn}"})) * 100`;
+
+    const [overallData] = await Promise.all([
+      queryVictoriaMetricsRange(overallQuery, start, end, step),
+    ]);
+
+    const dataMap = new Map();
+
+    if (overallData[0]?.values) {
+      overallData[0].values.forEach(([timestamp, value]) => {
+        const time = formatTimestamp(timestamp, timeRange);
+        dataMap.set(time, {
+          timestamp: time,
+          overall: parseFloat(value),
+        });
+      });
+    }
+
+    return Array.from(dataMap.values());
+  } catch (error) {
+    console.error('Error fetching simple GPU occupation:', error);
     return [];
   }
 }
@@ -973,6 +1024,7 @@ module.exports = {
   getHistoricalJobStats,
   getHistoricalResourceStats,
   getHistoricalGPUOccupation,
+  getSimpleGPUOccupation,
   getHardwareStatus,
   updateHardwareStatusCache,
   getCachedHardwareStatus,

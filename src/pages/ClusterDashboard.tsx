@@ -532,21 +532,6 @@ const getMergedWaitTimeTimeRangeLabel = () => {
     'AISG_debug', 'AISG_large', 'AISG_guest'
   ];
 
-  // Get wait time for a queue
-  const getLatestWaitTimeForQueue = (queueName: string): number | undefined => {
-    const currentWaitData = mergedWaitTimeTimeRange === '1d' ? mergedWaitTime1d 
-      : mergedWaitTimeTimeRange === '7d' ? mergedWaitTime7d 
-      : mergedWaitTime30d;
-    
-    if (!currentWaitData || currentWaitData.length === 0) return undefined;
-    
-    const queueData = currentWaitData.filter(d => d.queueName === queueName);
-    if (queueData.length === 0) return undefined;
-    
-    const avgWait = queueData.reduce((sum, d) => sum + d.avgWaitMinutes, 0) / queueData.length;
-    return avgWait;
-  };
-
   // Build queue details - show ALL 9 queues with running and queued
   const queueDetails = knownQueues.map(queueName => {
     const queueData = jobs.byQueue?.find(q => q.queue === queueName);
@@ -558,7 +543,6 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       running: running,
       queued: queued,
       total: running + queued,
-      avgWaitMinutes: getLatestWaitTimeForQueue(queueName),
       queueType: queueName.toLowerCase().includes('aisg') ? 'AISG' as const : 'NUS-IT' as const,
     };
   });
@@ -615,7 +599,7 @@ const getMergedWaitTimeTimeRangeLabel = () => {
       </div>
 
       {/* Queue Details */}
-      <QueueDetailsCard queues={queueDetails} title="Queue Status - Real-time" />
+      <QueueDetailsCard queues={queueDetails} title="Queue Status - Real-time" showWaitTime={false} />
 
       {/* Monthly GPU Hours Chart */}
       <Card title="GPU Hours: Total (Last 2 Years)" className="gpu-hours-card">
@@ -624,11 +608,10 @@ const getMergedWaitTimeTimeRangeLabel = () => {
         ) : monthlyGPUHoursError ? (
           <div className="error">{monthlyGPUHoursError}</div>
         ) : (
-          <>
-            <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={400}>
             <BarChart data={monthlyGPUHours.map(item => ({
               month: item.month,
-              gpuHours: parseFloat(item.gpuHours)
+              GPU: parseFloat(item.gpuHours) || 0
             }))}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
               <XAxis
@@ -642,8 +625,13 @@ const getMergedWaitTimeTimeRangeLabel = () => {
               <YAxis
                 stroke="#64748b"
                 tick={{ fill: '#64748b' }}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                label={{ value: 'GPU Hours: Total', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
+                tickFormatter={(value) => {
+                  const num = parseFloat(value) || 0;
+                  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+                  if (num >= 1000) return `${(num / 1000).toFixed(0)}k`;
+                  return num.toString();
+                }}
+                label={{ value: 'GPU Hours', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
               />
               <Tooltip
                 contentStyle={{
@@ -652,22 +640,68 @@ const getMergedWaitTimeTimeRangeLabel = () => {
                   borderRadius: '10px',
                   color: '#f8fafc'
                 }}
-                formatter={(value: any) => [`${(value / 1000).toFixed(1)}k`, 'GPU Hours']}
+                formatter={(value: any) => {
+                  const numVal = parseFloat(value) || 0;
+                  if (numVal >= 1000000) return [`${(numVal / 1000000).toFixed(1)}M`, 'GPU Hours'];
+                  if (numVal >= 1000) return [`${(numVal / 1000).toFixed(1)}k`, 'GPU Hours'];
+                  return [numVal.toString(), 'GPU Hours'];
+                }}
               />
-              <Bar
-                dataKey="gpuHours"
-                fill="url(#barGradient)"
-                radius={[8, 8, 0, 0]}
-              />
-              <defs>
-                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
-                </linearGradient>
-              </defs>
+              <Bar dataKey="GPU" fill="#3b82f6" name="GPU Hours" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-          </>
+        )}
+      </Card>
+
+      {/* Monthly CPU Hours Chart */}
+      <Card title="CPU Hours: Total (Last 2 Years)" className="cpu-hours-card">
+        {monthlyGPUHoursLoading ? (
+          <div className="loading">Loading monthly CPU hours...</div>
+        ) : monthlyGPUHoursError ? (
+          <div className="error">{monthlyGPUHoursError}</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={monthlyGPUHours.map(item => ({
+              month: item.month,
+              CPU: parseFloat(item.cpuHours) || 0
+            }))}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
+              <XAxis
+                dataKey="month"
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{ fill: '#64748b' }}
+                tickFormatter={(value) => {
+                  const num = parseFloat(value) || 0;
+                  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+                  if (num >= 1000) return `${(num / 1000).toFixed(0)}k`;
+                  return num.toString();
+                }}
+                label={{ value: 'CPU Hours', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1a2235',
+                  border: '1px solid rgba(148, 163, 184, 0.2)',
+                  borderRadius: '10px',
+                  color: '#f8fafc'
+                }}
+                formatter={(value: any) => {
+                  const numVal = parseFloat(value) || 0;
+                  if (numVal >= 1000000) return [`${(numVal / 1000000).toFixed(1)}M`, 'CPU Hours'];
+                  if (numVal >= 1000) return [`${(numVal / 1000).toFixed(1)}k`, 'CPU Hours'];
+                  return [numVal.toString(), 'CPU Hours'];
+                }}
+              />
+              <Bar dataKey="CPU" fill="#10b981" name="CPU Hours" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </Card>
 

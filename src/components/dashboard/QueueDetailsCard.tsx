@@ -13,9 +13,10 @@ interface QueueDetail {
 interface QueueDetailsCardProps {
   queues: QueueDetail[];
   title?: string;
+  showWaitTime?: boolean;
 }
 
-const QueueDetailsCard: React.FC<QueueDetailsCardProps> = ({ queues, title = 'Queue Details' }) => {
+const QueueDetailsCard: React.FC<QueueDetailsCardProps> = ({ queues, title = 'Queue Details', showWaitTime = true }) => {
   const getWaitTimeStatus = (minutes?: number): { label: string; className: string } => {
     if (minutes === undefined) return { label: 'N/A', className: 'status-unknown' };
     if (minutes < 15) return { label: `${minutes.toFixed(0)}m`, className: 'status-good' };
@@ -49,13 +50,15 @@ const QueueDetailsCard: React.FC<QueueDetailsCardProps> = ({ queues, title = 'Qu
               </span>
             )}
           </div>
-          <div className={`wait-time-badge ${waitStatus.className}`}>
-            <svg viewBox="0 0 24 24" fill="none" className="wait-icon">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            {waitStatus.label}
-          </div>
+          {showWaitTime && (
+            <div className={`wait-time-badge ${waitStatus.className}`}>
+              <svg viewBox="0 0 24 24" fill="none" className="wait-icon">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              {waitStatus.label}
+            </div>
+          )}
         </div>
         
         <div className="queue-progress-container">
